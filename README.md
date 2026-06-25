@@ -1,4 +1,4 @@
-# เส้นทางสาวก — แอปเช็คการเติบโตฝ่ายวิญญาณ 9 ด้าน
+# growthCT — แอปเช็คการเติบโตฝ่ายวิญญาณ 9 ด้าน
 
 > รองรับ 2 ภาษา: **ไทย / English** — สลับได้ทันทีด้วยปุ่มภาษา (🌐) บนแถบบน หรือหน้าลงทะเบียน
 > Bilingual (Thai/English) — tap the language button in the top bar to switch anytime.

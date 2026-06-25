@@ -31,7 +31,7 @@
   // ---------- ระบบ 2 ภาษา (i18n) ----------
   // ค่าเป็น string หรือ function(...args) ก็ได้
   const STR = {
-    brand: { th: 'เส้นทางสาวก', en: 'Disciple Path' },
+    brand: { th: 'growthCT', en: 'growthCT' },
     tagline: { th: 'เครื่องมือเช็คการเติบโตฝ่ายวิญญาณ 9 ด้าน', en: 'A 9-area spiritual growth check-up' },
     // ลงทะเบียน
     yourName: { th: 'ชื่อของคุณ', en: 'Your name' },

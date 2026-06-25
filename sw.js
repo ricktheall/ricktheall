@@ -1,5 +1,5 @@
 /* sw.js — service worker ให้แอปทำงานออฟไลน์ (cache-first) */
-const CACHE = 'disciple-tracker-v7';
+const CACHE = 'growthct-v8';
 const ASSETS = [
   './',
   './index.html',
