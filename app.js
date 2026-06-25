@@ -255,6 +255,49 @@
   function field(label, input) {
     return el('label', { class: 'field' }, el('span', {}, label), input);
   }
+
+  // สร้างลิงก์เชิญสมาชิกให้กรอกเอง (ฝังชื่อ + ผู้นำ)
+  function inviteLink(name) {
+    const p = getProfile() || {};
+    const qs = new URLSearchParams({ n: name, by: p.name || '', c: p.supervisorContact || '' });
+    return location.origin + location.pathname + '#invite?' + qs.toString();
+  }
+
+  // ---------- หน้า: รับคำเชิญ (สมาชิกเปิดลิงก์จากผู้นำ) ----------
+  route('invite', (params) => {
+    const name = (params.n || '').trim();
+    const by = (params.by || '').trim();
+    const contact = (params.c || '').trim();
+    const existing = getProfile();
+    const wrap = el('div', { class: 'page' });
+
+    if (!name) { go(existing ? 'home' : 'register'); return wrap; }
+
+    wrap.appendChild(el('div', { class: 'brand' },
+      el('div', { class: 'logo' }, '✝'),
+      el('h1', {}, 'สวัสดี ' + name + ' 🙏'),
+      el('p', { class: 'muted' }, (by ? by + ' ' : '') + 'เชิญคุณเช็คสุขภาพฝ่ายวิญญาณ 9 ด้าน'),
+    ));
+    wrap.appendChild(el('div', { class: 'card' },
+      el('p', {}, 'แอปนี้เป็นของคุณคนเดียว — ', el('b', {}, 'ข้อมูลเก็บในเครื่องคุณ เห็นเฉพาะของคุณ'), ' เมื่อประเมินเสร็จ เพียงกด "ส่งให้ผู้นำ" ผลของคุณก็จะไปรวมในภาพรวมของผู้นำ'),
+      (existing && existing.name !== name)
+        ? el('p', { class: 'muted small' }, '* เครื่องนี้เคยตั้งค่าเป็น "' + existing.name + '" มาก่อน หากดำเนินต่อจะเปลี่ยนเป็น "' + name + '"')
+        : null,
+    ));
+    wrap.appendChild(el('div', { class: 'action-row col' },
+      el('button', { class: 'btn primary', onclick: () => {
+        setProfile({
+          id: (existing && existing.name === name) ? existing.id : uid(),
+          name, role: 'member',
+          believeDate: (existing && existing.name === name) ? existing.believeDate : '',
+          supervisor: by, supervisorContact: contact, createdAt: Date.now(),
+        });
+        go('assess');
+      } }, 'เริ่มประเมินของฉัน'),
+    ));
+    return wrap;
+  });
+
   function selectEl(name, opts, val) {
     const s = el('select', { name });
     for (const [v, t] of opts) {
@@ -675,6 +718,12 @@
 
     const assessBtn = el('button', { class: 'btn primary', onclick: () => go('assess', { for: name }) },
       reports.length ? '✅ ประเมินรอบใหม่ให้ ' + name : '✅ เริ่มประเมินให้ ' + name);
+    const inviteBtn = el('button', { class: 'btn', onclick: async () => {
+      const link = inviteLink(name);
+      const msg = (getProfile().name || 'ผู้นำ') + ' เชิญ ' + name + ' เช็คสุขภาพฝ่ายวิญญาณ\nเปิดลิงก์นี้เพื่อประเมินด้วยตัวเอง:\n' + link;
+      if (navigator.share) { try { await navigator.share({ title: 'ลิงก์ประเมินสำหรับ ' + name, text: msg }); return; } catch {} }
+      copy(msg);
+    } }, '🔗 ส่งลิงก์ให้ ' + name + ' กรอกเอง');
 
     // ยังไม่มีผลประเมิน
     if (!reports.length) {
@@ -685,6 +734,7 @@
       ));
       wrap.appendChild(el('div', { class: 'action-row col' },
         assessBtn,
+        inviteBtn,
         el('button', { class: 'btn danger', onclick: () => {
           if (!confirm('ลบสมาชิก ' + name + '?')) return;
           setMembers(getMembers().filter((m) => m.name !== name));
@@ -704,7 +754,7 @@
     card.appendChild(levelBar(sc.byArea));
     wrap.appendChild(card);
 
-    wrap.appendChild(el('div', { class: 'action-row' }, assessBtn));
+    wrap.appendChild(el('div', { class: 'action-row col' }, assessBtn, inviteBtn));
 
     // แนวโน้มเทียบรายงานก่อนหน้า
     if (reports[1]) {
@@ -811,7 +861,7 @@
   function boot() {
     document.body.appendChild(navBar());
     // ถ้ามาจากลิงก์รายงานแต่ยังไม่มีโปรไฟล์ ให้ลงทะเบียนก่อนแล้วค่อยกลับ
-    if (!getProfile() && !location.hash.startsWith('#import')) location.hash = '#register';
+    if (!getProfile() && !location.hash.startsWith('#import') && !location.hash.startsWith('#invite')) location.hash = '#register';
     window.addEventListener('hashchange', render);
     render();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
