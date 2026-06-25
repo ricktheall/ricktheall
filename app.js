@@ -8,7 +8,8 @@
   // ---------- ที่เก็บข้อมูล ----------
   const KEY_PROFILE = 'dt.profile';      // โปรไฟล์ผู้ใช้
   const KEY_HISTORY = 'dt.history';      // ประวัติการประเมินของตัวเอง
-  const KEY_TEAM    = 'dt.team';         // รายงานที่รับมาจากสมาชิก (สำหรับผู้ดูแล)
+  const KEY_TEAM    = 'dt.team';         // รายงาน/ผลประเมินของสมาชิก (สำหรับผู้ดูแล)
+  const KEY_MEMBERS = 'dt.members';      // รายชื่อสมาชิกที่ผู้ดูแลเพิ่มเอง (รวมคนที่ยังไม่ประเมิน)
 
   const store = {
     get(k, def) { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } },
@@ -21,6 +22,8 @@
   const setHistory = (h) => store.set(KEY_HISTORY, h);
   const getTeam = () => store.get(KEY_TEAM, []);
   const setTeam = (t) => store.set(KEY_TEAM, t);
+  const getMembers = () => store.get(KEY_MEMBERS, []);
+  const setMembers = (m) => store.set(KEY_MEMBERS, m);
 
   // ---------- ยูทิลิตี้ ----------
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -335,12 +338,17 @@
   });
 
   // ---------- หน้า: ทำแบบประเมิน ----------
-  route('assess', () => {
+  // params.for = ชื่อสมาชิก -> ผู้ดูแลประเมินแทนสมาชิกคนนั้น (เก็บเข้าทีม)
+  route('assess', (params) => {
     const p = getProfile();
     if (!p) { go('register'); return el('div'); }
+    const forName = params.for || '';
+    const backTo = forName ? 'member?name=' + encodeURIComponent(forName) : 'home';
     const ratings = emptyRatings();
     const wrap = el('div', { class: 'page' });
-    wrap.appendChild(header('แบบประเมินสุขภาพฝ่ายวิญญาณ', 'ทำเครื่องหมายในระดับที่คุณไปถึงของแต่ละข้อ', 'home'));
+    wrap.appendChild(header(
+      forName ? 'ประเมินให้: ' + forName : 'แบบประเมินสุขภาพฝ่ายวิญญาณ',
+      'ทำเครื่องหมายในระดับที่ไปถึงของแต่ละข้อ', backTo));
 
     // คำอธิบายสเกล
     const legend = el('div', { class: 'legend' });
@@ -391,13 +399,23 @@
 
     wrap.appendChild(el('div', { class: 'action-row' },
       el('button', { class: 'btn primary', onclick: () => {
-        const rec = { id: uid(), date: todayISO(), ratings, note: $('textarea', noteWrap).value.trim() };
-        const hist = getHistory();
-        hist.unshift(rec);
-        setHistory(hist);
-        go('result', { i: 0 });
+        const note = $('textarea', noteWrap).value.trim();
+        if (forName) {
+          // ผู้ดูแลประเมินแทนสมาชิก -> เก็บเข้าทีม
+          const m = getMembers().find((x) => x.name === forName);
+          const team = getTeam();
+          team.unshift({ name: forName, believeDate: m ? m.believeDate : '', supervisor: p.name, date: todayISO(), ratings, note, savedAt: Date.now() });
+          setTeam(team);
+          go('member', { name: forName });
+        } else {
+          const rec = { id: uid(), date: todayISO(), ratings, note };
+          const hist = getHistory();
+          hist.unshift(rec);
+          setHistory(hist);
+          go('result', { i: 0 });
+        }
       } }, 'บันทึกผลการประเมิน'),
-      el('button', { class: 'btn', onclick: () => go('home') }, 'ยกเลิก'),
+      el('button', { class: 'btn', onclick: () => go(backTo) }, 'ยกเลิก'),
     ));
     return wrap;
   });
@@ -522,14 +540,95 @@
     const p = getProfile();
     if (!p) { go('register'); return el('div'); }
     const team = getTeam();
-    const wrap = el('div', { class: 'page' });
-    wrap.appendChild(header('ทีม & สถิติรวม', team.length + ' รายงานจากสมาชิก', 'home'));
+    const members = getMembers();
 
-    // กล่องวางลิงก์/โค้ดเพื่อรับรายงาน
-    const importBox = el('div', { class: 'card' },
-      el('p', {}, el('b', {}, 'รับรายงานใหม่: '), 'วางลิงก์หรือโค้ดรายงานที่สมาชิกส่งมา'),
+    // รายงานล่าสุดต่อคน + จำนวนการประเมินต่อคน
+    const latestByPerson = {};
+    const countByPerson = {};
+    for (const r of team) {
+      countByPerson[r.name] = (countByPerson[r.name] || 0) + 1;
+      if (!latestByPerson[r.name] || r.date > latestByPerson[r.name].date) latestByPerson[r.name] = r;
+    }
+    // รวมรายชื่อทั้งหมด: คนที่ผู้ดูแลเพิ่ม + คนที่มีผลประเมินแล้ว
+    const allNames = Array.from(new Set([...members.map((m) => m.name), ...Object.keys(latestByPerson)]));
+    const assessed = Object.values(latestByPerson); // เฉพาะคนที่มีผลประเมิน (ใช้คิดค่าเฉลี่ย)
+
+    const wrap = el('div', { class: 'page' });
+    wrap.appendChild(header('ทีม & สถิติรวม', allNames.length + ' สมาชิก · ' + assessed.length + ' คนประเมินแล้ว', 'home'));
+
+    // (1) ช่องเพิ่มสมาชิกใหม่
+    const addCard = el('div', { class: 'card' });
+    addCard.appendChild(el('h3', { class: 'card-h' }, '➕ เพิ่มสมาชิกใหม่'));
+    const nameInput = el('input', { id: 'newm', placeholder: 'ชื่อสมาชิก เช่น มานะ' });
+    addCard.appendChild(el('div', { class: 'add-row' },
+      nameInput,
+      el('button', { class: 'btn primary add-btn', onclick: () => {
+        const nm = nameInput.value.trim();
+        if (!nm) { toast('กรุณาใส่ชื่อ'); return; }
+        if (allNames.includes(nm)) { toast('มีสมาชิกชื่อนี้แล้ว'); return; }
+        const ms = getMembers(); ms.push({ name: nm, believeDate: '', createdAt: Date.now() }); setMembers(ms);
+        toast('เพิ่ม ' + nm + ' แล้ว ✓');
+        go('member', { name: nm });
+      } }, 'เพิ่ม'),
+    ));
+    addCard.appendChild(el('p', { class: 'muted small' }, 'เพิ่มแล้วแตะที่ชื่อเพื่อทำแบบประเมินให้สมาชิกได้เลย'));
+    wrap.appendChild(addCard);
+
+    // ว่างเปล่า
+    if (!allNames.length) {
+      wrap.appendChild(el('div', { class: 'card empty' }, el('div', { class: 'emoji' }, '👥'),
+        el('p', { class: 'muted' }, 'ยังไม่มีสมาชิก — เพิ่มสมาชิกคนแรกด้านบน หรือรับรายงานจากลิงก์ที่สมาชิกส่งมา')));
+    }
+
+    // (2) ค่าเฉลี่ยรวมของสมาชิกทั้งหมด
+    if (assessed.length) {
+      let sumPct = 0; const areaSum = {}; AREAS.forEach((a) => areaSum[a.id] = 0);
+      assessed.forEach((r) => { const s = score(r.ratings); sumPct += s.pct; AREAS.forEach((a) => areaSum[a.id] += s.byArea[a.id].pct); });
+      const avg = Math.round(sumPct / assessed.length);
+      wrap.appendChild(el('div', { class: 'card center' },
+        ringSvg(avg),
+        el('p', { class: 'muted' }, 'ค่าเฉลี่ยการเติบโตของทีม (จาก ' + assessed.length + ' คนที่ประเมินแล้ว)'),
+      ));
+      const areaAvgs = AREAS.map((a) => ({ a, v: Math.round(areaSum[a.id] / assessed.length) })).sort((x, y) => x.v - y.v);
+      const areaCard = el('div', { class: 'card' }, el('h3', { class: 'section-h' }, 'เฉลี่ยรายด้านของทีม'));
+      areaAvgs.forEach(({ a, v }) => {
+        areaCard.appendChild(el('div', { class: 'res-area' },
+          el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, a.title), el('span', { class: 'res-pct' }, v + '%')),
+          el('div', { class: 'bar' }, el('div', { class: 'bar-fill ' + (v < 40 ? 'lk' : v < 70 ? 'ld' : 'ls'), style: `width:${v}%` })),
+        ));
+      });
+      wrap.appendChild(areaCard);
+    }
+
+    // (3) รายชื่อสมาชิก (แตะเพื่อดู/ประเมินรายบุคคล)
+    if (allNames.length) {
+      wrap.appendChild(el('h3', { class: 'section-h' }, 'สมาชิกในทีม (แตะเพื่อดู/ประเมิน)'));
+      const list = el('div', { class: 'list' });
+      // เรียง: คนที่ % ต่ำสุดก่อน, คนที่ยังไม่ประเมินไว้ท้ายสุด
+      allNames.map((nm) => ({ nm, r: latestByPerson[nm] }))
+        .sort((x, y) => (x.r ? score(x.r.ratings).pct : 999) - (y.r ? score(y.r.ratings).pct : 999))
+        .forEach(({ nm, r }) => {
+          const pct = r ? score(r.ratings).pct + '%' : '—';
+          const sub = r ? ('ล่าสุด ' + fmtDate(r.date) + ' · ' + countByPerson[nm] + ' ครั้ง') : 'ยังไม่ประเมิน';
+          list.appendChild(el('button', { class: 'list-item person', onclick: () => go('member', { name: nm }) },
+            el('span', { class: 'li-avatar' + (r ? '' : ' pending') }, (nm || '?').trim().charAt(0)),
+            el('span', { class: 'li-col' },
+              el('span', { class: 'li-name' }, nm),
+              el('span', { class: 'li-date muted' }, sub),
+            ),
+            el('span', { class: 'li-pct' }, pct),
+            el('span', { class: 'li-go' }, '›'),
+          ));
+        });
+      wrap.appendChild(list);
+    }
+
+    // รับรายงานจากลิงก์ (ทางเลือก สำหรับสมาชิกที่ประเมินเองในเครื่องตัวเอง)
+    const impDetails = el('details', { class: 'card details' },
+      el('summary', {}, '🔗 รับรายงานจากลิงก์ที่สมาชิกส่งมา'),
+      el('p', { class: 'muted small' }, 'ใช้กรณีสมาชิกประเมินในเครื่องตัวเองแล้วส่งลิงก์มา'),
       el('textarea', { id: 'imp', rows: '2', placeholder: 'วางลิงก์ #import?r=... หรือโค้ดที่นี่' }),
-      el('button', { class: 'btn primary', onclick: () => {
+      el('button', { class: 'btn', onclick: () => {
         let s = $('#imp').value.trim();
         const m = s.match(/[?&]r=([^&\s]+)/);
         if (m) s = decodeURIComponent(m[1]);
@@ -537,63 +636,13 @@
         else toast('อ่านรายงานไม่ได้ ตรวจสอบลิงก์/โค้ด');
       } }, 'เปิดรายงาน'),
     );
-    wrap.appendChild(importBox);
+    wrap.appendChild(impDetails);
 
-    if (!team.length) {
-      wrap.appendChild(el('div', { class: 'card empty' }, el('div', { class: 'emoji' }, '👥'), el('p', { class: 'muted' }, 'ยังไม่มีรายงานจากสมาชิก — ส่งลิงก์แอปให้ผู้เชื่อใหม่เพื่อเริ่มเช็คตัวเอง แล้วให้ส่งรายงานกลับมา')));
-      return wrap;
-    }
-
-    // เก็บรายงานล่าสุดต่อคน
-    const latestByPerson = {};
-    for (const r of team) {
-      if (!latestByPerson[r.name] || r.date > latestByPerson[r.name].date) latestByPerson[r.name] = r;
-    }
-    const people = Object.values(latestByPerson);
-
-    // สถิติรวม: ค่าเฉลี่ยภาพรวม + เฉลี่ยรายด้าน
-    let sumPct = 0; const areaSum = {}; AREAS.forEach((a) => areaSum[a.id] = 0);
-    people.forEach((r) => { const s = score(r.ratings); sumPct += s.pct; AREAS.forEach((a) => areaSum[a.id] += s.byArea[a.id].pct); });
-    const avg = Math.round(sumPct / people.length);
-
-    wrap.appendChild(el('div', { class: 'card center' },
-      ringSvg(avg),
-      el('p', { class: 'muted' }, 'ค่าเฉลี่ยการเติบโตของทีม (' + people.length + ' คน)'),
-    ));
-
-    // เฉลี่ยรายด้าน (จุดที่ทีมต้องหนุนเสริม = ด้านที่ต่ำสุด)
-    const areaAvgs = AREAS.map((a) => ({ a, v: Math.round(areaSum[a.id] / people.length) })).sort((x, y) => x.v - y.v);
-    const areaCard = el('div', { class: 'card' }, el('h3', { class: 'section-h' }, 'เฉลี่ยรายด้านของทีม'));
-    areaAvgs.forEach(({ a, v }) => {
-      areaCard.appendChild(el('div', { class: 'res-area' },
-        el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, a.title), el('span', { class: 'res-pct' }, v + '%')),
-        el('div', { class: 'bar' }, el('div', { class: 'bar-fill ' + (v < 40 ? 'lk' : v < 70 ? 'ld' : 'ls'), style: `width:${v}%` })),
+    if (assessed.length) {
+      wrap.appendChild(el('div', { class: 'action-row' },
+        el('button', { class: 'btn', onclick: () => exportTeamSummary(assessed) }, '📋 คัดลอกสรุปทั้งทีม'),
       ));
-    });
-    wrap.appendChild(areaCard);
-
-    // รายชื่อสมาชิก (แตะเพื่อดูรายบุคคล)
-    wrap.appendChild(el('h3', { class: 'section-h' }, 'สมาชิกในทีม (แตะเพื่อดูรายละเอียด)'));
-    const countByPerson = {};
-    for (const r of team) countByPerson[r.name] = (countByPerson[r.name] || 0) + 1;
-    const list = el('div', { class: 'list' });
-    people.sort((x, y) => score(x.ratings).pct - score(y.ratings).pct).forEach((r) => {
-      const s = score(r.ratings);
-      list.appendChild(el('button', { class: 'list-item person', onclick: () => go('member', { name: r.name }) },
-        el('span', { class: 'li-avatar' }, (r.name || '?').trim().charAt(0)),
-        el('span', { class: 'li-col' },
-          el('span', { class: 'li-name' }, r.name),
-          el('span', { class: 'li-date muted' }, 'ล่าสุด ' + fmtDate(r.date) + ' · ' + countByPerson[r.name] + ' รายงาน'),
-        ),
-        el('span', { class: 'li-pct' }, s.pct + '%'),
-        el('span', { class: 'li-go' }, '›'),
-      ));
-    });
-    wrap.appendChild(list);
-
-    wrap.appendChild(el('div', { class: 'action-row' },
-      el('button', { class: 'btn', onclick: () => exportTeamSummary(people) }, '📋 คัดลอกสรุปทั้งทีม'),
-    ));
+    }
     return wrap;
   });
 
@@ -620,8 +669,31 @@
   route('member', (params) => {
     const name = params.name;
     const reports = getTeam().filter((r) => r.name === name).sort((a, b) => (b.date > a.date ? 1 : -1));
+    const member = getMembers().find((m) => m.name === name);
     const wrap = el('div', { class: 'page' });
-    if (!reports.length) { go('team'); return wrap; }
+    if (!reports.length && !member) { go('team'); return wrap; }
+
+    const assessBtn = el('button', { class: 'btn primary', onclick: () => go('assess', { for: name }) },
+      reports.length ? '✅ ประเมินรอบใหม่ให้ ' + name : '✅ เริ่มประเมินให้ ' + name);
+
+    // ยังไม่มีผลประเมิน
+    if (!reports.length) {
+      wrap.appendChild(header(name, 'ยังไม่มีผลประเมิน', 'team'));
+      wrap.appendChild(el('div', { class: 'card empty' },
+        el('div', { class: 'emoji' }, '📝'),
+        el('p', { class: 'muted' }, 'ยังไม่ได้ประเมิน ' + name + ' — เริ่มทำแบบประเมินให้สมาชิกคนนี้ได้เลย'),
+      ));
+      wrap.appendChild(el('div', { class: 'action-row col' },
+        assessBtn,
+        el('button', { class: 'btn danger', onclick: () => {
+          if (!confirm('ลบสมาชิก ' + name + '?')) return;
+          setMembers(getMembers().filter((m) => m.name !== name));
+          go('team');
+        } }, 'ลบสมาชิกนี้'),
+      ));
+      return wrap;
+    }
+
     const latest = reports[0];
     const sc = score(latest.ratings);
     wrap.appendChild(header(name, (latest.believeDate ? 'รับเชื่อ ' + fmtDate(latest.believeDate) + ' · ' : '') + reports.length + ' รายงาน', 'team'));
@@ -631,6 +703,8 @@
     card.appendChild(el('p', { class: 'muted' }, 'ประเมินล่าสุด ' + fmtDate(latest.date)));
     card.appendChild(levelBar(sc.byArea));
     wrap.appendChild(card);
+
+    wrap.appendChild(el('div', { class: 'action-row' }, assessBtn));
 
     // แนวโน้มเทียบรายงานก่อนหน้า
     if (reports[1]) {
@@ -666,8 +740,9 @@
 
     wrap.appendChild(el('div', { class: 'action-row' },
       el('button', { class: 'btn danger', onclick: () => {
-        if (!confirm('ลบรายงานทั้งหมดของ ' + name + '?')) return;
+        if (!confirm('ลบสมาชิก ' + name + ' และผลประเมินทั้งหมด?')) return;
         setTeam(getTeam().filter((x) => x.name !== name));
+        setMembers(getMembers().filter((m) => m.name !== name));
         go('team');
       } }, 'ลบสมาชิกนี้'),
     ));
