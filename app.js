@@ -366,7 +366,8 @@
         ...LEVELS.map((l) => el('span', { class: 'aa-cell' }, l.label)),
       ));
       a.verses.forEach((v, vi) => {
-        const row = el('div', { class: 'aa-row' }, el('span', { class: 'aa-verse' }, v));
+        const row = el('div', { class: 'aa-row' },
+          el('button', { class: 'aa-verse verse-link', type: 'button', onclick: () => showVerse(v) }, v, el('span', { class: 'verse-ico' }, '📖')));
         LEVELS.forEach((l, li) => {
           const box = el('input', { type: 'checkbox', class: 'chk lv' + li });
           box.addEventListener('change', () => {
@@ -571,23 +572,105 @@
     });
     wrap.appendChild(areaCard);
 
-    // รายชื่อสมาชิก
-    wrap.appendChild(el('h3', { class: 'section-h' }, 'สมาชิกในทีม'));
+    // รายชื่อสมาชิก (แตะเพื่อดูรายบุคคล)
+    wrap.appendChild(el('h3', { class: 'section-h' }, 'สมาชิกในทีม (แตะเพื่อดูรายละเอียด)'));
+    const countByPerson = {};
+    for (const r of team) countByPerson[r.name] = (countByPerson[r.name] || 0) + 1;
     const list = el('div', { class: 'list' });
     people.sort((x, y) => score(x.ratings).pct - score(y.ratings).pct).forEach((r) => {
       const s = score(r.ratings);
-      list.appendChild(el('div', { class: 'list-item person' },
-        el('span', { class: 'li-name' }, r.name),
-        el('span', { class: 'li-date muted' }, fmtDate(r.date)),
+      list.appendChild(el('button', { class: 'list-item person', onclick: () => go('member', { name: r.name }) },
+        el('span', { class: 'li-avatar' }, (r.name || '?').trim().charAt(0)),
+        el('span', { class: 'li-col' },
+          el('span', { class: 'li-name' }, r.name),
+          el('span', { class: 'li-date muted' }, 'ล่าสุด ' + fmtDate(r.date) + ' · ' + countByPerson[r.name] + ' รายงาน'),
+        ),
         el('span', { class: 'li-pct' }, s.pct + '%'),
-        el('button', { class: 'li-del', title: 'ลบ', onclick: () => {
-          if (!confirm('ลบรายงานของ ' + r.name + '?')) return;
-          setTeam(getTeam().filter((x) => x.name !== r.name));
-          render();
-        } }, '✕'),
+        el('span', { class: 'li-go' }, '›'),
       ));
     });
     wrap.appendChild(list);
+
+    wrap.appendChild(el('div', { class: 'action-row' },
+      el('button', { class: 'btn', onclick: () => exportTeamSummary(people) }, '📋 คัดลอกสรุปทั้งทีม'),
+    ));
+    return wrap;
+  });
+
+  // คัดลอกสรุปสถิติทั้งทีมเป็นข้อความ
+  function exportTeamSummary(people) {
+    let sumPct = 0; const areaSum = {}; AREAS.forEach((a) => areaSum[a.id] = 0);
+    people.forEach((r) => { const s = score(r.ratings); sumPct += s.pct; AREAS.forEach((a) => areaSum[a.id] += s.byArea[a.id].pct); });
+    const avg = Math.round(sumPct / people.length);
+    const lines = [];
+    lines.push('สรุปสถิติทีม (' + people.length + ' คน)');
+    lines.push('ค่าเฉลี่ยการเติบโต: ' + avg + '%');
+    lines.push('');
+    lines.push('เฉลี่ยรายด้าน:');
+    AREAS.map((a) => ({ a, v: Math.round(areaSum[a.id] / people.length) })).sort((x, y) => x.v - y.v)
+      .forEach(({ a, v }) => lines.push('• ' + a.title + ': ' + v + '%'));
+    lines.push('');
+    lines.push('รายบุคคล:');
+    people.slice().sort((x, y) => score(y.ratings).pct - score(x.ratings).pct)
+      .forEach((r) => lines.push('• ' + r.name + ': ' + score(r.ratings).pct + '% (' + fmtDate(r.date) + ')'));
+    copy(lines.join('\n'));
+  }
+
+  // ---------- หน้า: รายละเอียดสมาชิกรายบุคคล ----------
+  route('member', (params) => {
+    const name = params.name;
+    const reports = getTeam().filter((r) => r.name === name).sort((a, b) => (b.date > a.date ? 1 : -1));
+    const wrap = el('div', { class: 'page' });
+    if (!reports.length) { go('team'); return wrap; }
+    const latest = reports[0];
+    const sc = score(latest.ratings);
+    wrap.appendChild(header(name, (latest.believeDate ? 'รับเชื่อ ' + fmtDate(latest.believeDate) + ' · ' : '') + reports.length + ' รายงาน', 'team'));
+
+    const card = el('div', { class: 'card center' });
+    card.appendChild(ringSvg(sc.pct));
+    card.appendChild(el('p', { class: 'muted' }, 'ประเมินล่าสุด ' + fmtDate(latest.date)));
+    card.appendChild(levelBar(sc.byArea));
+    wrap.appendChild(card);
+
+    // แนวโน้มเทียบรายงานก่อนหน้า
+    if (reports[1]) {
+      const diff = sc.pct - score(reports[1].ratings).pct;
+      wrap.appendChild(el('div', { class: 'trend ' + (diff >= 0 ? 'up' : 'down') },
+        (diff >= 0 ? '▲ ' : '▼ ') + Math.abs(diff) + '% จากรายงานก่อน (' + fmtDate(reports[1].date) + ')'));
+    }
+
+    // รายด้านของรายงานล่าสุด
+    wrap.appendChild(el('h3', { class: 'section-h' }, 'รายด้าน (ล่าสุด)'));
+    for (const a of AREAS) {
+      const s = sc.byArea[a.id];
+      wrap.appendChild(el('div', { class: 'res-area' },
+        el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, a.title), el('span', { class: 'res-pct' }, s.pct + '%')),
+        el('div', { class: 'bar' }, el('div', { class: 'bar-fill ls', style: `width:${s.pct}%` })),
+        el('div', { class: 'res-mini' }, `รู้ ${s.know} · กระทำ ${s.do} · แบ่งปัน ${s.share} (จาก ${s.items} ข้อ)`),
+      ));
+    }
+
+    // ประวัติรายงานของคนนี้
+    if (reports.length > 1) {
+      wrap.appendChild(el('h3', { class: 'section-h' }, 'ประวัติรายงาน'));
+      const list = el('div', { class: 'list' });
+      reports.forEach((r) => {
+        const s = score(r.ratings);
+        list.appendChild(el('div', { class: 'list-item' },
+          el('span', { class: 'li-date' }, fmtDate(r.date)),
+          el('span', { class: 'li-pct' }, s.pct + '%'),
+        ));
+      });
+      wrap.appendChild(list);
+    }
+
+    wrap.appendChild(el('div', { class: 'action-row' },
+      el('button', { class: 'btn danger', onclick: () => {
+        if (!confirm('ลบรายงานทั้งหมดของ ' + name + '?')) return;
+        setTeam(getTeam().filter((x) => x.name !== name));
+        go('team');
+      } }, 'ลบสมาชิกนี้'),
+    ));
     return wrap;
   });
 
@@ -621,6 +704,32 @@
     if (!t) { t = el('div', { id: 'toast', class: 'toast' }); document.body.appendChild(t); }
     t.textContent = msg; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ---------- ป๊อบอัพข้อพระคัมภีร์ ----------
+  function showVerse(ref) {
+    const data = (typeof BIBLE !== 'undefined') ? BIBLE[ref] : null;
+    const overlay = el('div', { class: 'modal-overlay', onclick: (e) => { if (e.target === overlay) close(); } });
+    function close() { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 200); }
+    const sheet = el('div', { class: 'modal-sheet' });
+    sheet.appendChild(el('div', { class: 'modal-head' },
+      el('h3', {}, ref),
+      el('button', { class: 'modal-x', onclick: close }, '✕'),
+    ));
+    const body = el('div', { class: 'modal-body' });
+    if (data && data.length) {
+      data.forEach((row) => {
+        body.appendChild(el('p', { class: 'verse-p' },
+          el('sup', { class: 'verse-n' }, String(row.n)), ' ', row.t));
+      });
+    } else {
+      body.appendChild(el('p', { class: 'muted' }, 'ไม่พบข้อความสำหรับข้ออ้างอิงนี้'));
+    }
+    sheet.appendChild(body);
+    sheet.appendChild(el('div', { class: 'modal-foot' }, (typeof BIBLE_VERSION !== 'undefined' ? BIBLE_VERSION : 'พระคัมภีร์')));
+    overlay.appendChild(sheet);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('show'));
   }
 
   // ---------- บูต ----------
