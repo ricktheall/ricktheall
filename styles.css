@@ -256,6 +256,25 @@ select option { background: #0f1422; }
 .tab-ico { font-size: 1.28rem; }
 .tab-label { font-size: .72rem; font-weight: 600; }
 
+/* ---- เอฟเฟกต์/ภาพเคลื่อนไหว ---- */
+.fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 80; overflow: hidden; }
+.particle {
+  position: fixed; transform: translate(-50%, -50%);
+  will-change: transform, opacity; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4));
+  animation-name: particle-pop; animation-timing-function: cubic-bezier(.2,.7,.3,1); animation-fill-mode: forwards;
+}
+@keyframes particle-pop {
+  0% { transform: translate(-50%, -50%) translate(0, 0) scale(.3) rotate(0); opacity: 0; }
+  18% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(1) rotate(var(--rot)); opacity: 0; }
+}
+.chk-pop { animation: chk-pop .32s cubic-bezier(.34,1.56,.64,1); }
+@keyframes chk-pop { 0% { transform: scale(1); } 45% { transform: scale(1.4); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .chk-pop { animation: none; }
+  .bar-fill, .ring-fg { transition: none; }
+}
+
 /* ---- toast ---- */
 .toast {
   position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%) translateY(20px);

@@ -189,11 +189,25 @@
       return ci;
     };
     svg.appendChild(mk('ring-bg'));
-    svg.appendChild(mk('ring-fg', off));
+    const fg = mk('ring-fg', c); // เริ่มจากว่าง แล้วค่อยวิ่งไปถึงเป้า
+    svg.appendChild(fg);
     const t = document.createElementNS(ns, 'text');
     t.setAttribute('x', size / 2); t.setAttribute('y', size / 2); t.setAttribute('class', 'ring-text');
-    t.textContent = pct + '%';
+    t.textContent = '0%';
     svg.appendChild(t);
+    // อนิเมชัน: เส้นวิ่ง + ตัวเลขนับขึ้น
+    if (reducedMotion()) { fg.setAttribute('stroke-dashoffset', off); t.textContent = pct + '%'; }
+    else {
+      requestAnimationFrame(() => requestAnimationFrame(() => { fg.setAttribute('stroke-dashoffset', off); }));
+      const start = performance.now(), dur = 750;
+      const tick = (now) => {
+        const k = Math.min(1, (now - start) / dur);
+        const e = 1 - Math.pow(1 - k, 3); // ease-out
+        t.textContent = Math.round(pct * e) + '%';
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
     return svg;
   }
 
@@ -427,6 +441,7 @@
             if (box.checked) for (let k = 0; k < li; k++) { ratings[a.id][vi][k] = true; row.querySelectorAll('.chk')[k].checked = true; }
             else for (let k = li + 1; k < LEVELS.length; k++) { ratings[a.id][vi][k] = false; row.querySelectorAll('.chk')[k].checked = false; }
             updateTop();
+            if (box.checked) checkFx(box, a.icon, li); // เอฟเฟกต์กระจาย ต่างกันตามด้าน/ระดับ
           });
           row.appendChild(el('label', { class: 'aa-cell' }, box));
         });
@@ -449,13 +464,13 @@
           const team = getTeam();
           team.unshift({ name: forName, believeDate: m ? m.believeDate : '', supervisor: p.name, date: todayISO(), ratings, note, savedAt: Date.now() });
           setTeam(team);
-          go('member', { name: forName });
+          go('member', { name: forName, c: 1 });
         } else {
           const rec = { id: uid(), date: todayISO(), ratings, note };
           const hist = getHistory();
           hist.unshift(rec);
           setHistory(hist);
-          go('result', { i: 0 });
+          go('result', { i: 0, c: 1 });
         }
       } }, 'บันทึกผลการประเมิน'),
       el('button', { class: 'btn', onclick: () => go(backTo) }, 'ยกเลิก'),
@@ -473,6 +488,7 @@
     const sc = score(rec.ratings);
     const wrap = el('div', { class: 'page' });
     wrap.appendChild(header('ผลการประเมิน', fmtDate(rec.date), 'home'));
+    if (params.c) celebrate();
 
     const card = el('div', { class: 'card center' });
     card.appendChild(ringSvg(sc.pct));
@@ -715,6 +731,7 @@
     const member = getMembers().find((m) => m.name === name);
     const wrap = el('div', { class: 'page' });
     if (!reports.length && !member) { go('team'); return wrap; }
+    if (params.c && reports.length) celebrate();
 
     const assessBtn = el('button', { class: 'btn primary', onclick: () => go('assess', { for: name }) },
       reports.length ? '✅ ประเมินรอบใหม่ให้ ' + name : '✅ เริ่มประเมินให้ ' + name);
@@ -829,6 +846,57 @@
     if (!t) { t = el('div', { id: 'toast', class: 'toast' }); document.body.appendChild(t); }
     t.textContent = msg; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ---------- เอฟเฟกต์/ภาพเคลื่อนไหว ----------
+  const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function fxLayer() {
+    let l = $('#fx');
+    if (!l) { l = el('div', { id: 'fx', class: 'fx-layer' }); document.body.appendChild(l); }
+    return l;
+  }
+  function vibrate(pat) { try { navigator.vibrate && navigator.vibrate(pat); } catch {} }
+  // กระจายอนุภาคจากจุด (x,y)
+  function burstAt(x, y, opts = {}) {
+    if (reducedMotion()) return;
+    const { emojis = ['✨'], count = 10, power = 90, scale = 1 } = opts;
+    const layer = fxLayer();
+    for (let i = 0; i < count; i++) {
+      const p = el('span', { class: 'particle' }, emojis[i % emojis.length]);
+      const ang = Math.random() * Math.PI * 2;
+      const dist = power * (0.45 + Math.random() * 0.8);
+      p.style.left = x + 'px'; p.style.top = y + 'px';
+      p.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
+      p.style.setProperty('--dy', (Math.sin(ang) * dist - 24) + 'px');
+      p.style.setProperty('--rot', (Math.random() * 360 - 180) + 'deg');
+      p.style.fontSize = (15 * scale * (0.7 + Math.random() * 0.6)) + 'px';
+      p.style.animationDuration = (650 + Math.random() * 550) + 'ms';
+      p.addEventListener('animationend', () => p.remove());
+      layer.appendChild(p);
+    }
+  }
+  // เอฟเฟกต์ตอนเช็ค — ต่างกันตามด้าน (ใช้ไอคอนด้าน) และระดับ (รู้/กระทำ/แบ่งปัน)
+  function checkFx(box, areaIcon, level) {
+    const r = box.getBoundingClientRect();
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const conf = [
+      { emojis: [areaIcon, '✨'], count: 8, power: 70, scale: 1, vib: 8 },
+      { emojis: [areaIcon, '⭐', '✨'], count: 13, power: 100, scale: 1.15, vib: 14 },
+      { emojis: [areaIcon, '🎉', '💚', '⭐', '✨'], count: 22, power: 140, scale: 1.35, vib: [10, 24, 12] },
+    ][level] || {};
+    burstAt(x, y, conf);
+    vibrate(conf.vib);
+    box.classList.remove('chk-pop'); void box.offsetWidth; box.classList.add('chk-pop');
+  }
+  // ฉลองตอนทำเสร็จ
+  function celebrate() {
+    if (reducedMotion()) return;
+    vibrate([12, 30, 12, 30, 18]);
+    const w = window.innerWidth;
+    const emojis = ['🎉', '✨', '⭐', '💛', '💙', '💚', '🙌', '🔥'];
+    for (let k = 0; k < 3; k++) {
+      setTimeout(() => burstAt(w * (0.22 + 0.28 * k), 130, { emojis, count: 20, power: 170, scale: 1.35 }), k * 170);
+    }
   }
 
   // ---------- ป๊อบอัพข้อพระคัมภีร์ ----------
