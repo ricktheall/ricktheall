@@ -49,6 +49,15 @@
     if (isNaN(d)) return iso;
     return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
   };
+  // เวลา HH:MM จาก timestamp (ms)
+  const fmtTime = (ms) => {
+    if (!ms) return '';
+    const d = new Date(ms);
+    if (isNaN(d)) return '';
+    return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  };
+  // วันที่ + เวลา (ถ้ามี timestamp)
+  const fmtDateTime = (iso, ms) => fmtDate(iso) + (ms ? ' · ' + fmtTime(ms) + ' น.' : '');
 
   // ---------- โมเดลคะแนน ----------
   // สร้างชุดข้อมูลว่างสำหรับการประเมิน 1 ครั้ง: { areaId: [ [know,do,share], ... ] }
@@ -165,9 +174,9 @@
   }
 
   // ---------- ส่วนประกอบ UI ที่ใช้ซ้ำ ----------
-  function header(title, subtitle, backTo) {
+  // การย้อนกลับใช้แถบนำทางด้านบน (history) — header แสดงเฉพาะชื่อหน้า
+  function header(title, subtitle) {
     return el('div', { class: 'page-head' },
-      backTo ? el('button', { class: 'back', onclick: () => go(backTo) }, '‹') : null,
       el('div', {},
         el('h1', {}, title),
         subtitle ? el('p', { class: 'muted' }, subtitle) : null,
@@ -384,7 +393,7 @@
       hist.forEach((rec, i) => {
         const sc = score(rec.ratings);
         list.appendChild(el('button', { class: 'list-item', onclick: () => go('result', { i }) },
-          el('span', { class: 'li-date' }, fmtDate(rec.date)),
+          el('span', { class: 'li-date' }, fmtDateTime(rec.date, rec.at)),
           el('span', { class: 'li-pct' }, sc.pct + '%'),
           el('span', { class: 'li-go' }, '›'),
         ));
@@ -466,7 +475,7 @@
           setTeam(team);
           go('member', { name: forName, c: 1 });
         } else {
-          const rec = { id: uid(), date: todayISO(), ratings, note };
+          const rec = { id: uid(), date: todayISO(), at: Date.now(), ratings, note };
           const hist = getHistory();
           hist.unshift(rec);
           setHistory(hist);
@@ -487,7 +496,7 @@
     if (!rec) { go('home'); return el('div'); }
     const sc = score(rec.ratings);
     const wrap = el('div', { class: 'page' });
-    wrap.appendChild(header('ผลการประเมิน', fmtDate(rec.date), 'home'));
+    wrap.appendChild(header('ผลการประเมิน', fmtDateTime(rec.date, rec.at)));
     if (params.c) celebrate();
 
     const card = el('div', { class: 'card center' });
@@ -798,7 +807,7 @@
       reports.forEach((r) => {
         const s = score(r.ratings);
         list.appendChild(el('div', { class: 'list-item' },
-          el('span', { class: 'li-date' }, fmtDate(r.date)),
+          el('span', { class: 'li-date' }, fmtDateTime(r.date, r.at || r.savedAt)),
           el('span', { class: 'li-pct' }, s.pct + '%'),
         ));
       });
@@ -816,14 +825,29 @@
     return wrap;
   });
 
+  // ---------- แถบนำทางบน (ย้อนกลับ / ถัดไป / หน้าหลัก) ----------
+  const PAGE_TITLES = {
+    home: 'หน้าหลัก', assess: 'แบบประเมิน', result: 'ผลการประเมิน', share: 'ส่งรายงาน',
+    team: 'ทีม', member: 'สมาชิก', import: 'รับรายงาน', register: 'ลงทะเบียน', invite: 'คำเชิญ',
+  };
+  function appBar() {
+    return el('header', { class: 'appbar', id: 'appbar' },
+      el('div', { class: 'appbar-nav' },
+        el('button', { class: 'nav-btn', title: 'ย้อนกลับ', onclick: () => history.back() }, '‹'),
+        el('button', { class: 'nav-btn', title: 'ถัดไป', onclick: () => history.forward() }, '›'),
+      ),
+      el('div', { class: 'appbar-title', id: 'appbar-title' }, 'เส้นทางสาวก'),
+      el('button', { class: 'nav-btn home-btn', title: 'หน้าหลัก', onclick: () => go('home') }, '🏠'),
+    );
+  }
+
   // ---------- แถบนำทางล่าง ----------
   function navBar() {
-    const p = getProfile();
     const items = [
       ['home', '🏠', 'หน้าหลัก'],
       ['assess', '✅', 'ประเมิน'],
+      ['team', '👥', 'ทีม'],
     ];
-    items.push(['team', '👥', 'ทีม']);
     const nav = el('nav', { class: 'tabbar', id: 'tabbar' });
     items.forEach(([r, icon, label]) => {
       nav.appendChild(el('button', { class: 'tab', 'data-route': r, onclick: () => go(r) },
@@ -832,11 +856,17 @@
     return nav;
   }
   function updateNav(active) {
+    const show = !!getProfile() && active !== 'register' && active !== 'invite';
     const nav = $('#tabbar');
-    if (!nav) return;
-    const show = !!getProfile() && active !== 'register';
-    nav.style.display = show ? '' : 'none';
-    nav.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.route === active));
+    if (nav) {
+      nav.style.display = show ? '' : 'none';
+      nav.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.route === active));
+    }
+    const bar = $('#appbar');
+    if (bar) bar.style.display = show ? '' : 'none';
+    document.body.classList.toggle('with-appbar', show);
+    const tt = $('#appbar-title');
+    if (tt) tt.textContent = PAGE_TITLES[active] || 'เส้นทางสาวก';
   }
 
   // ---------- toast ----------
@@ -893,7 +923,7 @@
     if (reducedMotion()) return;
     vibrate([12, 30, 12, 30, 18]);
     const w = window.innerWidth;
-    const emojis = ['🎉', '✨', '⭐', '💛', '💙', '💚', '🙌', '🔥'];
+    const emojis = ['🎉', '✨', '⭐', '💛', '💚', '🙌', '🔥'];
     for (let k = 0; k < 3; k++) {
       setTimeout(() => burstAt(w * (0.22 + 0.28 * k), 130, { emojis, count: 20, power: 170, scale: 1.35 }), k * 170);
     }
@@ -927,6 +957,7 @@
 
   // ---------- บูต ----------
   function boot() {
+    document.body.appendChild(appBar());
     document.body.appendChild(navBar());
     // ถ้ามาจากลิงก์รายงานแต่ยังไม่มีโปรไฟล์ ให้ลงทะเบียนก่อนแล้วค่อยกลับ
     if (!getProfile() && !location.hash.startsWith('#import') && !location.hash.startsWith('#invite')) location.hash = '#register';
