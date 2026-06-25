@@ -73,6 +73,13 @@ h3 { margin: 0; }
 }
 .nav-btn:active { background: var(--card); transform: scale(.95); }
 .nav-btn.home-btn { font-size: 1.15rem; }
+.nav-btn.lang-btn { width: auto; padding: 0 12px; font-size: .82rem; font-weight: 800; letter-spacing: .02em; }
+
+/* ---- ปุ่มสลับภาษา (หน้าลงทะเบียน/คำเชิญ) ---- */
+.lang-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 14px; }
+.lang-globe { font-size: 1rem; opacity: .8; }
+.lang-opt { border: 1px solid var(--line-2); background: var(--card-2); color: var(--ink-soft); padding: 7px 18px; border-radius: 22px; font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; }
+.lang-opt.active { background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: #16120a; border: none; }
 
 /* ---- หัวข้อหน้า ---- */
 .page-head { margin: 4px 0 18px; }

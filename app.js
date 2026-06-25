@@ -24,6 +24,160 @@
   const setTeam = (t) => store.set(KEY_TEAM, t);
   const getMembers = () => store.get(KEY_MEMBERS, []);
   const setMembers = (m) => store.set(KEY_MEMBERS, m);
+  const KEY_LANG = 'dt.lang';
+  const getLang = () => store.get(KEY_LANG, 'th');
+  const setLang = (l) => store.set(KEY_LANG, l);
+
+  // ---------- ระบบ 2 ภาษา (i18n) ----------
+  // ค่าเป็น string หรือ function(...args) ก็ได้
+  const STR = {
+    brand: { th: 'เส้นทางสาวก', en: 'Disciple Path' },
+    tagline: { th: 'เครื่องมือเช็คการเติบโตฝ่ายวิญญาณ 9 ด้าน', en: 'A 9-area spiritual growth check-up' },
+    // ลงทะเบียน
+    yourName: { th: 'ชื่อของคุณ', en: 'Your name' },
+    namePh: { th: 'ชื่อ-นามสกุล', en: 'Full name' },
+    role: { th: 'บทบาท', en: 'Role' },
+    roleMember: { th: 'ผู้เชื่อใหม่ / สาวก', en: 'New believer / Disciple' },
+    roleLeader: { th: 'ผู้ดูแล / ผู้นำกลุ่ม', en: 'Leader / Group leader' },
+    believeDate: { th: 'วันที่รับเชื่อ (ถ้ามี)', en: 'Date you believed (optional)' },
+    supName: { th: 'ชื่อผู้ดูแล/พี่เลี้ยง', en: 'Mentor / leader name' },
+    supNamePh: { th: 'เช่น พี่สมชาย', en: 'e.g. John' },
+    supContact: { th: 'ช่องทางติดต่อผู้ดูแล (LINE/เบอร์)', en: 'Mentor contact (LINE/phone)' },
+    supContactPh: { th: 'ไว้ใช้ส่งรายงาน', en: 'For sending reports' },
+    start: { th: 'เริ่มใช้งาน', en: 'Get started' },
+    // คำเชิญ
+    inviteHi: { th: (n) => 'สวัสดี ' + n + ' 🙏', en: (n) => 'Hi ' + n + ' 🙏' },
+    inviteSub: { th: (by) => (by ? by + ' ' : '') + 'เชิญคุณเช็คสุขภาพฝ่ายวิญญาณ 9 ด้าน', en: (by) => (by ? by + ' ' : '') + 'invites you to check your spiritual health (9 areas)' },
+    invitePrivacy1: { th: 'แอปนี้เป็นของคุณคนเดียว — ', en: 'This app is just for you — ' },
+    invitePrivacy2: { th: 'ข้อมูลเก็บในเครื่องคุณ เห็นเฉพาะของคุณ', en: 'data stays on your device, only you see it' },
+    invitePrivacy3: { th: ' เมื่อประเมินเสร็จ เพียงกด "ส่งให้ผู้นำ" ผลของคุณก็จะไปรวมในภาพรวมของผู้นำ', en: '. When done, just tap "Send to leader" and your result joins the leader\'s overview.' },
+    inviteSwitch: { th: (a, b) => '* เครื่องนี้เคยตั้งค่าเป็น "' + a + '" มาก่อน หากดำเนินต่อจะเปลี่ยนเป็น "' + b + '"', en: (a, b) => '* This device was set up as "' + a + '". Continuing will switch it to "' + b + '".' },
+    inviteStart: { th: 'เริ่มประเมินของฉัน', en: 'Start my check-up' },
+    // หน้าหลัก
+    hello: { th: 'สวัสดี', en: 'Hello' },
+    noAssessYet: { th: 'ยังไม่มีการประเมิน', en: 'No check-up yet' },
+    noAssessSub: { th: 'เริ่มเช็คสุขภาพฝ่ายวิญญาณของคุณครั้งแรกได้เลย', en: 'Start your first spiritual health check-up' },
+    startFirst: { th: 'เริ่มประเมินครั้งแรก', en: 'Start first check-up' },
+    latestOverview: { th: 'ภาพรวมล่าสุด', en: 'Latest overview' },
+    vsPrev: { th: (d, dt) => d + '% เทียบกับครั้งก่อน (' + dt + ')', en: (d, dt) => d + '% vs last time (' + dt + ')' },
+    progressByArea: { th: 'ความก้าวหน้ารายด้าน', en: 'Progress by area' },
+    newAssess: { th: '＋ ประเมินรอบใหม่', en: '＋ New check-up' },
+    sendReport: { th: '📤 ส่งรายงาน', en: '📤 Send report' },
+    history: { th: 'ประวัติย้อนหลัง', en: 'History' },
+    // ประเมิน
+    assessTitle: { th: 'แบบประเมินสุขภาพฝ่ายวิญญาณ', en: 'Spiritual Health Check-up' },
+    assessFor: { th: (n) => 'ประเมินให้: ' + n, en: (n) => 'Assessing: ' + n },
+    assessHint: { th: 'ทำเครื่องหมายในระดับที่ไปถึงของแต่ละข้อ', en: 'Tick the level you have reached for each item' },
+    verseCol: { th: 'ข้อพระคัมภีร์', en: 'Scripture' },
+    answered: { th: (a, b) => a + '/' + b + ' ข้อที่ตอบแล้ว', en: (a, b) => a + '/' + b + ' answered' },
+    noteLabel: { th: 'บันทึก/คำอธิษฐาน (ไม่บังคับ)', en: 'Notes / prayer (optional)' },
+    notePh: { th: 'สิ่งที่พระเจ้าตรัส, เป้าหมายที่อยากเติบโต...', en: 'What God is saying, growth goals...' },
+    saveAssess: { th: 'บันทึกผลการประเมิน', en: 'Save results' },
+    cancel: { th: 'ยกเลิก', en: 'Cancel' },
+    // ผล
+    resultTitle: { th: 'ผลการประเมิน', en: 'Results' },
+    miniBreak: { th: (k, d, s, n) => `รู้ ${k} · กระทำ ${d} · แบ่งปัน ${s} (จาก ${n} ข้อ)`, en: (k, d, s, n) => `Know ${k} · Do ${d} · Share ${s} (of ${n})` },
+    noteLabelShort: { th: 'บันทึก: ', en: 'Note: ' },
+    sendToLeader: { th: '📤 ส่งรายงานให้ผู้ดูแล', en: '📤 Send report to leader' },
+    del: { th: 'ลบ', en: 'Delete' },
+    confirmDelResult: { th: 'ลบผลการประเมินนี้?', en: 'Delete this result?' },
+    // ส่งรายงาน
+    shareTitle: { th: 'ส่งรายงานให้ผู้ดูแล', en: 'Send report to leader' },
+    shareTo: { th: (s) => 'ถึง: ' + s, en: (s) => 'To: ' + s },
+    shareIntro: { th: 'ส่งสรุปผลให้พี่เลี้ยง/ผู้ดูแลของคุณ เพื่อหนุนใจและติดตามการเติบโต', en: 'Send a summary to your mentor/leader for encouragement and follow-up' },
+    shareBtn: { th: '📲 ส่ง/แชร์ (LINE, ข้อความ ฯลฯ)', en: '📲 Send / Share (LINE, message, etc.)' },
+    copyText: { th: '📋 คัดลอกข้อความรายงาน', en: '📋 Copy report text' },
+    copyLink: { th: '🔗 คัดลอกลิงก์รายงาน', en: '🔗 Copy report link' },
+    supChannel: { th: (c) => 'ช่องทางผู้ดูแล: ' + c, en: (c) => 'Leader contact: ' + c },
+    copied: { th: 'คัดลอกแล้ว ✓', en: 'Copied ✓' },
+    copyFail: { th: 'คัดลอกไม่สำเร็จ', en: 'Copy failed' },
+    reportTitle: { th: 'รายงานการเติบโตฝ่ายวิญญาณ', en: 'Spiritual Growth Report' },
+    rpName: { th: 'ชื่อ', en: 'Name' },
+    rpDate: { th: 'วันที่', en: 'Date' },
+    rpOverall: { th: 'ภาพรวม', en: 'Overall' },
+    rpSeeMore: { th: 'ดูรายละเอียด/รวมสถิติ:', en: 'View details / aggregate:' },
+    inviteMsg: { th: (by, n, link) => by + ' เชิญ ' + n + ' เช็คสุขภาพฝ่ายวิญญาณ\nเปิดลิงก์นี้เพื่อประเมินด้วยตัวเอง:\n' + link, en: (by, n, link) => by + ' invites ' + n + ' to a spiritual health check-up.\nOpen this link to assess yourself:\n' + link },
+    // รับรายงาน
+    importTitle: { th: 'รับรายงานจากสมาชิก', en: 'Receive member report' },
+    importBad: { th: 'ลิงก์รายงานไม่ถูกต้องหรือเสียหาย', en: 'Report link is invalid or corrupted' },
+    assessedOn: { th: (d) => 'ประเมินวันที่ ' + d, en: (d) => 'Assessed on ' + d },
+    saveToTeam: { th: 'บันทึกเข้ารายชื่อทีม', en: 'Save to team' },
+    savedToTeam: { th: 'บันทึกเข้าทีมแล้ว ✓', en: 'Saved to team ✓' },
+    // ทีม
+    teamTitle: { th: 'ทีม & สถิติรวม', en: 'Team & Stats' },
+    teamSub: { th: (a, b) => a + ' สมาชิก · ' + b + ' คนประเมินแล้ว', en: (a, b) => a + ' members · ' + b + ' assessed' },
+    addMember: { th: '➕ เพิ่มสมาชิกใหม่', en: '➕ Add new member' },
+    memberPh: { th: 'ชื่อสมาชิก เช่น มานะ', en: 'Member name, e.g. Mana' },
+    add: { th: 'เพิ่ม', en: 'Add' },
+    addHint: { th: 'เพิ่มแล้วแตะที่ชื่อเพื่อทำแบบประเมินให้สมาชิกได้เลย', en: 'After adding, tap the name to assess them' },
+    enterName: { th: 'กรุณาใส่ชื่อ', en: 'Please enter a name' },
+    dupName: { th: 'มีสมาชิกชื่อนี้แล้ว', en: 'A member with this name already exists' },
+    added: { th: (n) => 'เพิ่ม ' + n + ' แล้ว ✓', en: (n) => 'Added ' + n + ' ✓' },
+    noMembers: { th: 'ยังไม่มีสมาชิก — เพิ่มสมาชิกคนแรกด้านบน หรือรับรายงานจากลิงก์ที่สมาชิกส่งมา', en: 'No members yet — add your first above, or receive a report link from a member' },
+    teamAvg: { th: (n) => 'ค่าเฉลี่ยการเติบโตของทีม (จาก ' + n + ' คนที่ประเมินแล้ว)', en: (n) => 'Team average growth (from ' + n + ' assessed)' },
+    teamAreaAvg: { th: 'เฉลี่ยรายด้านของทีม', en: 'Team average by area' },
+    teamRoster: { th: 'สมาชิกในทีม (แตะเพื่อดู/ประเมิน)', en: 'Team roster (tap to view/assess)' },
+    lastN: { th: (d, n) => 'ล่าสุด ' + d + ' · ' + n + ' ครั้ง', en: (d, n) => 'Last ' + d + ' · ' + n + 'x' },
+    notAssessed: { th: 'ยังไม่ประเมิน', en: 'Not assessed' },
+    importFromLink: { th: '🔗 รับรายงานจากลิงก์ที่สมาชิกส่งมา', en: '🔗 Receive a report link from a member' },
+    importFromLinkHint: { th: 'ใช้กรณีสมาชิกประเมินในเครื่องตัวเองแล้วส่งลิงก์มา', en: 'For when a member assessed on their own device and sent a link' },
+    importPh: { th: 'วางลิงก์ #import?r=... หรือโค้ดที่นี่', en: 'Paste #import?r=... link or code here' },
+    openReport: { th: 'เปิดรายงาน', en: 'Open report' },
+    readFail: { th: 'อ่านรายงานไม่ได้ ตรวจสอบลิงก์/โค้ด', en: 'Could not read report — check the link/code' },
+    copyTeamSummary: { th: '📋 คัดลอกสรุปทั้งทีม', en: '📋 Copy team summary' },
+    sumTeam: { th: (n) => 'สรุปสถิติทีม (' + n + ' คน)', en: (n) => 'Team summary (' + n + ' people)' },
+    sumAvg: { th: (v) => 'ค่าเฉลี่ยการเติบโต: ' + v + '%', en: (v) => 'Average growth: ' + v + '%' },
+    sumByArea: { th: 'เฉลี่ยรายด้าน:', en: 'Average by area:' },
+    sumByPerson: { th: 'รายบุคคล:', en: 'By person:' },
+    // สมาชิก (รายบุคคล)
+    mNoResult: { th: 'ยังไม่มีผลประเมิน', en: 'No results yet' },
+    mEmpty: { th: (n) => 'ยังไม่ได้ประเมิน ' + n + ' — เริ่มทำแบบประเมินให้สมาชิกคนนี้ได้เลย', en: (n) => n + ' has not been assessed yet — start a check-up for them' },
+    mBelieve: { th: (d) => 'รับเชื่อ ' + d + ' · ', en: (d) => 'Believed ' + d + ' · ' },
+    mReports: { th: (n) => n + ' รายงาน', en: (n) => n + ' report(s)' },
+    assessAgainFor: { th: (n) => '✅ ประเมินรอบใหม่ให้ ' + n, en: (n) => '✅ New check-up for ' + n },
+    assessForBtn: { th: (n) => '✅ เริ่มประเมินให้ ' + n, en: (n) => '✅ Start check-up for ' + n },
+    inviteLinkBtn: { th: (n) => '🔗 ส่งลิงก์ให้ ' + n + ' กรอกเอง', en: (n) => '🔗 Send ' + n + ' a self-assess link' },
+    inviteShareTitle: { th: (n) => 'ลิงก์ประเมินสำหรับ ' + n, en: (n) => 'Check-up link for ' + n },
+    lastAssessed: { th: (d) => 'ประเมินล่าสุด ' + d, en: (d) => 'Last assessed ' + d },
+    areasLatest: { th: 'รายด้าน (ล่าสุด)', en: 'Areas (latest)' },
+    reportHistory: { th: 'ประวัติรายงาน', en: 'Report history' },
+    delMember: { th: 'ลบสมาชิกนี้', en: 'Delete member' },
+    confirmDelMember: { th: (n) => 'ลบสมาชิก ' + n + '?', en: (n) => 'Delete member ' + n + '?' },
+    confirmDelMemberAll: { th: (n) => 'ลบสมาชิก ' + n + ' และผลประเมินทั้งหมด?', en: (n) => 'Delete ' + n + ' and all their results?' },
+    fromPrev: { th: (d, dt) => d + '% จากรายงานก่อน (' + dt + ')', en: (d, dt) => d + '% from previous (' + dt + ')' },
+    // อื่น ๆ
+    editProfile: { th: 'แก้ไขโปรไฟล์', en: 'Edit profile' },
+    back: { th: 'ย้อนกลับ', en: 'Back' },
+    forward: { th: 'ถัดไป', en: 'Forward' },
+    home: { th: 'หน้าหลัก', en: 'Home' },
+    verseNotFound: { th: 'ไม่พบข้อความสำหรับข้ออ้างอิงนี้', en: 'No text found for this reference' },
+    tabHome: { th: 'หน้าหลัก', en: 'Home' },
+    tabAssess: { th: 'ประเมิน', en: 'Assess' },
+    tabTeam: { th: 'ทีม', en: 'Team' },
+    titHome: { th: 'หน้าหลัก', en: 'Home' },
+    titAssess: { th: 'แบบประเมิน', en: 'Check-up' },
+    titResult: { th: 'ผลการประเมิน', en: 'Results' },
+    titShare: { th: 'ส่งรายงาน', en: 'Send report' },
+    titTeam: { th: 'ทีม', en: 'Team' },
+    titMember: { th: 'สมาชิก', en: 'Member' },
+    titImport: { th: 'รับรายงาน', en: 'Receive report' },
+    titRegister: { th: 'ลงทะเบียน', en: 'Register' },
+    titInvite: { th: 'คำเชิญ', en: 'Invitation' },
+  };
+  function t(key, ...args) {
+    const e = STR[key];
+    if (!e) return key;
+    const v = e[getLang()] ?? e.th;
+    return typeof v === 'function' ? v(...args) : v;
+  }
+  // ตัวช่วยเนื้อหาตามภาษา
+  const areaTitle = (a) => (getLang() === 'en' && a.title_en) ? a.title_en : a.title;
+  const levelLabel = (l) => (getLang() === 'en' && l.label_en) ? l.label_en : l.label;
+  const levelDesc = (l) => (getLang() === 'en' && l.desc_en) ? l.desc_en : l.desc;
+  const refLabel = (k) => (getLang() === 'en' && typeof REF_EN !== 'undefined' && REF_EN[k]) ? REF_EN[k] : k;
+  const bibleFor = (k) => (getLang() === 'en' && typeof BIBLE_EN !== 'undefined') ? BIBLE_EN[k] : BIBLE[k];
+  const bibleVersion = () => (getLang() === 'en' && typeof BIBLE_VERSION_EN !== 'undefined') ? BIBLE_VERSION_EN : BIBLE_VERSION;
+
 
   // ---------- ยูทิลิตี้ ----------
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -43,21 +197,22 @@
   };
   const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
   const todayISO = () => new Date().toISOString().slice(0, 10);
+  const locale = () => (getLang() === 'en' ? 'en-GB' : 'th-TH');
   const fmtDate = (iso) => {
     if (!iso) return '-';
     const d = new Date(iso);
     if (isNaN(d)) return iso;
-    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(locale(), { year: 'numeric', month: 'short', day: 'numeric' });
   };
   // เวลา HH:MM จาก timestamp (ms)
   const fmtTime = (ms) => {
     if (!ms) return '';
     const d = new Date(ms);
     if (isNaN(d)) return '';
-    return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
   };
   // วันที่ + เวลา (ถ้ามี timestamp)
-  const fmtDateTime = (iso, ms) => fmtDate(iso) + (ms ? ' · ' + fmtTime(ms) + ' น.' : '');
+  const fmtDateTime = (iso, ms) => fmtDate(iso) + (ms ? ' · ' + fmtTime(ms) + (getLang() === 'en' ? '' : ' น.') : '');
 
   // ---------- โมเดลคะแนน ----------
   // สร้างชุดข้อมูลว่างสำหรับการประเมิน 1 ครั้ง: { areaId: [ [know,do,share], ... ] }
@@ -225,7 +380,7 @@
     let know = 0, doc = 0, share = 0, items = 0;
     for (const a of AREAS) { const s = byArea[a.id]; know += s.know; doc += s.do; share += s.share; items += s.items; }
     const wrap = el('div', { class: 'levels' });
-    [['รู้', know, 'lk'], ['กระทำ', doc, 'ld'], ['แบ่งปัน', share, 'ls']].forEach(([label, n, cls]) => {
+    [[levelLabel(LEVELS[0]), know, 'lk'], [levelLabel(LEVELS[1]), doc, 'ld'], [levelLabel(LEVELS[2]), share, 'ls']].forEach(([label, n, cls]) => {
       const pct = items ? Math.round((n / items) * 100) : 0;
       wrap.appendChild(el('div', { class: 'level-row' },
         el('span', { class: 'level-label' }, label),
@@ -242,9 +397,10 @@
     const wrap = el('div', { class: 'page' });
     wrap.appendChild(el('div', { class: 'brand' },
       el('div', { class: 'logo' }, '✝'),
-      el('h1', {}, 'เส้นทางสาวก'),
-      el('p', { class: 'muted' }, 'เครื่องมือเช็คการเติบโตฝ่ายวิญญาณ 9 ด้าน'),
+      el('h1', {}, t('brand')),
+      el('p', { class: 'muted' }, t('tagline')),
     ));
+    wrap.appendChild(langToggleRow());
 
     const f = el('form', { class: 'card form', onsubmit: (e) => {
       e.preventDefault();
@@ -262,21 +418,29 @@
       go('home');
     } });
 
-    f.appendChild(field('ชื่อของคุณ', el('input', { name: 'name', value: p.name || '', placeholder: 'ชื่อ-นามสกุล', required: 'true' })));
-    f.appendChild(field('บทบาท', selectEl('role', [
-      ['member', 'ผู้เชื่อใหม่ / สาวก'],
-      ['leader', 'ผู้ดูแล / ผู้นำกลุ่ม'],
+    f.appendChild(field(t('yourName'), el('input', { name: 'name', value: p.name || '', placeholder: t('namePh'), required: 'true' })));
+    f.appendChild(field(t('role'), selectEl('role', [
+      ['member', t('roleMember')],
+      ['leader', t('roleLeader')],
     ], p.role || 'member')));
-    f.appendChild(field('วันที่รับเชื่อ (ถ้ามี)', el('input', { name: 'believeDate', type: 'date', value: p.believeDate || '' })));
-    f.appendChild(field('ชื่อผู้ดูแล/พี่เลี้ยง', el('input', { name: 'supervisor', value: p.supervisor || '', placeholder: 'เช่น พี่สมชาย' })));
-    f.appendChild(field('ช่องทางติดต่อผู้ดูแล (LINE/เบอร์)', el('input', { name: 'supervisorContact', value: p.supervisorContact || '', placeholder: 'ไว้ใช้ส่งรายงาน' })));
-    f.appendChild(el('button', { class: 'btn primary', type: 'submit' }, 'เริ่มใช้งาน'));
+    f.appendChild(field(t('believeDate'), el('input', { name: 'believeDate', type: 'date', value: p.believeDate || '' })));
+    f.appendChild(field(t('supName'), el('input', { name: 'supervisor', value: p.supervisor || '', placeholder: t('supNamePh') })));
+    f.appendChild(field(t('supContact'), el('input', { name: 'supervisorContact', value: p.supervisorContact || '', placeholder: t('supContactPh') })));
+    f.appendChild(el('button', { class: 'btn primary', type: 'submit' }, t('start')));
     wrap.appendChild(f);
     return wrap;
   });
 
   function field(label, input) {
     return el('label', { class: 'field' }, el('span', {}, label), input);
+  }
+
+  // สลับภาษา TH/EN
+  function switchLang(l) { if (getLang() !== l) { setLang(l); render(); } }
+  function langToggleRow() {
+    const cur = getLang();
+    const mk = (code, label) => el('button', { class: 'lang-opt' + (cur === code ? ' active' : ''), type: 'button', onclick: () => switchLang(code) }, label);
+    return el('div', { class: 'lang-toggle' }, el('span', { class: 'lang-globe' }, '🌐'), mk('th', 'ไทย'), mk('en', 'English'));
   }
 
   // สร้างลิงก์เชิญสมาชิกให้กรอกเอง (ฝังชื่อ + ผู้นำ)
@@ -296,15 +460,16 @@
 
     if (!name) { go(existing ? 'home' : 'register'); return wrap; }
 
+    wrap.appendChild(langToggleRow());
     wrap.appendChild(el('div', { class: 'brand' },
       el('div', { class: 'logo' }, '✝'),
-      el('h1', {}, 'สวัสดี ' + name + ' 🙏'),
-      el('p', { class: 'muted' }, (by ? by + ' ' : '') + 'เชิญคุณเช็คสุขภาพฝ่ายวิญญาณ 9 ด้าน'),
+      el('h1', {}, t('inviteHi', name)),
+      el('p', { class: 'muted' }, t('inviteSub', by)),
     ));
     wrap.appendChild(el('div', { class: 'card' },
-      el('p', {}, 'แอปนี้เป็นของคุณคนเดียว — ', el('b', {}, 'ข้อมูลเก็บในเครื่องคุณ เห็นเฉพาะของคุณ'), ' เมื่อประเมินเสร็จ เพียงกด "ส่งให้ผู้นำ" ผลของคุณก็จะไปรวมในภาพรวมของผู้นำ'),
+      el('p', {}, t('invitePrivacy1'), el('b', {}, t('invitePrivacy2')), t('invitePrivacy3')),
       (existing && existing.name !== name)
-        ? el('p', { class: 'muted small' }, '* เครื่องนี้เคยตั้งค่าเป็น "' + existing.name + '" มาก่อน หากดำเนินต่อจะเปลี่ยนเป็น "' + name + '"')
+        ? el('p', { class: 'muted small' }, t('inviteSwitch', existing.name, name))
         : null,
     ));
     wrap.appendChild(el('div', { class: 'action-row col' },
@@ -316,15 +481,15 @@
           supervisor: by, supervisorContact: contact, createdAt: Date.now(),
         });
         go('assess');
-      } }, 'เริ่มประเมินของฉัน'),
+      } }, t('inviteStart')),
     ));
     return wrap;
   });
 
   function selectEl(name, opts, val) {
     const s = el('select', { name });
-    for (const [v, t] of opts) {
-      const o = el('option', { value: v }, t);
+    for (const [v, lbl] of opts) {
+      const o = el('option', { value: v }, lbl);
       if (v === val) o.selected = true;
       s.appendChild(o);
     }
@@ -340,22 +505,22 @@
     const wrap = el('div', { class: 'page' });
 
     wrap.appendChild(el('div', { class: 'topbar' },
-      el('div', {}, el('div', { class: 'hello' }, 'สวัสดี', ), el('div', { class: 'name' }, p.name)),
-      el('button', { class: 'icon-btn', title: 'แก้ไขโปรไฟล์', onclick: () => go('register') }, '⚙'),
+      el('div', {}, el('div', { class: 'hello' }, t('hello'), ), el('div', { class: 'name' }, p.name)),
+      el('button', { class: 'icon-btn', title: t('editProfile'), onclick: () => go('register') }, '⚙'),
     ));
 
     if (!latest) {
       wrap.appendChild(el('div', { class: 'card empty' },
         el('div', { class: 'emoji' }, '🌱'),
-        el('h3', {}, 'ยังไม่มีการประเมิน'),
-        el('p', { class: 'muted' }, 'เริ่มเช็คสุขภาพฝ่ายวิญญาณของคุณครั้งแรกได้เลย'),
-        el('button', { class: 'btn primary', onclick: () => go('assess') }, 'เริ่มประเมินครั้งแรก'),
+        el('h3', {}, t('noAssessYet')),
+        el('p', { class: 'muted' }, t('noAssessSub')),
+        el('button', { class: 'btn primary', onclick: () => go('assess') }, t('startFirst')),
       ));
     } else {
       const sc = score(latest.ratings);
       const card = el('div', { class: 'card center' });
       card.appendChild(ringSvg(sc.pct));
-      card.appendChild(el('p', { class: 'muted' }, 'ภาพรวมล่าสุด • ' + fmtDate(latest.date)));
+      card.appendChild(el('p', { class: 'muted' }, t('latestOverview') + ' • ' + fmtDate(latest.date)));
       card.appendChild(levelBar(sc.byArea));
       wrap.appendChild(card);
 
@@ -364,7 +529,7 @@
         const prev = score(hist[1].ratings);
         const diff = sc.pct - prev.pct;
         wrap.appendChild(el('div', { class: 'trend ' + (diff >= 0 ? 'up' : 'down') },
-          (diff >= 0 ? '▲ ' : '▼ ') + Math.abs(diff) + '% เทียบกับครั้งก่อน (' + fmtDate(hist[1].date) + ')'));
+          (diff >= 0 ? '▲ ' : '▼ ') + t('vsPrev', Math.abs(diff), fmtDate(hist[1].date))));
       }
 
       // สรุปรายด้าน
@@ -373,22 +538,22 @@
         const s = sc.byArea[a.id];
         grid.appendChild(el('div', { class: 'area-chip' },
           el('span', { class: 'area-icon' }, a.icon),
-          el('span', { class: 'area-name' }, a.title),
+          el('span', { class: 'area-name' }, areaTitle(a)),
           el('span', { class: 'area-pct' }, s.pct + '%'),
         ));
       }
-      wrap.appendChild(el('h3', { class: 'section-h' }, 'ความก้าวหน้ารายด้าน'));
+      wrap.appendChild(el('h3', { class: 'section-h' }, t('progressByArea')));
       wrap.appendChild(grid);
     }
 
     const actions = el('div', { class: 'action-row' },
-      el('button', { class: 'btn primary', onclick: () => go('assess') }, '＋ ประเมินรอบใหม่'),
+      el('button', { class: 'btn primary', onclick: () => go('assess') }, t('newAssess')),
     );
-    if (latest) actions.appendChild(el('button', { class: 'btn', onclick: () => go('share') }, '📤 ส่งรายงาน'));
+    if (latest) actions.appendChild(el('button', { class: 'btn', onclick: () => go('share') }, t('sendReport')));
     wrap.appendChild(actions);
 
     if (hist.length) {
-      wrap.appendChild(el('h3', { class: 'section-h' }, 'ประวัติย้อนหลัง'));
+      wrap.appendChild(el('h3', { class: 'section-h' }, t('history')));
       const list = el('div', { class: 'list' });
       hist.forEach((rec, i) => {
         const sc = score(rec.ratings);
@@ -413,35 +578,35 @@
     const ratings = emptyRatings();
     const wrap = el('div', { class: 'page' });
     wrap.appendChild(header(
-      forName ? 'ประเมินให้: ' + forName : 'แบบประเมินสุขภาพฝ่ายวิญญาณ',
-      'ทำเครื่องหมายในระดับที่ไปถึงของแต่ละข้อ', backTo));
+      forName ? t('assessFor', forName) : t('assessTitle'),
+      t('assessHint')));
 
     // คำอธิบายสเกล
     const legend = el('div', { class: 'legend' });
-    LEVELS.forEach((l, i) => legend.appendChild(el('span', { class: 'legend-item lv' + i }, el('b', {}, l.label), ' = ' + l.desc)));
+    LEVELS.forEach((l, i) => legend.appendChild(el('span', { class: 'legend-item lv' + i }, el('b', {}, levelLabel(l)), ' = ' + levelDesc(l))));
     wrap.appendChild(legend);
 
-    const progressTop = el('div', { class: 'sticky-progress' }, el('div', { class: 'bar' }, el('div', { class: 'bar-fill lk', style: 'width:0%' })), el('span', {}, '0/' + TOTAL_ITEMS + ' ด้านที่แตะแล้ว'));
+    const progressTop = el('div', { class: 'sticky-progress' }, el('div', { class: 'bar' }, el('div', { class: 'bar-fill lk', style: 'width:0%' })), el('span', {}, t('answered', 0, TOTAL_ITEMS)));
     const updateTop = () => {
       let touched = 0;
       for (const a of AREAS) for (const row of ratings[a.id]) if (row.some(Boolean)) touched++;
       const pct = Math.round((touched / TOTAL_ITEMS) * 100);
       $('.bar-fill', progressTop).style.width = pct + '%';
-      $('span', progressTop).textContent = `${touched}/${TOTAL_ITEMS} ข้อที่ตอบแล้ว`;
+      $('span', progressTop).textContent = t('answered', touched, TOTAL_ITEMS);
     };
     wrap.appendChild(progressTop);
 
     for (const a of AREAS) {
       const sec = el('section', { class: 'assess-area' });
-      sec.appendChild(el('div', { class: 'aa-head' }, el('span', { class: 'aa-icon' }, a.icon), el('h3', {}, a.title)));
+      sec.appendChild(el('div', { class: 'aa-head' }, el('span', { class: 'aa-icon' }, a.icon), el('h3', {}, areaTitle(a))));
       const table = el('div', { class: 'aa-table' });
       table.appendChild(el('div', { class: 'aa-row aa-header' },
-        el('span', { class: 'aa-verse' }, 'ข้อพระคัมภีร์'),
-        ...LEVELS.map((l) => el('span', { class: 'aa-cell' }, l.label)),
+        el('span', { class: 'aa-verse' }, t('verseCol')),
+        ...LEVELS.map((l) => el('span', { class: 'aa-cell' }, levelLabel(l))),
       ));
       a.verses.forEach((v, vi) => {
         const row = el('div', { class: 'aa-row' },
-          el('button', { class: 'aa-verse verse-link', type: 'button', onclick: () => showVerse(v) }, v, el('span', { class: 'verse-ico' }, '📖')));
+          el('button', { class: 'aa-verse verse-link', type: 'button', onclick: () => showVerse(v) }, refLabel(v), el('span', { class: 'verse-ico' }, '📖')));
         LEVELS.forEach((l, li) => {
           const box = el('input', { type: 'checkbox', class: 'chk lv' + li });
           box.addEventListener('change', () => {
@@ -460,7 +625,7 @@
       wrap.appendChild(sec);
     }
 
-    const noteWrap = field('บันทึก/คำอธิษฐาน (ไม่บังคับ)', el('textarea', { name: 'note', rows: '3', placeholder: 'สิ่งที่พระเจ้าตรัส, เป้าหมายที่อยากเติบโต...' }));
+    const noteWrap = field(t('noteLabel'), el('textarea', { name: 'note', rows: '3', placeholder: t('notePh') }));
     noteWrap.classList.add('card');
     wrap.appendChild(noteWrap);
 
@@ -481,8 +646,8 @@
           setHistory(hist);
           go('result', { i: 0, c: 1 });
         }
-      } }, 'บันทึกผลการประเมิน'),
-      el('button', { class: 'btn', onclick: () => go(backTo) }, 'ยกเลิก'),
+      } }, t('saveAssess')),
+      el('button', { class: 'btn', onclick: () => go(backTo) }, t('cancel')),
     ));
     return wrap;
   });
@@ -496,7 +661,7 @@
     if (!rec) { go('home'); return el('div'); }
     const sc = score(rec.ratings);
     const wrap = el('div', { class: 'page' });
-    wrap.appendChild(header('ผลการประเมิน', fmtDateTime(rec.date, rec.at)));
+    wrap.appendChild(header(t('resultTitle'), fmtDateTime(rec.date, rec.at)));
     if (params.c) celebrate();
 
     const card = el('div', { class: 'card center' });
@@ -507,20 +672,20 @@
     for (const a of AREAS) {
       const s = sc.byArea[a.id];
       wrap.appendChild(el('div', { class: 'res-area' },
-        el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, a.title), el('span', { class: 'res-pct' }, s.pct + '%')),
+        el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, areaTitle(a)), el('span', { class: 'res-pct' }, s.pct + '%')),
         el('div', { class: 'bar' }, el('div', { class: 'bar-fill ls', style: `width:${s.pct}%` })),
-        el('div', { class: 'res-mini' }, `รู้ ${s.know} · กระทำ ${s.do} · แบ่งปัน ${s.share} (จาก ${s.items} ข้อ)`),
+        el('div', { class: 'res-mini' }, t('miniBreak', s.know, s.do, s.share, s.items)),
       ));
     }
 
-    if (rec.note) wrap.appendChild(el('div', { class: 'card note' }, el('b', {}, 'บันทึก: '), rec.note));
+    if (rec.note) wrap.appendChild(el('div', { class: 'card note' }, el('b', {}, t('noteLabelShort')), rec.note));
 
     wrap.appendChild(el('div', { class: 'action-row' },
-      el('button', { class: 'btn primary', onclick: () => go('share', { i }) }, '📤 ส่งรายงานให้ผู้ดูแล'),
+      el('button', { class: 'btn primary', onclick: () => go('share', { i }) }, t('sendToLeader')),
       el('button', { class: 'btn danger', onclick: () => {
-        if (!confirm('ลบผลการประเมินนี้?')) return;
+        if (!confirm(t('confirmDelResult'))) return;
         hist.splice(i, 1); setHistory(hist); go('home');
-      } }, 'ลบ'),
+      } }, t('del')),
     ));
     return wrap;
   });
@@ -536,37 +701,37 @@
     const code = encodeReport(rec, p);
     const link = location.origin + location.pathname + '#import?r=' + encodeURIComponent(code);
 
-    const summaryLines = AREAS.map((a) => `${a.icon} ${a.title}: ${sc.byArea[a.id].pct}%`).join('\n');
+    const summaryLines = AREAS.map((a) => `${a.icon} ${areaTitle(a)}: ${sc.byArea[a.id].pct}%`).join('\n');
     const text =
-      `รายงานการเติบโตฝ่ายวิญญาณ\n` +
-      `ชื่อ: ${p.name}\n` +
-      `วันที่: ${fmtDate(rec.date)}\n` +
-      `ภาพรวม: ${sc.pct}%\n\n` +
+      `${t('reportTitle')}\n` +
+      `${t('rpName')}: ${p.name}\n` +
+      `${t('rpDate')}: ${fmtDate(rec.date)}\n` +
+      `${t('rpOverall')}: ${sc.pct}%\n\n` +
       summaryLines +
-      `\n\nดูรายละเอียด/รวมสถิติ:\n${link}`;
+      `\n\n${t('rpSeeMore')}\n${link}`;
 
     const wrap = el('div', { class: 'page' });
-    wrap.appendChild(header('ส่งรายงานให้ผู้ดูแล', p.supervisor ? 'ถึง: ' + p.supervisor : null, 'home'));
+    wrap.appendChild(header(t('shareTitle'), p.supervisor ? t('shareTo', p.supervisor) : null));
     wrap.appendChild(el('div', { class: 'card' },
-      el('p', {}, 'ส่งสรุปผลให้พี่เลี้ยง/ผู้ดูแลของคุณ เพื่อหนุนใจและติดตามการเติบโต'),
+      el('p', {}, t('shareIntro')),
       el('pre', { class: 'report-preview' }, text),
     ));
 
     const actions = el('div', { class: 'action-row col' });
     actions.appendChild(el('button', { class: 'btn primary', onclick: async () => {
-      if (navigator.share) { try { await navigator.share({ title: 'รายงานการเติบโต', text }); return; } catch {} }
+      if (navigator.share) { try { await navigator.share({ title: t('reportTitle'), text }); return; } catch {} }
       copy(text);
-    } }, '📲 ส่ง/แชร์ (LINE, ข้อความ ฯลฯ)'));
-    actions.appendChild(el('button', { class: 'btn', onclick: () => copy(text) }, '📋 คัดลอกข้อความรายงาน'));
-    actions.appendChild(el('button', { class: 'btn', onclick: () => copy(link) }, '🔗 คัดลอกลิงก์รายงาน'));
-    if (p.supervisorContact) actions.appendChild(el('p', { class: 'muted center' }, 'ช่องทางผู้ดูแล: ' + p.supervisorContact));
+    } }, t('shareBtn')));
+    actions.appendChild(el('button', { class: 'btn', onclick: () => copy(text) }, t('copyText')));
+    actions.appendChild(el('button', { class: 'btn', onclick: () => copy(link) }, t('copyLink')));
+    if (p.supervisorContact) actions.appendChild(el('p', { class: 'muted center' }, t('supChannel', p.supervisorContact)));
     wrap.appendChild(actions);
     return wrap;
   });
 
   function copy(text) {
-    if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast('คัดลอกแล้ว ✓'), () => toast('คัดลอกไม่สำเร็จ'));
-    else { const t = el('textarea', {}); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); toast('คัดลอกแล้ว ✓'); } catch { toast('คัดลอกไม่สำเร็จ'); } t.remove(); }
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast(t('copied')), () => toast(t('copyFail')));
+    else { const ta = el('textarea', {}); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast(t('copied')); } catch { toast(t('copyFail')); } ta.remove(); }
   }
 
   // ---------- หน้า: รับรายงาน (เปิดจากลิงก์) ----------
@@ -574,15 +739,15 @@
     const code = params.r ? decodeURIComponent(params.r) : '';
     const rep = decodeReport(code);
     const wrap = el('div', { class: 'page' });
-    wrap.appendChild(header('รับรายงานจากสมาชิก', null, 'team'));
+    wrap.appendChild(header(t('importTitle'), null));
     if (!rep) {
-      wrap.appendChild(el('div', { class: 'card' }, el('p', {}, 'ลิงก์รายงานไม่ถูกต้องหรือเสียหาย')));
+      wrap.appendChild(el('div', { class: 'card' }, el('p', {}, t('importBad'))));
       return wrap;
     }
     const sc = score(rep.ratings);
     wrap.appendChild(el('div', { class: 'card center' },
       el('h3', {}, rep.name),
-      el('p', { class: 'muted' }, 'ประเมินวันที่ ' + fmtDate(rep.date)),
+      el('p', { class: 'muted' }, t('assessedOn', fmtDate(rep.date))),
       ringSvg(sc.pct),
       levelBar(sc.byArea),
     ));
@@ -595,10 +760,10 @@
         const entry = { ...rep, savedAt: Date.now() };
         if (idx >= 0) team[idx] = entry; else team.unshift(entry);
         setTeam(team);
-        toast('บันทึกเข้าทีมแล้ว ✓');
+        toast(t('savedToTeam'));
         go('team');
-      } }, 'บันทึกเข้ารายชื่อทีม'),
-      el('button', { class: 'btn', onclick: () => go('team') }, 'ยกเลิก'),
+      } }, t('saveToTeam')),
+      el('button', { class: 'btn', onclick: () => go('team') }, t('cancel')),
     ));
     return wrap;
   });
@@ -622,30 +787,30 @@
     const assessed = Object.values(latestByPerson); // เฉพาะคนที่มีผลประเมิน (ใช้คิดค่าเฉลี่ย)
 
     const wrap = el('div', { class: 'page' });
-    wrap.appendChild(header('ทีม & สถิติรวม', allNames.length + ' สมาชิก · ' + assessed.length + ' คนประเมินแล้ว', 'home'));
+    wrap.appendChild(header(t('teamTitle'), t('teamSub', allNames.length, assessed.length)));
 
     // (1) ช่องเพิ่มสมาชิกใหม่
     const addCard = el('div', { class: 'card' });
-    addCard.appendChild(el('h3', { class: 'card-h' }, '➕ เพิ่มสมาชิกใหม่'));
-    const nameInput = el('input', { id: 'newm', placeholder: 'ชื่อสมาชิก เช่น มานะ' });
+    addCard.appendChild(el('h3', { class: 'card-h' }, t('addMember')));
+    const nameInput = el('input', { id: 'newm', placeholder: t('memberPh') });
     addCard.appendChild(el('div', { class: 'add-row' },
       nameInput,
       el('button', { class: 'btn primary add-btn', onclick: () => {
         const nm = nameInput.value.trim();
-        if (!nm) { toast('กรุณาใส่ชื่อ'); return; }
-        if (allNames.includes(nm)) { toast('มีสมาชิกชื่อนี้แล้ว'); return; }
+        if (!nm) { toast(t('enterName')); return; }
+        if (allNames.includes(nm)) { toast(t('dupName')); return; }
         const ms = getMembers(); ms.push({ name: nm, believeDate: '', createdAt: Date.now() }); setMembers(ms);
-        toast('เพิ่ม ' + nm + ' แล้ว ✓');
+        toast(t('added', nm));
         go('member', { name: nm });
-      } }, 'เพิ่ม'),
+      } }, t('add')),
     ));
-    addCard.appendChild(el('p', { class: 'muted small' }, 'เพิ่มแล้วแตะที่ชื่อเพื่อทำแบบประเมินให้สมาชิกได้เลย'));
+    addCard.appendChild(el('p', { class: 'muted small' }, t('addHint')));
     wrap.appendChild(addCard);
 
     // ว่างเปล่า
     if (!allNames.length) {
       wrap.appendChild(el('div', { class: 'card empty' }, el('div', { class: 'emoji' }, '👥'),
-        el('p', { class: 'muted' }, 'ยังไม่มีสมาชิก — เพิ่มสมาชิกคนแรกด้านบน หรือรับรายงานจากลิงก์ที่สมาชิกส่งมา')));
+        el('p', { class: 'muted' }, t('noMembers'))));
     }
 
     // (2) ค่าเฉลี่ยรวมของสมาชิกทั้งหมด
@@ -655,13 +820,13 @@
       const avg = Math.round(sumPct / assessed.length);
       wrap.appendChild(el('div', { class: 'card center' },
         ringSvg(avg),
-        el('p', { class: 'muted' }, 'ค่าเฉลี่ยการเติบโตของทีม (จาก ' + assessed.length + ' คนที่ประเมินแล้ว)'),
+        el('p', { class: 'muted' }, t('teamAvg', assessed.length)),
       ));
       const areaAvgs = AREAS.map((a) => ({ a, v: Math.round(areaSum[a.id] / assessed.length) })).sort((x, y) => x.v - y.v);
-      const areaCard = el('div', { class: 'card' }, el('h3', { class: 'section-h' }, 'เฉลี่ยรายด้านของทีม'));
+      const areaCard = el('div', { class: 'card' }, el('h3', { class: 'section-h' }, t('teamAreaAvg')));
       areaAvgs.forEach(({ a, v }) => {
         areaCard.appendChild(el('div', { class: 'res-area' },
-          el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, a.title), el('span', { class: 'res-pct' }, v + '%')),
+          el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, areaTitle(a)), el('span', { class: 'res-pct' }, v + '%')),
           el('div', { class: 'bar' }, el('div', { class: 'bar-fill ' + (v < 40 ? 'lk' : v < 70 ? 'ld' : 'ls'), style: `width:${v}%` })),
         ));
       });
@@ -670,14 +835,14 @@
 
     // (3) รายชื่อสมาชิก (แตะเพื่อดู/ประเมินรายบุคคล)
     if (allNames.length) {
-      wrap.appendChild(el('h3', { class: 'section-h' }, 'สมาชิกในทีม (แตะเพื่อดู/ประเมิน)'));
+      wrap.appendChild(el('h3', { class: 'section-h' }, t('teamRoster')));
       const list = el('div', { class: 'list' });
       // เรียง: คนที่ % ต่ำสุดก่อน, คนที่ยังไม่ประเมินไว้ท้ายสุด
       allNames.map((nm) => ({ nm, r: latestByPerson[nm] }))
         .sort((x, y) => (x.r ? score(x.r.ratings).pct : 999) - (y.r ? score(y.r.ratings).pct : 999))
         .forEach(({ nm, r }) => {
           const pct = r ? score(r.ratings).pct + '%' : '—';
-          const sub = r ? ('ล่าสุด ' + fmtDate(r.date) + ' · ' + countByPerson[nm] + ' ครั้ง') : 'ยังไม่ประเมิน';
+          const sub = r ? t('lastN', fmtDate(r.date), countByPerson[nm]) : t('notAssessed');
           list.appendChild(el('button', { class: 'list-item person', onclick: () => go('member', { name: nm }) },
             el('span', { class: 'li-avatar' + (r ? '' : ' pending') }, (nm || '?').trim().charAt(0)),
             el('span', { class: 'li-col' },
@@ -693,22 +858,22 @@
 
     // รับรายงานจากลิงก์ (ทางเลือก สำหรับสมาชิกที่ประเมินเองในเครื่องตัวเอง)
     const impDetails = el('details', { class: 'card details' },
-      el('summary', {}, '🔗 รับรายงานจากลิงก์ที่สมาชิกส่งมา'),
-      el('p', { class: 'muted small' }, 'ใช้กรณีสมาชิกประเมินในเครื่องตัวเองแล้วส่งลิงก์มา'),
-      el('textarea', { id: 'imp', rows: '2', placeholder: 'วางลิงก์ #import?r=... หรือโค้ดที่นี่' }),
+      el('summary', {}, t('importFromLink')),
+      el('p', { class: 'muted small' }, t('importFromLinkHint')),
+      el('textarea', { id: 'imp', rows: '2', placeholder: t('importPh') }),
       el('button', { class: 'btn', onclick: () => {
         let s = $('#imp').value.trim();
         const m = s.match(/[?&]r=([^&\s]+)/);
         if (m) s = decodeURIComponent(m[1]);
         if (decodeReport(s)) go('import', { r: s });
-        else toast('อ่านรายงานไม่ได้ ตรวจสอบลิงก์/โค้ด');
-      } }, 'เปิดรายงาน'),
+        else toast(t('readFail'));
+      } }, t('openReport')),
     );
     wrap.appendChild(impDetails);
 
     if (assessed.length) {
       wrap.appendChild(el('div', { class: 'action-row' },
-        el('button', { class: 'btn', onclick: () => exportTeamSummary(assessed) }, '📋 คัดลอกสรุปทั้งทีม'),
+        el('button', { class: 'btn', onclick: () => exportTeamSummary(assessed) }, t('copyTeamSummary')),
       ));
     }
     return wrap;
@@ -720,14 +885,14 @@
     people.forEach((r) => { const s = score(r.ratings); sumPct += s.pct; AREAS.forEach((a) => areaSum[a.id] += s.byArea[a.id].pct); });
     const avg = Math.round(sumPct / people.length);
     const lines = [];
-    lines.push('สรุปสถิติทีม (' + people.length + ' คน)');
-    lines.push('ค่าเฉลี่ยการเติบโต: ' + avg + '%');
+    lines.push(t('sumTeam', people.length));
+    lines.push(t('sumAvg', avg));
     lines.push('');
-    lines.push('เฉลี่ยรายด้าน:');
+    lines.push(t('sumByArea'));
     AREAS.map((a) => ({ a, v: Math.round(areaSum[a.id] / people.length) })).sort((x, y) => x.v - y.v)
-      .forEach(({ a, v }) => lines.push('• ' + a.title + ': ' + v + '%'));
+      .forEach(({ a, v }) => lines.push('• ' + areaTitle(a) + ': ' + v + '%'));
     lines.push('');
-    lines.push('รายบุคคล:');
+    lines.push(t('sumByPerson'));
     people.slice().sort((x, y) => score(y.ratings).pct - score(x.ratings).pct)
       .forEach((r) => lines.push('• ' + r.name + ': ' + score(r.ratings).pct + '% (' + fmtDate(r.date) + ')'));
     copy(lines.join('\n'));
@@ -743,40 +908,40 @@
     if (params.c && reports.length) celebrate();
 
     const assessBtn = el('button', { class: 'btn primary', onclick: () => go('assess', { for: name }) },
-      reports.length ? '✅ ประเมินรอบใหม่ให้ ' + name : '✅ เริ่มประเมินให้ ' + name);
+      reports.length ? t('assessAgainFor', name) : t('assessForBtn', name));
     const inviteBtn = el('button', { class: 'btn', onclick: async () => {
       const link = inviteLink(name);
-      const msg = (getProfile().name || 'ผู้นำ') + ' เชิญ ' + name + ' เช็คสุขภาพฝ่ายวิญญาณ\nเปิดลิงก์นี้เพื่อประเมินด้วยตัวเอง:\n' + link;
-      if (navigator.share) { try { await navigator.share({ title: 'ลิงก์ประเมินสำหรับ ' + name, text: msg }); return; } catch {} }
+      const msg = t('inviteMsg', getProfile().name || (getLang() === 'en' ? 'Leader' : 'ผู้นำ'), name, link);
+      if (navigator.share) { try { await navigator.share({ title: t('inviteShareTitle', name), text: msg }); return; } catch {} }
       copy(msg);
-    } }, '🔗 ส่งลิงก์ให้ ' + name + ' กรอกเอง');
+    } }, t('inviteLinkBtn', name));
 
     // ยังไม่มีผลประเมิน
     if (!reports.length) {
-      wrap.appendChild(header(name, 'ยังไม่มีผลประเมิน', 'team'));
+      wrap.appendChild(header(name, t('mNoResult')));
       wrap.appendChild(el('div', { class: 'card empty' },
         el('div', { class: 'emoji' }, '📝'),
-        el('p', { class: 'muted' }, 'ยังไม่ได้ประเมิน ' + name + ' — เริ่มทำแบบประเมินให้สมาชิกคนนี้ได้เลย'),
+        el('p', { class: 'muted' }, t('mEmpty', name)),
       ));
       wrap.appendChild(el('div', { class: 'action-row col' },
         assessBtn,
         inviteBtn,
         el('button', { class: 'btn danger', onclick: () => {
-          if (!confirm('ลบสมาชิก ' + name + '?')) return;
+          if (!confirm(t('confirmDelMember', name))) return;
           setMembers(getMembers().filter((m) => m.name !== name));
           go('team');
-        } }, 'ลบสมาชิกนี้'),
+        } }, t('delMember')),
       ));
       return wrap;
     }
 
     const latest = reports[0];
     const sc = score(latest.ratings);
-    wrap.appendChild(header(name, (latest.believeDate ? 'รับเชื่อ ' + fmtDate(latest.believeDate) + ' · ' : '') + reports.length + ' รายงาน', 'team'));
+    wrap.appendChild(header(name, (latest.believeDate ? t('mBelieve', fmtDate(latest.believeDate)) : '') + t('mReports', reports.length)));
 
     const card = el('div', { class: 'card center' });
     card.appendChild(ringSvg(sc.pct));
-    card.appendChild(el('p', { class: 'muted' }, 'ประเมินล่าสุด ' + fmtDate(latest.date)));
+    card.appendChild(el('p', { class: 'muted' }, t('lastAssessed', fmtDate(latest.date))));
     card.appendChild(levelBar(sc.byArea));
     wrap.appendChild(card);
 
@@ -786,23 +951,23 @@
     if (reports[1]) {
       const diff = sc.pct - score(reports[1].ratings).pct;
       wrap.appendChild(el('div', { class: 'trend ' + (diff >= 0 ? 'up' : 'down') },
-        (diff >= 0 ? '▲ ' : '▼ ') + Math.abs(diff) + '% จากรายงานก่อน (' + fmtDate(reports[1].date) + ')'));
+        (diff >= 0 ? '▲ ' : '▼ ') + t('fromPrev', Math.abs(diff), fmtDate(reports[1].date))));
     }
 
     // รายด้านของรายงานล่าสุด
-    wrap.appendChild(el('h3', { class: 'section-h' }, 'รายด้าน (ล่าสุด)'));
+    wrap.appendChild(el('h3', { class: 'section-h' }, t('areasLatest')));
     for (const a of AREAS) {
       const s = sc.byArea[a.id];
       wrap.appendChild(el('div', { class: 'res-area' },
-        el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, a.title), el('span', { class: 'res-pct' }, s.pct + '%')),
+        el('div', { class: 'res-head' }, el('span', { class: 'aa-icon' }, a.icon), el('b', {}, areaTitle(a)), el('span', { class: 'res-pct' }, s.pct + '%')),
         el('div', { class: 'bar' }, el('div', { class: 'bar-fill ls', style: `width:${s.pct}%` })),
-        el('div', { class: 'res-mini' }, `รู้ ${s.know} · กระทำ ${s.do} · แบ่งปัน ${s.share} (จาก ${s.items} ข้อ)`),
+        el('div', { class: 'res-mini' }, t('miniBreak', s.know, s.do, s.share, s.items)),
       ));
     }
 
     // ประวัติรายงานของคนนี้
     if (reports.length > 1) {
-      wrap.appendChild(el('h3', { class: 'section-h' }, 'ประวัติรายงาน'));
+      wrap.appendChild(el('h3', { class: 'section-h' }, t('reportHistory')));
       const list = el('div', { class: 'list' });
       reports.forEach((r) => {
         const s = score(r.ratings);
@@ -816,42 +981,39 @@
 
     wrap.appendChild(el('div', { class: 'action-row' },
       el('button', { class: 'btn danger', onclick: () => {
-        if (!confirm('ลบสมาชิก ' + name + ' และผลประเมินทั้งหมด?')) return;
+        if (!confirm(t('confirmDelMemberAll', name))) return;
         setTeam(getTeam().filter((x) => x.name !== name));
         setMembers(getMembers().filter((m) => m.name !== name));
         go('team');
-      } }, 'ลบสมาชิกนี้'),
+      } }, t('delMember')),
     ));
     return wrap;
   });
 
-  // ---------- แถบนำทางบน (ย้อนกลับ / ถัดไป / หน้าหลัก) ----------
-  const PAGE_TITLES = {
-    home: 'หน้าหลัก', assess: 'แบบประเมิน', result: 'ผลการประเมิน', share: 'ส่งรายงาน',
-    team: 'ทีม', member: 'สมาชิก', import: 'รับรายงาน', register: 'ลงทะเบียน', invite: 'คำเชิญ',
+  // ---------- แถบนำทางบน (ย้อนกลับ / ถัดไป / ภาษา / หน้าหลัก) ----------
+  const PAGE_TITLE_KEY = {
+    home: 'titHome', assess: 'titAssess', result: 'titResult', share: 'titShare',
+    team: 'titTeam', member: 'titMember', import: 'titImport', register: 'titRegister', invite: 'titInvite',
   };
   function appBar() {
     return el('header', { class: 'appbar', id: 'appbar' },
       el('div', { class: 'appbar-nav' },
-        el('button', { class: 'nav-btn', title: 'ย้อนกลับ', onclick: () => history.back() }, '‹'),
-        el('button', { class: 'nav-btn', title: 'ถัดไป', onclick: () => history.forward() }, '›'),
+        el('button', { class: 'nav-btn', title: t('back'), onclick: () => history.back() }, '‹'),
+        el('button', { class: 'nav-btn', title: t('forward'), onclick: () => history.forward() }, '›'),
       ),
-      el('div', { class: 'appbar-title', id: 'appbar-title' }, 'เส้นทางสาวก'),
-      el('button', { class: 'nav-btn home-btn', title: 'หน้าหลัก', onclick: () => go('home') }, '🏠'),
+      el('div', { class: 'appbar-title', id: 'appbar-title' }, t('brand')),
+      el('button', { class: 'nav-btn lang-btn', id: 'lang-btn', title: 'ภาษา / Language', onclick: () => switchLang(getLang() === 'th' ? 'en' : 'th') }, getLang() === 'th' ? 'EN' : 'ไทย'),
+      el('button', { class: 'nav-btn home-btn', title: t('home'), onclick: () => go('home') }, '🏠'),
     );
   }
 
   // ---------- แถบนำทางล่าง ----------
   function navBar() {
-    const items = [
-      ['home', '🏠', 'หน้าหลัก'],
-      ['assess', '✅', 'ประเมิน'],
-      ['team', '👥', 'ทีม'],
-    ];
+    const items = [['home', '🏠', 'tabHome'], ['assess', '✅', 'tabAssess'], ['team', '👥', 'tabTeam']];
     const nav = el('nav', { class: 'tabbar', id: 'tabbar' });
-    items.forEach(([r, icon, label]) => {
-      nav.appendChild(el('button', { class: 'tab', 'data-route': r, onclick: () => go(r) },
-        el('span', { class: 'tab-ico' }, icon), el('span', { class: 'tab-label' }, label)));
+    items.forEach(([r, icon, key]) => {
+      nav.appendChild(el('button', { class: 'tab', 'data-route': r, 'data-key': key, onclick: () => go(r) },
+        el('span', { class: 'tab-ico' }, icon), el('span', { class: 'tab-label' }, t(key))));
     });
     return nav;
   }
@@ -860,22 +1022,26 @@
     const nav = $('#tabbar');
     if (nav) {
       nav.style.display = show ? '' : 'none';
-      nav.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.route === active));
+      nav.querySelectorAll('.tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.dataset.route === active);
+        const lbl = $('.tab-label', tab); if (lbl) lbl.textContent = t(tab.dataset.key);
+      });
     }
     const bar = $('#appbar');
     if (bar) bar.style.display = show ? '' : 'none';
     document.body.classList.toggle('with-appbar', show);
     const tt = $('#appbar-title');
-    if (tt) tt.textContent = PAGE_TITLES[active] || 'เส้นทางสาวก';
+    if (tt) tt.textContent = t(PAGE_TITLE_KEY[active] || 'brand');
+    const lb = $('#lang-btn'); if (lb) lb.textContent = getLang() === 'th' ? 'EN' : 'ไทย';
   }
 
   // ---------- toast ----------
   let toastTimer;
   function toast(msg) {
-    let t = $('#toast');
-    if (!t) { t = el('div', { id: 'toast', class: 'toast' }); document.body.appendChild(t); }
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    let node = $('#toast');
+    if (!node) { node = el('div', { id: 'toast', class: 'toast' }); document.body.appendChild(node); }
+    node.textContent = msg; node.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => node.classList.remove('show'), 2200);
   }
 
   // ---------- เอฟเฟกต์/ภาพเคลื่อนไหว ----------
@@ -931,12 +1097,12 @@
 
   // ---------- ป๊อบอัพข้อพระคัมภีร์ ----------
   function showVerse(ref) {
-    const data = (typeof BIBLE !== 'undefined') ? BIBLE[ref] : null;
+    const data = bibleFor(ref);
     const overlay = el('div', { class: 'modal-overlay', onclick: (e) => { if (e.target === overlay) close(); } });
     function close() { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 200); }
     const sheet = el('div', { class: 'modal-sheet' });
     sheet.appendChild(el('div', { class: 'modal-head' },
-      el('h3', {}, ref),
+      el('h3', {}, refLabel(ref)),
       el('button', { class: 'modal-x', onclick: close }, '✕'),
     ));
     const body = el('div', { class: 'modal-body' });
@@ -946,10 +1112,10 @@
           el('sup', { class: 'verse-n' }, String(row.n)), ' ', row.t));
       });
     } else {
-      body.appendChild(el('p', { class: 'muted' }, 'ไม่พบข้อความสำหรับข้ออ้างอิงนี้'));
+      body.appendChild(el('p', { class: 'muted' }, t('verseNotFound')));
     }
     sheet.appendChild(body);
-    sheet.appendChild(el('div', { class: 'modal-foot' }, (typeof BIBLE_VERSION !== 'undefined' ? BIBLE_VERSION : 'พระคัมภีร์')));
+    sheet.appendChild(el('div', { class: 'modal-foot' }, bibleVersion()));
     overlay.appendChild(sheet);
     document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add('show'));
