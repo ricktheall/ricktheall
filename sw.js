@@ -1,11 +1,12 @@
 /* sw.js — service worker ให้แอปทำงานออฟไลน์ (cache-first) */
-const CACHE = 'growthct-v8';
+const CACHE = 'growthct-v9';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './data.js',
   './bible.js',
+  './backup.js',
   './app.js',
   './manifest.webmanifest',
   './icons/icon-192.png',

@@ -275,6 +275,11 @@ select option { background: #0b1712; }
 .details[open] summary { border-bottom: 1px solid var(--line); }
 .details p, .details textarea, .details .btn { margin: 12px 18px; width: calc(100% - 36px); }
 
+/* ---- backup & restore ---- */
+.hidden-file { display: none; }
+.restore-preview { margin-top: 12px; }
+.danger-text { color: var(--danger); font-weight: 600; }
+
 /* ---- tabbar ---- */
 .tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
