@@ -5,6 +5,8 @@
 (function () {
   'use strict';
 
+  const APP_VERSION = '1.1.0'; // Phase 1: backup & restore
+
   // ---------- ที่เก็บข้อมูล ----------
   const KEY_PROFILE = 'dt.profile';      // โปรไฟล์ผู้ใช้
   const KEY_HISTORY = 'dt.history';      // ประวัติการประเมินของตัวเอง
@@ -163,6 +165,34 @@
     titImport: { th: 'รับรายงาน', en: 'Receive report' },
     titRegister: { th: 'ลงทะเบียน', en: 'Register' },
     titInvite: { th: 'คำเชิญ', en: 'Invitation' },
+    titBackup: { th: 'สำรองข้อมูล', en: 'Backup' },
+    // สำรองข้อมูล & กู้คืน (Phase 1)
+    backupCardTitle: { th: '🛟 สำรองข้อมูล & กู้คืน', en: '🛟 Backup & Restore' },
+    backupCardSub: { th: 'บันทึกข้อมูลทั้งหมดเป็นไฟล์ กันข้อมูลหายเมื่อเปลี่ยนหรือล้างเครื่อง', en: 'Save all data to a file so nothing is lost if you change or clear your device' },
+    backupOpen: { th: 'เปิดหน้าสำรองข้อมูล', en: 'Open backup & restore' },
+    backupTitle: { th: 'สำรองข้อมูล & กู้คืน', en: 'Backup & Restore' },
+    backupIntro: { th: 'ข้อมูลทั้งหมดเก็บอยู่ในเครื่องนี้เท่านั้น แนะนำให้ดาวน์โหลดไฟล์สำรองไว้เป็นประจำ เพื่อกู้คืนได้หากเปลี่ยนเครื่องหรือข้อมูลหาย', en: 'All data is stored only on this device. Download a backup regularly so you can restore it if you switch devices or lose data.' },
+    backupSection: { th: 'สำรองข้อมูล (ดาวน์โหลด)', en: 'Back up (download)' },
+    backupContains: { th: (m, s, a) => `รวม: ${m} สมาชิก · ${s} การประเมินของฉัน · ${a} รายงานสมาชิก`, en: (m, s, a) => `Includes: ${m} members · ${s} of my check-ups · ${a} member reports` },
+    backupNow: { th: '⬇️ ดาวน์โหลดไฟล์สำรอง', en: '⬇️ Download backup file' },
+    backupDownloaded: { th: 'ดาวน์โหลดไฟล์สำรองแล้ว ✓', en: 'Backup downloaded ✓' },
+    restoreSection: { th: 'กู้คืนข้อมูล', en: 'Restore' },
+    restoreIntro: { th: 'เลือกไฟล์สำรอง (.json) ที่เคยดาวน์โหลดไว้', en: 'Choose a backup file (.json) you saved earlier' },
+    restoreChoose: { th: '📂 เลือกไฟล์สำรอง', en: '📂 Choose backup file' },
+    backupAdvanced: { th: 'ตัวเลือกเพิ่มเติม (คัดลอก/วางข้อความ)', en: 'Advanced (copy / paste as text)' },
+    backupCopyText: { th: '📋 คัดลอกข้อมูลสำรองเป็นข้อความ', en: '📋 Copy backup as text' },
+    restorePastePh: { th: 'วางข้อความสำรองที่นี่ แล้วกดอ่าน', en: 'Paste backup text here, then read' },
+    restorePasteBtn: { th: 'อ่านข้อความสำรอง', en: 'Read backup text' },
+    restoreBad: { th: 'ไฟล์/ข้อความสำรองไม่ถูกต้องหรือเสียหาย', en: 'Backup file/text is invalid or corrupted' },
+    restoreTooNew: { th: 'ไฟล์สำรองนี้มาจากแอปเวอร์ชันใหม่กว่า โปรดอัปเดตแอปก่อนกู้คืน', en: 'This backup is from a newer app version. Please update the app before restoring.' },
+    restorePreview: { th: (m, s, a, d) => `พบในไฟล์สำรอง: ${m} สมาชิก · ${s} การประเมินของฉัน · ${a} รายงานสมาชิก${d ? ' · สำรองเมื่อ ' + d : ''}`, en: (m, s, a, d) => `Found in backup: ${m} members · ${s} my check-ups · ${a} member reports${d ? ' · backed up ' + d : ''}` },
+    restoreReplace: { th: '♻️ แทนที่ข้อมูลทั้งหมด', en: '♻️ Replace all data' },
+    restoreReplaceExplain: { th: 'ลบข้อมูลในเครื่องนี้ แล้วใช้ข้อมูลจากไฟล์แทน', en: 'Delete data on this device and use the file instead' },
+    restoreReplaceConfirm: { th: 'แทนที่ข้อมูลทั้งหมดในเครื่องนี้ด้วยไฟล์สำรอง? ข้อมูลปัจจุบันจะถูกเขียนทับและกู้คืนไม่ได้', en: 'Replace ALL data on this device with the backup? Current data will be overwritten and cannot be recovered.' },
+    restoreMerge: { th: '➕ รวมกับข้อมูลเดิม', en: '➕ Merge with current data' },
+    restoreMergeExplain: { th: 'เพิ่มข้อมูลจากไฟล์ โดยไม่ลบข้อมูลเดิม (ข้ามรายการที่ซ้ำ)', en: 'Add data from the file without deleting current data (skips duplicates)' },
+    restoreMergeConfirm: { th: 'รวมข้อมูลจากไฟล์สำรองเข้ากับข้อมูลปัจจุบัน?', en: 'Merge backup data into current data?' },
+    restoreDone: { th: 'กู้คืนข้อมูลแล้ว ✓', en: 'Data restored ✓' },
   };
   function t(key, ...args) {
     const e = STR[key];
@@ -565,6 +595,7 @@
       });
       wrap.appendChild(list);
     }
+    wrap.appendChild(dataSafetyCard());
     return wrap;
   });
 
@@ -636,7 +667,7 @@
           // ผู้ดูแลประเมินแทนสมาชิก -> เก็บเข้าทีม
           const m = getMembers().find((x) => x.name === forName);
           const team = getTeam();
-          team.unshift({ name: forName, believeDate: m ? m.believeDate : '', supervisor: p.name, date: todayISO(), ratings, note, savedAt: Date.now() });
+          team.unshift({ id: uid(), memberId: m ? m.id : null, name: forName, believeDate: m ? m.believeDate : '', supervisor: p.name, date: todayISO(), at: Date.now(), ratings, note, savedAt: Date.now() });
           setTeam(team);
           go('member', { name: forName, c: 1 });
         } else {
@@ -757,7 +788,7 @@
         // อัปเดตถ้ามีรายงานของคนนี้วันเดียวกันแล้ว
         const k = (r) => r.name + '|' + r.date;
         const idx = team.findIndex((r) => k(r) === k(rep));
-        const entry = { ...rep, savedAt: Date.now() };
+        const entry = { ...rep, id: (idx >= 0 && team[idx] && team[idx].id) ? team[idx].id : uid(), savedAt: Date.now() };
         if (idx >= 0) team[idx] = entry; else team.unshift(entry);
         setTeam(team);
         toast(t('savedToTeam'));
@@ -799,7 +830,7 @@
         const nm = nameInput.value.trim();
         if (!nm) { toast(t('enterName')); return; }
         if (allNames.includes(nm)) { toast(t('dupName')); return; }
-        const ms = getMembers(); ms.push({ name: nm, believeDate: '', createdAt: Date.now() }); setMembers(ms);
+        const ms = getMembers(); ms.push({ id: uid(), name: nm, believeDate: '', createdAt: Date.now() }); setMembers(ms);
         toast(t('added', nm));
         go('member', { name: nm });
       } }, t('add')),
@@ -876,6 +907,7 @@
         el('button', { class: 'btn', onclick: () => exportTeamSummary(assessed) }, t('copyTeamSummary')),
       ));
     }
+    wrap.appendChild(dataSafetyCard());
     return wrap;
   });
 
@@ -990,10 +1022,119 @@
     return wrap;
   });
 
+  // ---------- สำรองข้อมูล & กู้คืน (Phase 1) ----------
+  // รวบรวมข้อมูลทั้งหมดในรูปแบบ localStorage
+  function gatherRaw() {
+    return { profile: getProfile(), history: getHistory(), members: getMembers(), team: getTeam(), lang: getLang(), appVersion: APP_VERSION };
+  }
+  // เขียนข้อมูลกลับลง localStorage (ใช้ทั้งกรณีแทนที่และกรณีรวม)
+  function applyRaw(raw) {
+    if (raw.profile) setProfile(raw.profile);
+    setHistory(raw.history || []);
+    setMembers(raw.members || []);
+    setTeam(raw.team || []);
+    if (raw.lang) setLang(raw.lang);
+  }
+  // ดาวน์โหลดไฟล์สำรอง (.json) — รูปแบบพร้อมย้ายไป Supabase ภายหลัง
+  function downloadBackup() {
+    const env = GrowthBackup.build(gatherRaw());
+    const blob = new Blob([JSON.stringify(env, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = el('a', { href: url, download: 'growthct-backup-' + todayISO() + '.json' });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    toast(t('backupDownloaded'));
+  }
+  // การ์ดทางลัดไปหน้าสำรองข้อมูล (วางบนหน้าหลัก/ทีม)
+  function dataSafetyCard() {
+    return el('div', { class: 'card' },
+      el('h3', { class: 'card-h' }, t('backupCardTitle')),
+      el('p', { class: 'muted small' }, t('backupCardSub')),
+      el('button', { class: 'btn', onclick: () => go('backup') }, t('backupOpen')),
+    );
+  }
+
+  // ---------- หน้า: สำรองข้อมูล & กู้คืน ----------
+  route('backup', () => {
+    const wrap = el('div', { class: 'page' });
+    wrap.appendChild(header(t('backupTitle'), t('backupIntro')));
+    const raw = gatherRaw();
+
+    // (1) สำรอง (ดาวน์โหลด)
+    const exp = el('div', { class: 'card' },
+      el('h3', { class: 'card-h' }, t('backupSection')),
+      el('p', { class: 'muted small' }, t('backupContains', (raw.members || []).length, (raw.history || []).length, (raw.team || []).length)),
+      el('button', { class: 'btn primary', onclick: downloadBackup }, t('backupNow')),
+    );
+    wrap.appendChild(exp);
+
+    // (2) กู้คืน
+    const imp = el('div', { class: 'card' },
+      el('h3', { class: 'card-h' }, t('restoreSection')),
+      el('p', { class: 'muted small' }, t('restoreIntro')),
+    );
+    const preview = el('div', { class: 'restore-preview' });
+
+    const showParsed = (parsed) => {
+      preview.innerHTML = '';
+      if (!parsed || !parsed.ok) {
+        preview.appendChild(el('p', { class: 'danger-text' }, parsed && parsed.error === 'too-new' ? t('restoreTooNew') : t('restoreBad')));
+        return;
+      }
+      const s = parsed.summary;
+      const when = s.exportedAt ? fmtDate(String(s.exportedAt).slice(0, 10)) : '';
+      preview.appendChild(el('p', {}, t('restorePreview', s.members, s.selfAssessments, s.memberAssessments, when)));
+      preview.appendChild(el('div', { class: 'action-row col' },
+        el('button', { class: 'btn primary', onclick: () => {
+          if (!confirm(t('restoreReplaceConfirm'))) return;
+          applyRaw(parsed.data); toast(t('restoreDone')); go('home');
+        } }, t('restoreReplace')),
+        el('p', { class: 'muted small' }, t('restoreReplaceExplain')),
+        el('button', { class: 'btn', onclick: () => {
+          if (!confirm(t('restoreMergeConfirm'))) return;
+          applyRaw(GrowthBackup.merge(gatherRaw(), parsed.data)); toast(t('restoreDone')); go('home');
+        } }, t('restoreMerge')),
+        el('p', { class: 'muted small' }, t('restoreMergeExplain')),
+      ));
+    };
+    const readText = (text) => {
+      try { showParsed(GrowthBackup.parse(JSON.parse(text))); }
+      catch { showParsed({ ok: false, error: 'parse' }); }
+    };
+
+    const fileInput = el('input', { type: 'file', accept: '.json,application/json', class: 'hidden-file' });
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files && fileInput.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => readText(reader.result);
+      reader.onerror = () => showParsed({ ok: false, error: 'read' });
+      reader.readAsText(f);
+    });
+    imp.appendChild(el('button', { class: 'btn', onclick: () => fileInput.click() }, t('restoreChoose')));
+    imp.appendChild(fileInput);
+    imp.appendChild(preview);
+    wrap.appendChild(imp);
+
+    // (3) ตัวเลือกเพิ่มเติม: คัดลอก/วางเป็นข้อความ (สำรองทาง LINE ฯลฯ)
+    const adv = el('details', { class: 'card details' },
+      el('summary', {}, t('backupAdvanced')),
+      el('button', { class: 'btn', onclick: () => copy(JSON.stringify(GrowthBackup.build(gatherRaw()))) }, t('backupCopyText')),
+      el('textarea', { id: 'restore-text', rows: '3', placeholder: t('restorePastePh') }),
+      el('button', { class: 'btn', onclick: () => {
+        const v = ($('#restore-text').value || '').trim();
+        if (v) readText(v);
+      } }, t('restorePasteBtn')),
+    );
+    wrap.appendChild(adv);
+    return wrap;
+  });
+
   // ---------- แถบนำทางบน (ย้อนกลับ / ถัดไป / ภาษา / หน้าหลัก) ----------
   const PAGE_TITLE_KEY = {
     home: 'titHome', assess: 'titAssess', result: 'titResult', share: 'titShare',
     team: 'titTeam', member: 'titMember', import: 'titImport', register: 'titRegister', invite: 'titInvite',
+    backup: 'titBackup',
   };
   function appBar() {
     return el('header', { class: 'appbar', id: 'appbar' },
