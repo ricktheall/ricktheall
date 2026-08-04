@@ -1,0 +1,61 @@
+/* styles.css — theAll Life Check: ส่วนเสริมเฉพาะเครื่องมือนี้ (ใช้ร่วมกับ ../styles.css) */
+
+.lc-intro-icon { font-size: 2.6rem; text-align: center; margin-bottom: 6px; }
+.lc-sub { text-align: center; color: var(--ink-soft); font-size: .95rem; margin: 2px 0 4px; }
+.lc-timeframe { text-align: center; color: var(--muted); font-size: .85rem; margin-bottom: 4px; }
+
+.lc-scale-list { display: flex; flex-direction: column; gap: 8px; }
+.lc-scale-row { display: flex; align-items: baseline; gap: 10px; font-size: .88rem; }
+.lc-scale-num {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--card-2); border: 1px solid var(--line-2); color: var(--gold-ink);
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .82rem;
+}
+.lc-scale-desc { color: var(--ink-soft); }
+
+/* ---- คำถาม ---- */
+.lc-q-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 15px; margin-bottom: 12px; }
+.lc-q-card.unanswered { border-color: rgba(217,122,106,.4); }
+.lc-q-num { color: var(--gold-ink); font-weight: 800; font-size: .78rem; margin-bottom: 6px; }
+.lc-q-text { font-size: .96rem; color: var(--ink); margin-bottom: 12px; line-height: 1.5; }
+.lc-choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.lc-choice {
+  appearance: none; border: 1px solid var(--line-2); background: #0b1712; color: var(--ink-soft);
+  border-radius: 11px; padding: 9px 4px; font: inherit; font-size: .72rem; font-weight: 700; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; line-height: 1.25;
+}
+.lc-choice b { font-size: .95rem; }
+.lc-choice.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: #16120a; border-color: transparent;
+  box-shadow: var(--glow);
+}
+
+/* ---- ผลรวม ---- */
+.lc-overall-title { text-align: center; font-weight: 800; font-size: 1.06rem; margin: 10px 0 4px; color: var(--gold-ink); }
+.lc-overall-text { text-align: center; color: var(--ink-soft); font-size: .9rem; }
+
+/* ---- แถบรายกลุ่ม ---- */
+.lc-cat-row { margin-bottom: 14px; }
+.lc-cat-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.lc-cat-icon { font-size: 1.2rem; }
+.lc-cat-title { flex: 1; font-size: .92rem; font-weight: 700; }
+.lc-cat-pct { font-weight: 800; font-size: .88rem; }
+.lc-cat-badge { font-size: .68rem; font-weight: 800; padding: 2px 9px; border-radius: 20px; }
+
+/* ---- การ์ดวิเคราะห์จุดที่ควรเสริม ---- */
+.lc-focus-card { background: linear-gradient(180deg, var(--card), var(--card-2)); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+.lc-focus-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.lc-focus-icon { font-size: 1.6rem; }
+.lc-focus-title { flex: 1; font-size: 1.02rem; font-weight: 800; }
+.lc-focus-blurb { font-size: .9rem; color: var(--ink-soft); line-height: 1.65; margin-bottom: 12px; }
+.lc-focus-steps-h { font-size: .8rem; font-weight: 800; color: var(--gold-ink); margin-bottom: 8px; letter-spacing: .01em; }
+.lc-focus-steps { display: flex; flex-direction: column; gap: 9px; padding: 0; margin: 0; list-style: none; }
+.lc-focus-steps li { display: flex; gap: 9px; font-size: .88rem; color: var(--ink-soft); line-height: 1.55; }
+.lc-focus-steps li::before { content: '→'; color: var(--green-2); flex: 0 0 auto; font-weight: 800; }
+
+.lc-more-cats summary { padding: 14px 4px; font-weight: 700; font-size: .9rem; color: var(--ink-soft); cursor: pointer; list-style: none; }
+.lc-more-cats summary::-webkit-details-marker { display: none; }
+.lc-more-cats summary::before { content: '▸ '; color: var(--gold-ink); }
+.lc-more-cats[open] summary::before { content: '▾ '; }
+
+.lc-empty-hist { text-align: center; padding: 20px; color: var(--muted); font-size: .88rem; }

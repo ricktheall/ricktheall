@@ -552,6 +552,9 @@
     if (latest) actions.appendChild(el('button', { class: 'btn', onclick: () => go('share') }, t('sendReport')));
     wrap.appendChild(actions);
 
+    wrap.appendChild(el('a', { class: 'btn', href: 'lifecheck/index.html' },
+      '🪞 ' + (getLang() === 'en' ? 'theAll Life Check — 30-item heart mirror' : 'theAll Life Check — กระจก 30 ข้อ')));
+
     if (hist.length) {
       wrap.appendChild(el('h3', { class: 'section-h' }, t('history')));
       const list = el('div', { class: 'list' });
