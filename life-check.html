@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0a1410" />
+<meta name="color-scheme" content="dark" />
+<title>theAll Life Check · เปิดฝากระโปรงหัวใจ</title>
+<meta name="description" content="theAll Life Check — แบบสำรวจตรวจสภาพใจผู้นำ 30 ข้อ พร้อมสรุปผลและวิเคราะห์เจ็ดไฟเตือน อ้างอิง 1 ทิโมธี 4:16 และ 2 ทิโมธี 2:2" />
+<link rel="icon" href="icons/icon-192.png" type="image/png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<style>
+:root{
+  --bg:#0a1410; --bg-2:#0c1a14; --card:#102019; --card-2:#15291e;
+  --ink:#f4f1e3; --ink-soft:#d7d3c0; --muted:#8b9489;
+  --gold:#e7c45c; --gold-2:#cda23a; --gold-ink:#edcb6b;
+  --green:#2f9e63; --green-2:#45c47e; --green-deep:#0f3826;
+  --line:rgba(231,196,92,.12); --line-2:rgba(231,196,92,.24);
+  --radius:18px; --shadow:0 8px 30px rgba(0,0,0,.5); --glow:0 6px 22px rgba(231,196,92,.4);
+  --lvl0:#3a5a4a; --lvl1:#cda23a; --lvl2:#d98f3f; --lvl3:#d15b4d;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+html{scroll-padding-top:130px;scroll-padding-bottom:110px;}
+body{
+  font-family:-apple-system,"Noto Sans Thai","Segoe UI","Sukhumvit Set",Tahoma,sans-serif;
+  color:var(--ink); line-height:1.6;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(231,196,92,.12), transparent 60%),
+    radial-gradient(900px 520px at 100% 0%, rgba(47,158,99,.14), transparent 55%),
+    var(--bg);
+  background-attachment:fixed; min-height:100vh;
+}
+#app{max-width:640px;margin:0 auto;padding:0 16px calc(100px + env(safe-area-inset-bottom));}
+.screen{display:none;animation:in .3s ease both;}
+.screen.active{display:block;}
+@keyframes in{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+header.top{position:sticky;top:0;z-index:20;background:rgba(10,20,16,.85);backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 16px;
+  margin:0 -16px 18px;display:flex;align-items:center;gap:10px;}
+header.top .ttl{font-weight:800;font-size:1.02rem;letter-spacing:-.01em;flex:1;}
+header.top .sub{font-size:.72rem;color:var(--muted);}
+.crest{font-size:1.4rem;}
+
+h1{font-size:1.5rem;margin:6px 0 4px;letter-spacing:-.01em;}
+h2{font-size:1.15rem;margin:0 0 8px;color:var(--gold-ink);}
+h3{font-size:1rem;margin:0 0 6px;}
+p{margin:0 0 12px;}
+.muted{color:var(--muted);font-size:.9rem;}
+.center{text-align:center;}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+.card.soft{background:var(--card-2);}
+.card.gold-edge{border-color:var(--line-2);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:14px 18px;border-radius:14px;border:none;font-size:1rem;font-weight:800;
+  cursor:pointer;font-family:inherit;letter-spacing:-.01em;}
+.btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#1a1206;box-shadow:var(--glow);}
+.btn.primary:active{transform:scale(.98);}
+.btn.ghost{background:var(--card-2);color:var(--ink-soft);border:1px solid var(--line-2);}
+.btn.ghost:active{background:var(--card);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn.sm{padding:10px 14px;font-size:.85rem;width:auto;}
+
+.pillbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px;}
+.pill{background:var(--card-2);border:1px solid var(--line);border-radius:999px;
+  padding:6px 12px;font-size:.78rem;color:var(--ink-soft);}
+
+/* intro list */
+ul.plain{margin:0 0 12px;padding-left:20px;}
+ul.plain li{margin-bottom:6px;}
+
+/* quiz */
+.progress-wrap{position:sticky;top:56px;z-index:15;background:var(--bg-2);border-radius:12px;
+  padding:8px 12px;margin-bottom:14px;border:1px solid var(--line);}
+.progress-track{height:8px;border-radius:99px;background:var(--card-2);overflow:hidden;margin-top:6px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));width:0%;transition:width .25s ease;}
+.qcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 14px 10px;margin-bottom:10px;scroll-margin-top:130px;scroll-margin-bottom:110px;}
+.qcard.unanswered-flag{border-color:var(--lvl3);}
+.qnum{font-size:.75rem;color:var(--gold-ink);font-weight:800;margin-bottom:4px;}
+.qtext{font-size:.96rem;margin-bottom:10px;}
+.scale{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.scale label{display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 4px;border-radius:10px;border:1px solid var(--line-2);background:var(--card-2);
+  cursor:pointer;font-size:.72rem;color:var(--muted);text-align:center;}
+.scale input{position:absolute;opacity:0;pointer-events:none;}
+.scale label .num{font-size:1.1rem;font-weight:800;color:var(--ink-soft);}
+.scale label:has(input:checked){background:var(--green-deep);border-color:var(--green);color:var(--green-2);}
+.scale label:has(input:checked) .num{color:var(--gold-ink);}
+
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:25;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(0deg, rgba(10,20,16,.95) 40%, rgba(10,20,16,0));}
+.dock-inner{max-width:640px;margin:0 auto;display:flex;gap:10px;}
+
+/* results */
+.scorebar-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.scorebar-row .em{font-size:1.4rem;width:30px;text-align:center;flex:0 0 auto;}
+.scorebar-row .info{flex:1;min-width:0;}
+.scorebar-row .lbl{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px;}
+.scorebar-row .lbl b{color:var(--ink);}
+.scorebar-row .lbl span{color:var(--muted);font-variant-numeric:tabular-nums;}
+.scorebar-track{height:10px;border-radius:99px;background:var(--card-2);overflow:hidden;}
+.scorebar-fill{height:100%;border-radius:99px;}
+
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.68rem;font-weight:800;margin-left:6px;}
+.top3-list{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px;}
+.top3-item{display:flex;align-items:center;gap:10px;background:var(--card-2);border:1px solid var(--line-2);
+  border-radius:12px;padding:10px 12px;}
+.top3-item .rank{width:24px;height:24px;border-radius:8px;background:var(--gold);color:#1a1206;
+  font-weight:800;font-size:.8rem;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+
+/* accordion */
+.acc{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;background:var(--card);}
+.acc.highlight{border-color:var(--gold-2);box-shadow:0 0 0 1px var(--gold-2) inset;}
+.acc-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none;}
+.acc-head .em{font-size:1.5rem;}
+.acc-head .ttl{flex:1;}
+.acc-head .ttl b{display:block;font-size:.98rem;}
+.acc-head .ttl small{color:var(--muted);font-size:.76rem;}
+.acc-head .chev{color:var(--muted);transition:transform .2s ease;font-size:.85rem;}
+.acc.open .acc-head .chev{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.acc.open .acc-body{max-height:2400px;}
+.acc-body-inner{padding:0 14px 16px;border-top:1px solid var(--line);}
+.field{margin-top:12px;}
+.field .k{font-size:.72rem;font-weight:800;color:var(--gold-ink);letter-spacing:.02em;margin-bottom:3px;
+  display:flex;align-items:center;gap:5px;}
+.field .v{font-size:.9rem;color:var(--ink-soft);}
+.verse-box{background:var(--green-deep);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:4px;}
+.verse-box .ref{color:var(--green-2);font-weight:800;font-size:.78rem;margin-bottom:3px;}
+.prayer-box{background:var(--card-2);border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 8px 8px 0;
+  font-style:italic;color:var(--ink-soft);font-size:.88rem;margin-top:4px;}
+
+textarea, input[type=text]{width:100%;background:var(--card-2);border:1px solid var(--line-2);border-radius:10px;
+  color:var(--ink);padding:10px 12px;font-family:inherit;font-size:.9rem;resize:vertical;min-height:64px;}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--gold-2);}
+label.field-label{display:block;font-size:.82rem;color:var(--ink-soft);font-weight:700;margin:12px 0 5px;}
+
+select.fireselect{width:100%;background:var(--card-2);border:1px solid var(--line-2);border-radius:10px;
+  color:var(--ink);padding:10px 12px;font-family:inherit;font-size:.9rem;}
+
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(10px);
+  background:var(--gold);color:#1a1206;font-weight:800;font-size:.85rem;padding:10px 18px;
+  border-radius:99px;box-shadow:var(--glow);opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+hr.sep{border:none;border-top:1px solid var(--line);margin:22px 0;}
+@media print{
+  .dock,header.top,.btn,.acc-head .chev,select.fireselect{display:none !important;}
+  .acc-body{max-height:none !important;}
+  body{background:#fff;color:#111;}
+  .card,.acc,.qcard{background:#fff;border-color:#ddd;box-shadow:none;}
+}
+</style>
+</head>
+<body>
+<header class="top"><span class="crest">🚗</span>
+  <div><div class="ttl">theAll Life Check</div><div class="sub">เปิดฝากระโปรงหัวใจ</div></div>
+</header>
+
+<div id="app">
+
+  <!-- ============ SCREEN: INTRO ============ -->
+  <section class="screen active" id="screen-intro">
+    <h1>เปิดฝากระโปรงหัวใจ</h1>
+    <p class="muted">ตรวจสภาพผู้นำ ก่อนพาคนอื่นไปต่อ · 1 ทิโมธี 4:16 สู่ 2 ทิโมธี 2:2</p>
+
+    <div class="card gold-edge">
+      <p>ก่อนเปาโลจะบอกทิโมธีให้ไปสร้างคนที่สร้างคนต่อ (2 ทิโมธี 2:2) ท่านเขียนไว้ก่อนแล้วว่า
+      "จงเอาใจใส่ตัวท่านเองและคำสอนของท่าน" (1 ทิโมธี 4:16) คนที่ขับรถพาคนอื่นตลอดเวลา
+      มักเป็นคนที่ไม่มีเวลาเอารถของตัวเองเข้าศูนย์ วันนี้เราจะเปิดฝากระโปรงหัวใจตัวเองก่อน
+      ไม่ใช่เพื่อประจาน แต่เพราะเรารักคนที่นั่งหลังรถเรามากพอที่จะตรวจสภาพก่อนออกเดินทาง</p>
+    </div>
+
+    <h2>🔒 กรอบความปลอดภัย</h2>
+    <div class="card">
+      <ul class="plain muted" style="font-size:.9rem">
+        <li>ตอบจากพฤติกรรมจริงในช่วง <b style="color:var(--ink-soft)">สี่สัปดาห์ที่ผ่านมา</b> ไม่ใช่สิ่งที่อยากเป็น</li>
+        <li>คำตอบและคะแนนเป็นข้อมูลส่วนตัว — เก็บอยู่ในเครื่องของคุณเท่านั้น ไม่มีใครเห็นโดยไม่ได้รับอนุญาต</li>
+        <li>ไม่ใช้ประเมินตำแหน่งหรือคุณค่าฝ่ายวิญญาณของใคร</li>
+        <li>ชื่อสัตว์เป็นเพียงชื่อช่วยจำของรูปแบบการตอบสนอง ไม่ใช่ตัวตนของคุณ</li>
+        <li>คะแนนใช้เพื่อสะท้อนตนเอง ไม่ใช่เกณฑ์มาตรฐานทางจิตวิทยา และไม่ใช้เปรียบเทียบคนหนึ่งกับอีกคน</li>
+      </ul>
+    </div>
+
+    <h2>🧭 วิธีตอบ</h2>
+    <div class="card">
+      <p style="margin-bottom:8px">30 ข้อ ให้คะแนนแต่ละข้อตามความจริงที่เกิดขึ้น ไม่ใช่ที่อยากให้เกิด</p>
+      <div class="pillbar">
+        <span class="pill"><b>0</b> ไม่เคย/แทบไม่เกิด</span>
+        <span class="pill"><b>1</b> เกิดบางครั้ง</span>
+        <span class="pill"><b>2</b> เกิดซ้ำเมื่อกดดัน</span>
+        <span class="pill"><b>3</b> เกิดบ่อยและส่งผลต่อคนรอบตัว</span>
+      </div>
+    </div>
+
+    <button class="btn primary" id="btn-start" style="margin-top:6px">เริ่มทำแบบสำรวจ (5–6 นาที) →</button>
+    <button class="btn ghost" id="btn-resume" style="margin-top:10px;display:none">↺ ทำต่อจากที่ค้างไว้ / ดูผลล่าสุด</button>
+    <p class="muted center" style="margin-top:16px;font-size:.78rem">ทำเสร็จแล้วระบบจะคำนวณคะแนนและวิเคราะห์ให้อัตโนมัติ</p>
+  </section>
+
+  <!-- ============ SCREEN: QUIZ ============ -->
+  <section class="screen" id="screen-quiz">
+    <div class="progress-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;">
+        <span class="muted">ตอบตามพฤติกรรมจริงในสี่สัปดาห์ที่ผ่านมา</span>
+        <b id="progress-text" style="color:var(--gold-ink)">0/30</b>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div id="questions-list"></div>
+    <div style="height:8px"></div>
+  </section>
+
+  <!-- ============ SCREEN: RESULTS ============ -->
+  <section class="screen" id="screen-results">
+    <h1>📊 ผลสรุปและวิเคราะห์</h1>
+    <p class="muted" id="result-date"></p>
+
+    <div class="card gold-edge" id="summary-text"></div>
+
+    <h2>ไฟเตือนทั้งเจ็ดดวง + รากของหัวใจ</h2>
+    <div class="card" id="scorebars"></div>
+
+    <div class="card soft">
+      <h3>🔥 ไฟเด่นสามดวงของฉันในช่วงนี้</h3>
+      <div class="top3-list" id="top3-list"></div>
+      <p class="muted" style="margin-top:8px;font-size:.82rem">เพื่อความแม่นยำ ลองนำสามดวงนี้ไปถามคู่สมรส เพื่อนร่วมทีม
+      หรือคนใกล้ชิดว่าเขาเห็นตรงกันไหม — จุดบอดจริงมักเป็นสิ่งที่เจ้าตัวมองไม่เห็น</p>
+    </div>
+
+    <h2 style="margin-top:22px">🐾 รู้จักไฟทั้งเจ็ด — วิเคราะห์รายดวง</h2>
+    <div id="accordions"></div>
+
+    <div class="card gold-edge" id="root-card"></div>
+
+    <h2 style="margin-top:22px">✝️ จุดหมุนข่าวประเสริฐ</h2>
+    <div class="card">
+      <p>ไม่ใช่ทุกไฟมีรากเดียวกัน บางดวงคือบาปที่ต้องกลับใจ บางดวงคือบาดแผลที่ต้องเยียวยา
+      บางดวงคือความเชื่อผิดที่ต้องรื้อสร้างใหม่ บางดวงคือนิสัยที่ต้องฝึกใหม่ หรือระบบและภาระที่ไม่สมดุล
+      เราไม่ใช้บาดแผลเป็นข้อแก้ตัวให้บาป และไม่ใช้คำว่าบาปไปกลบความเจ็บที่ต้องได้รับการเยียวยา</p>
+      <p>ใต้ไฟทั้งเจ็ดดวงมีรากสองอย่างที่ข้อ 29 กับ 30 วัดไว้ คือเราสงสัยว่าพระเจ้าทรงดีจริงไหม
+      และเรายังพยายามพิสูจน์ตัวเองด้วยผลงานอยู่หรือเปล่า นี่คือจุดที่ข่าวประเสริฐรักษาตรงที่สุด
+      เพราะข่าวประเสริฐบอกว่าพระเจ้าทรงดีพอที่จะมอบพระบุตร และในพระคริสต์เราถูกรับไว้แล้ว
+      ก่อนที่เราจะทำอะไรได้เลย</p>
+      <p style="margin-bottom:6px">พระเยซูตรัสในมัทธิว 11:28 "บรรดาผู้เหน็ดเหนื่อยและแบกภาระหนัก จงมาหาเรา"
+      พระองค์ไม่ใช่เพียงครูหรือแบบอย่างให้เลียนแบบ แต่ทรงเป็นพระผู้ไถ่ เป็นเถาองุ่นที่เราต้องติดสนิท (ยอห์น 15:5)
+      และเป็นองค์พระผู้เป็นเจ้าผู้ประทานชีวิตใหม่แก่เรา</p>
+      <p style="margin-bottom:0">สามความจริงที่ต้องยึดไว้: <b style="color:var(--ink-soft)">หนึ่ง</b> เราเป็นคนใหม่ในพระคริสต์แล้วจริงๆ
+      (2 โครินธ์ 5:17) <b style="color:var(--ink-soft)">สอง</b> เรายังต้องเดินตามพระวิญญาณและต่อสู้กับเนื้อหนังทุกวัน
+      (กาลาเทีย 5:16-17) <b style="color:var(--ink-soft)">สาม</b> พระเจ้ากำลังเปลี่ยนเราอย่างต่อเนื่องจากรัศมีสู่รัศมี
+      (2 โครินธ์ 3:18) ไฟที่ยังติดอยู่บ้างไม่ได้แปลว่าข่าวประเสริฐไม่ได้ผล แต่แปลว่าเรายังอยู่ในกระบวนการที่พระเจ้าทรงสัญญาว่าจะทำให้สำเร็จ
+      ไฟเตือนจึงไม่ใช่ศัตรู แต่คือพระคุณที่ดังก่อนเครื่องจะพัง</p>
+    </div>
+
+    <h2 style="margin-top:22px">🪞 กระจกเงาลึก</h2>
+    <div class="card">
+      <p class="muted">เลือกไฟดวงที่คุณอยากใคร่ครวญลึกที่สุด (ระบบเลือกดวงคะแนนสูงสุดให้ก่อน) แล้วเขียนตอบห้าคำถามนี้ด้วยความเงียบและตรงไปตรงมา</p>
+      <label class="field-label">ไฟที่จะใคร่ครวญ</label>
+      <select class="fireselect" id="mirror-select"></select>
+
+      <label class="field-label">1. เกิดเหตุการณ์จริงอะไรขึ้นล่าสุด ที่ไฟดวงนี้ปรากฏ และฉันตอบสนองอย่างไร</label>
+      <textarea id="mirror-1" placeholder="เขียนตามจริง..."></textarea>
+
+      <label class="field-label">2. ตอนนั้นฉันกำลังเชื่อหรือตีความอะไร เกี่ยวกับพระเจ้า ตัวเอง หรือผู้อื่น</label>
+      <textarea id="mirror-2"></textarea>
+
+      <label class="field-label">3. ฉันกำลังพึ่งพา ปกป้อง หรือแสวงหาอะไร แทนการวางใจในพระเจ้า</label>
+      <textarea id="mirror-3"></textarea>
+
+      <label class="field-label">4. ความจริงในพระคัมภีร์และข่าวประเสริฐเรื่องใด ที่เข้ามาแก้ไขและจัดวางความเชื่อนั้นใหม่ให้ถูกต้อง</label>
+      <textarea id="mirror-4"></textarea>
+
+      <label class="field-label">5. ภายในสี่สิบแปดชั่วโมง ฉันจะก้าวเชื่อฟังที่วัดผลได้จริงหนึ่งเรื่องอะไร</label>
+      <textarea id="mirror-5"></textarea>
+    </div>
+
+    <h2 style="margin-top:22px">🤝 แบ่งปันและคู่หนุนใจ 48 ชั่วโมง</h2>
+    <div class="card">
+      <p class="muted">ไม่ต้องเล่าคะแนนทั้งหมด แบ่งปันแค่สามสิ่งนี้กับคู่หนุนใจ ให้เขาทักถามคุณภายในสองวัน</p>
+      <label class="field-label">ชื่อคู่หนุนใจ (ไม่บังคับ)</label>
+      <input type="text" id="partner-name" placeholder="เช่น พี่จอห์น" />
+      <label class="field-label">ความจริงเรื่องพระคริสต์ที่ฉันจะยึด</label>
+      <textarea id="commit-truth" placeholder="สรุปสั้นๆ จากข่าวประเสริฐของไฟที่เลือก"></textarea>
+      <label class="field-label">สิ่งที่ฉันจะเชื่อฟังภายใน 48 ชั่วโมง</label>
+      <textarea id="commit-action" placeholder="ก้าวที่วัดผลได้จริงหนึ่งเรื่อง"></textarea>
+      <button class="btn primary" id="btn-copy-share" style="margin-top:12px">📋 คัดลอกสรุปเพื่อแชร์กับคู่หนุนใจ</button>
+    </div>
+
+    <div class="card">
+      <p style="margin-bottom:0;font-style:italic;color:var(--ink-soft)">"ก่อนจะพาคนอื่นไปต่อ เราต้องยอมให้พระคริสต์เปิดฝากระโปรงหัวใจเราก่อน"
+      — ไฟเตือนคือพระคุณ เราตรวจใจวันนี้ไม่ใช่เพื่อทำงานได้ดีขึ้น แต่เพื่อเติบโตเป็นผู้ใหญ่ในพระคริสต์ (โคโลสี 1:28)</p>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn ghost" id="btn-print">🖨 พิมพ์ / บันทึกเป็น PDF</button>
+      <button class="btn ghost" id="btn-restart">↺ ทำใหม่</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="dock" id="quiz-dock">
+  <div class="dock-inner">
+    <button class="btn ghost sm" id="btn-back-intro" style="flex:0 0 auto">←</button>
+    <button class="btn primary" id="btn-submit">ดูผลสรุป</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- DATA ---------------- */
+
+var QUESTIONS = [
+  {n:1,  fire:"hen",       t:"ฉันมักทำงานของคนอื่นซ้ำ เพราะไม่ไว้ใจว่าเขาจะทำได้ดีพอ"},
+  {n:2,  fire:"tiger",     t:"เมื่อฉันไม่พอใจ น้ำเสียง สีหน้า หรือความเงียบของฉันมักเปลี่ยนจนคนรอบตัวรับรู้ได้"},
+  {n:3,  fire:"turtle",    t:"มีบทสนทนาสำคัญที่ฉันเลี่ยงมาแล้วหลายสัปดาห์"},
+  {n:4,  fire:"chameleon", t:"ฉันมักปรับคำตอบให้ตรงกับสิ่งที่คนตรงหน้าอยากได้ยิน"},
+  {n:5,  fire:"peacock",   t:"ฉันใส่ใจว่าคนมองฉันอย่างไร มากกว่าว่าจริงๆ แล้วฉันเป็นอย่างไร"},
+  {n:6,  fire:"ant",       t:"ฉันปฏิเสธงานหรือคำขอไม่ค่อยเป็น"},
+  {n:7,  fire:"fox",       t:"เมื่อเล่าเหตุการณ์หนึ่ง ฉันมักเลือกข้อมูลที่ทำให้ตนเองดูดี และละส่วนที่ทำให้ฉันต้องรับผิดชอบ"},
+  {n:8,  fire:"peacock",   t:"ฉันมักเปิดเผยเฉพาะด้านที่ดูเข้มแข็งหรือสำเร็จ และเก็บด้านที่ไม่เป็นเช่นนั้นไว้ไม่ให้คนเห็น"},
+  {n:9,  fire:"fox",       t:"ฉันมักพูดอ้อม แทนที่จะพูดสิ่งที่คิดตรงๆ"},
+  {n:10, fire:"hen",       t:"ฉันกระวนกระวายเมื่อไม่ได้เป็นคนควบคุมสถานการณ์"},
+  {n:11, fire:"turtle",    t:"พอใกล้ความขัดแย้ง ฉันมักเงียบลงหรือทำตัวยุ่งขึ้น"},
+  {n:12, fire:"ant",       t:"ลึกๆ ฉันรู้สึกว่าตนเองมีคุณค่าเมื่อมีคนต้องการฉัน หรือเมื่อฉันเป็นคนแก้ปัญหาให้ทุกคน"},
+  {n:13, fire:"tiger",     t:"เมื่อมีคนเห็นต่างจากฉัน ฉันมักแสดงปฏิกิริยาจนเขาหยุดพูด ถอยออก หรือยอมตาม"},
+  {n:14, fire:"chameleon", t:"ฉันมักพูดว่าใช่ ทั้งที่ในใจอยากปฏิเสธ แล้วมาน้อยใจทีหลัง"},
+  {n:15, fire:"ant",       t:"ฉันรับงานไว้กับตัวเองมากเกินไป จนไม่มีเวลา ไม่มีแรง หรือทำไม่ทัน"},
+  {n:16, fire:"tiger",     t:"ฉันใช้อารมณ์หรือความไม่พอใจ กดดันให้คนยอมทำตาม"},
+  {n:17, fire:"chameleon", t:"ฉันกลัวทำให้คนอื่นผิดหวัง จนยอมละเลยสิ่งที่รู้ว่าถูกต้องต่อพระพักตร์พระเจ้า"},
+  {n:18, fire:"fox",       t:"เมื่อเกิดผลเสีย ฉันมักอธิบายเหตุการณ์โดยลดหรือหลีกเลี่ยงส่วนที่ตนเองต้องรับผิดชอบ"},
+  {n:19, fire:"turtle",    t:"ฉันยอมให้ปัญหาค้างไว้ ดีกว่าต้องเผชิญหน้ากับมัน"},
+  {n:20, fire:"hen",       t:"ฉันมักต้องการให้คนรอบตัวรอการอนุมัติจากฉัน แม้เป็นเรื่องที่เขาตัดสินใจเองได้"},
+  {n:21, fire:"peacock",   t:"ฉันเหนื่อยจากการต้องรักษาภาพว่าตัวเองโอเคหรือเก่ง"},
+  {n:22, fire:"hen",       t:"ฉันรู้สึกไม่มั่นคงและพยายามเข้าควบคุม เมื่อสิ่งต่างๆ ไม่เป็นไปตามแผนของฉัน"},
+  {n:23, fire:"tiger",     t:"ฉันเชื่อว่าการเพิ่มน้ำเสียง ความแรง หรือแรงกดดัน จะทำให้คนยอมทำตามได้เร็วขึ้น"},
+  {n:24, fire:"turtle",    t:"ฉันมักบอกตัวเองว่ายังไม่ใช่เวลา เพื่อเลื่อนการเผชิญปัญหาที่ควรจัดการแล้ว"},
+  {n:25, fire:"chameleon", t:"ฉันรู้สึกว่าคุณค่าของฉันลดลง เมื่อคนอื่นไม่ยอมรับ ไม่เห็นด้วย หรือไม่พอใจในตัวฉัน"},
+  {n:26, fire:"peacock",   t:"ฉันหลีกเลี่ยงการเปิดเผยความอ่อนแอกับคนที่ปลอดภัย เพราะกลัวว่าเขาจะหมดความเชื่อมั่นในตัวฉัน"},
+  {n:27, fire:"ant",       t:"ฉันรับผิดชอบสิ่งที่ควรมอบหมายให้ผู้อื่น เพราะเชื่อว่าฉันทำได้ดีกว่า เร็วกว่า หรือปลอดภัยกว่า"},
+  {n:28, fire:"fox",       t:"ฉันสื่อสารข้อมูลเพียงบางส่วน เพื่อพาคนไปสู่ผลที่ฉันต้องการ โดยไม่ได้บอกความตั้งใจทั้งหมดอย่างตรงไปตรงมา"},
+  {n:29, fire:"root",      t:"เมื่อสิ่งต่างๆ ไม่เป็นไปตามที่หวัง ฉันมักตอบสนองราวกับว่าพระเจ้าไม่ทรงดีหรือไม่อาจไว้วางใจได้"},
+  {n:30, fire:"root",      t:"ฉันดำเนินชีวิตเหมือนต้องใช้ผลงานและความพยายามพิสูจน์ให้พระเจ้าทรงยอมรับฉัน แม้พระองค์ทรงรับฉันแล้วในพระคริสต์"}
+];
+
+var FIRE_ORDER = ["hen","tiger","turtle","chameleon","peacock","ant","fox"];
+
+var ANIMALS = {
+  hen:{
+    em:"🐔", name:"แม่ไก่", fire:"ไฟควบคุม",
+    gift:"รับผิดชอบสูง ดูแลคน ใส่ใจคุณภาพ",
+    pressure:"เข้าไปจับทุกเรื่อง ทำงานคนอื่นซ้ำ ไม่กล้าปล่อยให้คนอื่นตัดสินใจ",
+    shadow:"คนรอบตัวไม่ได้โต เพราะไม่มีพื้นที่ให้ลอง",
+    psych:"การควบคุมที่มากเกินไป มักเป็นความพยายามลดความไม่แน่นอนและความวิตกกังวล ไม่ได้แปลว่าต้องการอำนาจเสมอไป",
+    q:"ฉันกำลังดูแลสิ่งที่พระเจ้าฝาก หรือพยายามเป็นผู้ควบคุมทุกอย่างแทนพระองค์",
+    gospel:"พระคริสต์ทรงเป็นองค์พระผู้เป็นเจ้าและเจ้าของคริสตจักร ไม่ใช่คุณ พระองค์ทรงยึดสรรพสิ่งไว้ คุณจึงวางมือได้",
+    verseRef:"1 เปโตร 5:7", verse:"จงละความกังวลทั้งสิ้นไว้กับพระองค์ เพราะพระองค์ทรงห่วงใยท่าน",
+    obey:"มอบงานจริงหนึ่งอย่างให้คนอื่น แล้วไม่เข้าไปแก้ ปล่อยให้เขาทำในแบบของเขา",
+    prayer:"พระบิดา สอนข้าให้วางมือจากสิ่งที่พระองค์ไม่ได้มอบหมาย และไว้ใจว่าพระองค์ทรงรักคนเหล่านี้มากกว่าข้าพเจ้า"
+  },
+  tiger:{
+    em:"🐯", name:"เสือ", fire:"ไฟใช้อารมณ์กดดัน",
+    gift:"กล้าพูดกล้าตัดสินใจ มีพลัง จริงจัง",
+    pressure:"ใช้น้ำเสียง ท่าที หรืออารมณ์ เพื่อเข้าควบคุมสถานการณ์อย่างรวดเร็ว",
+    shadow:"คนทำตามเพราะกลัว ไม่ใช่เพราะเชื่อ คนรอบข้างต้องเดินบนเปลือกไข่",
+    psych:"เมื่ออารมณ์รุนแรงขึ้น ความสามารถหยุดคิดและเลือกคำตอบจะลดลง การหยุด หายใจ และเว้นระยะก่อนตอบ ช่วยให้ระบบประสาทกลับสู่ระดับที่คิดได้ดีขึ้น",
+    q:"ฉันใช้อารมณ์เพื่อปกป้องความถูกต้อง หรือเพื่อบังคับให้ได้อย่างใจ",
+    gospel:"พระคริสต์ทรงมีสิทธิอำนาจทั้งสิ้น แต่สำแดงฤทธิ์ผ่านความสุภาพ ไม่ใช่ความกลัว ในพระองค์คุณไม่ต้องบังคับ ในสิ่งที่พระคุณให้ฟรีอยู่แล้ว",
+    verseRef:"ยากอบ 1:19-20", verse:"จงไวในการฟัง ช้าในการพูด ช้าในการโกรธ",
+    obey:"หายใจก่อนพูดตอนอารมณ์ขึ้น และกลับไปขอโทษคนที่คุณใช้อารมณ์กด อย่างเจาะจง",
+    prayer:"พระเยซู ขอให้ฤทธิ์เดชของพระองค์สำแดงผ่านข้าพเจ้าด้วยความรัก ไม่ใช่ด้วยความกลัว"
+  },
+  turtle:{
+    em:"🐢", name:"เต่า", fire:"ไฟหลบหนี",
+    gift:"ใจเย็น ไม่หุนหัน รักความสงบ",
+    pressure:"ดึงตัวออกจากความตึงเครียด เงียบหาย หรือเปลี่ยนเรื่องเพื่อเลี่ยงการเผชิญหน้า",
+    shadow:"ปัญหาค้างเติ่ง ความสัมพันธ์ไม่ถูกแก้ เพราะไม่มีใครกล้าเริ่มคุย",
+    psych:"การหลีกเลี่ยงให้โล่งใจระยะสั้น แต่เสริมให้สมองเรียนรู้ว่าการหนีคือทางปลอดภัย จึงทำให้การเผชิญครั้งต่อไปยากขึ้น",
+    q:"การเงียบของฉันมาจากความเชื่อที่รอพระเจ้า หรือมาจากความกลัวที่จะเผชิญ",
+    gospel:"พระเยซูทรงมุ่งพระพักตร์ไปยังกางเขนเพื่อคุณ ไม่ทรงหนีทางที่ยาก และในพระองค์ คุณปลอดภัยพอที่จะเผชิญหน้า",
+    verseRef:"โยชูวา 1:9", verse:"จงเข้มแข็งและกล้าหาญเถิด เพราะพระเจ้าทรงสถิตกับเจ้าทุกที่ที่เจ้าไป",
+    obey:"เลือกบทสนทนาที่เลี่ยงอยู่หนึ่งเรื่อง แล้วนัดคุยภายในสัปดาห์นี้ เริ่มจากเรื่องเล็กก่อนก็ได้",
+    prayer:"พระวิญญาณ ขอประทานความกล้าที่จะพูดความจริงด้วยความรัก แทนการหลบหนี"
+  },
+  chameleon:{
+    em:"🦎", name:"กิ้งก่า", fire:"ไฟเอาใจคน",
+    gift:"อ่อนโยน เข้าใจคน เข้ากับใครก็ได้",
+    pressure:"เออออตามเสียงส่วนใหญ่ ยอมสละความต้องการตัวเองทันทีเพื่อรักษาบรรยากาศ",
+    shadow:"เปลี่ยนสีตามคนที่คุยด้วย จนคนไม่รู้ว่าคุณยืนอยู่ตรงไหนจริงๆ",
+    psych:"การเอาใจคนอาจเป็นวิธีลดความเสี่ยงต่อการถูกปฏิเสธ แต่เมื่อใช้ตลอดเวลา จะทำให้สูญเสียขอบเขตและไม่กล้าสื่อสารความต้องการจริง",
+    q:"ฉันพูดว่าใช่ เพราะเชื่อฟังพระเจ้า หรือเพราะกลัวถูกปฏิเสธ",
+    gospel:"ในพระคริสต์ คุณเป็นที่รักก่อนที่คุณจะทำให้ใครพอใจ คุณจึงไม่ต้องซื้อคุณค่าด้วยการเอาใจทุกคน",
+    verseRef:"กาลาเทีย 1:10", verse:"ถ้าข้ายังเอาใจมนุษย์อยู่ ข้าก็ไม่ใช่ผู้รับใช้ของพระคริสต์",
+    obey:"พูดคำว่าไม่อย่างซื่อตรงหนึ่งครั้งสัปดาห์นี้ กับสิ่งที่ในใจคุณอยากปฏิเสธจริงๆ",
+    prayer:"พระบิดา ขอให้การที่ข้าถูกพระองค์รับไว้แล้ว เป็นความมั่นคงพอที่ข้าจะซื่อตรง แม้คนจะไม่พอใจ"
+  },
+  peacock:{
+    em:"🦚", name:"นกยูง", fire:"ไฟสร้างภาพ",
+    gift:"ใส่ใจมาตรฐาน ดูแลตัวเองดี อยากเป็นแบบอย่าง",
+    pressure:"นำเสนอเฉพาะด้านที่สำเร็จ ปิดบังความล้มเหลว ทำให้ทุกอย่างดูอยู่ในการควบคุม",
+    shadow:"เหนื่อยเพราะต้องแสดงตลอด และคนอื่นเข้าถึงตัวจริงของคุณได้ยาก",
+    psych:"การจัดการภาพลักษณ์เป็นเรื่องปกติในระดับหนึ่ง ปัญหาเกิดเมื่อช่องว่างระหว่างตัวจริงกับภาพที่แสดงกว้างจนต้องใช้พลังมากเพื่อรักษาไว้",
+    q:"ฉันกำลังจัดการภาพลักษณ์ หรือกำลังดำเนินชีวิตด้วยความจริงใจต่อพระพักตร์พระเจ้า",
+    gospel:"พระบิดาทรงเห็นตัวจริงของคุณตั้งแต่ก่อนคุณสร้างภาพ และยังทรงรัก คุณจึงไม่ต้องแสดงอีก",
+    verseRef:"1 ซามูเอล 16:7", verse:"มนุษย์ดูที่รูปลักษณ์ภายนอก แต่พระเจ้าทอดพระเนตรที่จิตใจ",
+    obey:"เล่าเรื่องที่กำลังสู้อยู่จริงหนึ่งเรื่อง ให้คนที่ไว้ใจฟังหนึ่งคน",
+    prayer:"พระเจ้า เพราะพระองค์เห็นและรักคนจริงข้างในข้า ขอให้ข้ากล้าเป็นคนจริงต่อหน้าคน"
+  },
+  ant:{
+    em:"🐜", name:"มดงาน", fire:"ไฟแบกเกิน",
+    gift:"เสียสละ ทุ่มเท เป็นคนที่พึ่งได้",
+    pressure:"รับงานเพิ่มเรื่อยๆ แม้เกินกำลัง ลึกๆ ขาดการกระจายงาน",
+    shadow:"ใกล้หมดไฟ และคนอื่นไม่ได้โตขึ้นมาช่วยแบก",
+    psych:"ความเครียดจากงานที่เรื้อรังและไม่ได้จัดการ นำไปสู่ความเหนื่อยล้าและประสิทธิภาพที่ลดลง",
+    q:"ฉันกำลังรับใช้ด้วยการมอบถวาย หรือกำลังทำตัวเป็นพระผู้ช่วยที่ขาดไม่ได้",
+    gospel:"พระคริสต์ทรงแบกกางเขนเพื่อโลกแล้ว คุณจึงไม่ต้องแบกโลกทั้งใบ มีพระผู้ช่วยองค์เดียว และไม่ใช่คุณ",
+    verseRef:"มัทธิว 11:28", verse:"บรรดาผู้เหน็ดเหนื่อยและแบกภาระหนัก จงมาหาเรา เราจะให้ท่านหายเหนื่อย",
+    obey:"ยกงานจริงหนึ่งอย่างให้คนอื่นทำ และจัดเวลาพักที่ไม่ทำงานเลยสักช่วง",
+    prayer:"พระเยซู ขอบพระคุณที่ทรงแบกสิ่งที่ข้าแบกไม่ไหวแล้ว ขอให้ข้าวางลง และให้คนอื่นได้เติบโตขึ้นมาแบกร่วม"
+  },
+  fox:{
+    em:"🦊", name:"จิ้งจอก", fire:"ไฟไม่ตรงไปตรงมา",
+    gift:"อ่านสถานการณ์เก่ง รู้จังหวะ รู้จักผ่อนหนักผ่อนเบา",
+    pressure:"สื่อสารอ้อม แย้มข้อมูลบางส่วน หรือใช้กลยุทธ์เพื่อให้ได้ผลโดยไม่ชนตรงๆ",
+    shadow:"ความไว้วางใจถูกกัดกร่อน คนไม่แน่ใจว่าสิ่งที่ได้ยินคือทั้งหมดหรือไม่",
+    psych:"การสื่อสารอ้อมอาจเคยช่วยเลี่ยงอันตรายหรือความขัดแย้ง แต่ในความสัมพันธ์ที่ควรปลอดภัย มันจะค่อยๆ กัดกร่อนความไว้วางใจ",
+    q:"ฉันใช้สติปัญญาเพื่อรักษาความจริง หรือเพื่อควบคุมผลลัพธ์ให้เข้าทางตัวเอง",
+    gospel:"เพราะความมั่นคงของคุณอยู่ในพระคริสต์ คุณจึงไม่ต้องปั่นเกมเพื่ออยู่รอด ความจริงปลอดภัยในพระองค์",
+    verseRef:"เอเฟซัส 4:15", verse:"จงพูดความจริงด้วยความรัก",
+    obey:"พูดสิ่งที่คิดตรงๆ หนึ่งเรื่องด้วยความรัก และขอสิ่งที่ต้องการอย่างตรงไปตรงมาแทนการเลี่ยง",
+    prayer:"พระเจ้า ขอให้ข้าวางใจในความมั่นคงจากพระองค์ พอที่จะพูดตรงและซื่อ โดยไม่ต้องปกป้องตัวเองด้วยเล่ห์"
+  }
+};
+
+var SCALE = [
+  {v:0, s:"ไม่เคย", d:"แทบไม่เกิด"},
+  {v:1, s:"บางครั้ง", d:"เกิดเป็นบางครั้ง"},
+  {v:2, s:"ซ้ำเมื่อกดดัน", d:"เกิดซ้ำเมื่ออยู่ใต้ความกดดัน"},
+  {v:3, s:"บ่อย", d:"เกิดบ่อยและส่งผลต่อคนรอบตัว"}
+];
+
+function fireBand(score){
+  if(score<=3) return {lvl:0, label:"ยังไม่เด่นชัด", desc:"ยังไม่เด่นชัดในช่วงนี้", color:"var(--lvl0)"};
+  if(score<=6) return {lvl:1, label:"เริ่มส่งสัญญาณ", desc:"เริ่มส่งสัญญาณ ควรสังเกตสถานการณ์ที่กระตุ้น", color:"var(--lvl1)"};
+  if(score<=9) return {lvl:2, label:"เกิดซ้ำ", desc:"เกิดซ้ำและเริ่มมีผลต่อตนเองหรือคนรอบข้าง", color:"var(--lvl2)"};
+  return {lvl:3, label:"ส่งผลชัดเจน", desc:"ส่งผลชัดเจน ควรเปิดเผยกับคู่หนุนใจและวางแผนก้าวเชื่อฟัง", color:"var(--lvl3)"};
+}
+function rootBand(score){
+  if(score<=1) return {label:"รากยังมั่นคง", desc:"ความไว้วางใจในพระเจ้าดูมั่นคงในช่วงนี้ เดินหน้าฝึกฝนต่อไปด้วยใจขอบคุณ", color:"var(--lvl0)"};
+  if(score<=3) return {label:"เริ่มมีสัญญาณ", desc:"ลองสังเกตว่าความไว้วางใจในพระเจ้าเริ่มสั่นคลอนตอนไหนบ้าง", color:"var(--lvl1)"};
+  if(score<=4) return {label:"เริ่มเห็นชัดขึ้น", desc:"รากนี้อาจกำลังส่งผลต่อไฟดวงอื่น ลองพูดคุยกับคู่หนุนใจ", color:"var(--lvl2)"};
+  return {label:"สูง", desc:"อาจชี้ว่าคุณกำลังต่อสู้กับความไว้วางใจในพระลักษณะของพระเจ้า หรือยังยึดการกระทำของตนเป็นเครื่องพิสูจน์การยอมรับ นี่ไม่ใช่คำตัดสิน แต่เป็นจุดเริ่มต้นที่ดีที่สุดในการสนทนากับคู่หนุนใจ เพราะเป็นรากที่อยู่ใต้ไฟทุกดวง", color:"var(--lvl3)"};
+}
+
+/* ---------------- STATE ---------------- */
+var STORE_KEY = "theall_lifecheck_v1";
+var state = loadState() || {answers:{}, mirror:{}, mirrorFire:null, partner:"", commitTruth:"", commitAction:"", finishedAt:null};
+
+function loadState(){
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function saveState(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* ---------------- SCREENS ---------------- */
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(function(s){ s.classList.remove("active"); });
+  document.getElementById(id).classList.add("active");
+  document.getElementById("quiz-dock").style.display = (id==="screen-quiz") ? "block" : "none";
+  window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+}
+
+/* ---------------- QUIZ RENDER ---------------- */
+function renderQuiz(){
+  var list = document.getElementById("questions-list");
+  list.innerHTML = "";
+  QUESTIONS.forEach(function(q){
+    var wrap = document.createElement("div");
+    wrap.className = "qcard";
+    wrap.id = "qcard-"+q.n;
+    var scaleHtml = SCALE.map(function(o){
+      var checked = state.answers[q.n]===o.v ? "checked" : "";
+      return '<label><input type="radio" name="q'+q.n+'" value="'+o.v+'" '+checked+'>'+
+             '<span class="num">'+o.v+'</span><span>'+o.s+'</span></label>';
+    }).join("");
+    wrap.innerHTML = '<div class="qnum">ข้อ '+q.n+' / 30</div>'+
+      '<div class="qtext">'+q.t+'</div>'+
+      '<div class="scale">'+scaleHtml+'</div>';
+    list.appendChild(wrap);
+  });
+  list.addEventListener("change", onAnswerChange);
+  updateProgress();
+}
+function onAnswerChange(e){
+  var t = e.target;
+  if(t.type!=="radio") return;
+  var n = parseInt(t.name.slice(1),10);
+  state.answers[n] = parseInt(t.value,10);
+  document.getElementById("qcard-"+n).classList.remove("unanswered-flag");
+  saveState();
+  updateProgress();
+}
+function updateProgress(){
+  var answered = Object.keys(state.answers).length;
+  document.getElementById("progress-text").textContent = answered+"/30";
+  document.getElementById("progress-fill").style.width = Math.round(answered/30*100)+"%";
+}
+
+/* ---------------- SCORING ---------------- */
+function computeScores(){
+  var totals = {hen:0,tiger:0,turtle:0,chameleon:0,peacock:0,ant:0,fox:0,root:0};
+  QUESTIONS.forEach(function(q){
+    var v = state.answers[q.n] || 0;
+    totals[q.fire] += v;
+  });
+  return totals;
+}
+function topFires(totals){
+  return FIRE_ORDER.slice().sort(function(a,b){
+    if(totals[b]!==totals[a]) return totals[b]-totals[a];
+    return FIRE_ORDER.indexOf(a)-FIRE_ORDER.indexOf(b);
+  });
+}
+
+/* ---------------- RESULTS RENDER ---------------- */
+function renderResults(){
+  var totals = computeScores();
+  var order = topFires(totals);
+  var top3 = order.slice(0,3);
+
+  document.getElementById("result-date").textContent =
+    "ผลจากแบบสำรวจ · " + new Date(state.finishedAt || Date.now()).toLocaleDateString("th-TH",{year:"numeric",month:"long",day:"numeric"});
+
+  // summary text
+  var rb = rootBand(totals.root);
+  var names = top3.map(function(k){ return ANIMALS[k].em+" "+ANIMALS[k].name+" ("+ANIMALS[k].fire+")"; });
+  var summaryHtml =
+    "<p>จากคำตอบ 30 ข้อของคุณในช่วงสี่สัปดาห์ที่ผ่านมา ไฟเตือนที่เด่นที่สุดตอนนี้คือ <b style='color:var(--gold-ink)'>"+names[0]+"</b> "+
+    "("+totals[top3[0]]+"/12) ตามด้วย <b>"+names[1]+"</b> ("+totals[top3[1]]+"/12) และ <b>"+names[2]+"</b> ("+totals[top3[2]]+"/12)<br>"+
+    "รากของหัวใจอยู่ที่ <b style='color:var(--gold-ink)'>"+totals.root+"/6</b> — "+rb.desc+"</p>"+
+    "<p style='margin-bottom:0'>คะแนนไม่ได้บอกว่าคุณเป็นใคร มันเพียงชี้ว่าในช่วงสี่สัปดาห์ที่ผ่านมา ภายใต้ความกดดัน คุณตอบสนองแบบใดบ่อยขึ้น "+
+    "นี่ไม่ใช่ป้ายชื่อ แต่เป็นกระจก และจุดบอดจริงมักเป็นสิ่งที่เจ้าตัวมองไม่เห็น</p>";
+  document.getElementById("summary-text").innerHTML = summaryHtml;
+
+  // score bars (7 fires + root)
+  var barsEl = document.getElementById("scorebars");
+  barsEl.innerHTML = "";
+  FIRE_ORDER.forEach(function(k){
+    barsEl.appendChild(scoreRow(ANIMALS[k].em, ANIMALS[k].name+" · "+ANIMALS[k].fire, totals[k], 12, fireBand(totals[k])));
+  });
+  barsEl.appendChild(scoreRow("❤️‍🔥", "รากของหัวใจ", totals.root, 6, rb));
+
+  // top3 list
+  var t3El = document.getElementById("top3-list");
+  t3El.innerHTML = "";
+  top3.forEach(function(k, i){
+    var a = ANIMALS[k];
+    var div = document.createElement("div");
+    div.className = "top3-item";
+    div.innerHTML = '<div class="rank">'+(i+1)+'</div><div style="font-size:1.3rem">'+a.em+'</div>'+
+      '<div style="flex:1"><b>'+a.name+'</b> <span class="muted">· '+a.fire+' · '+totals[k]+'/12</span></div>';
+    t3El.appendChild(div);
+  });
+
+  // accordions
+  var accEl = document.getElementById("accordions");
+  accEl.innerHTML = "";
+  order.forEach(function(k, idx){
+    accEl.appendChild(buildAccordion(k, totals[k], idx<3));
+  });
+
+  // root card
+  document.getElementById("root-card").innerHTML =
+    '<h3>❤️‍🔥 รากของหัวใจ — ชั้นเชื้อเพลิง ('+totals.root+'/6)</h3>'+
+    '<p class="muted" style="margin-bottom:10px">ข้อ 29 และ 30 วัดสิ่งที่หัวใจนมัสการจริงๆ ใต้ไฟทั้งเจ็ดดวง — '+
+    'เราไว้วางใจว่าพระเจ้าทรงดีจริงไหม และเรายังพยายามพิสูจน์ตัวเองด้วยผลงานอยู่หรือเปล่า</p>'+
+    '<p style="margin-bottom:0"><b style="color:var(--gold-ink)">'+rb.label+':</b> '+rb.desc+'</p>';
+
+  // mirror select
+  var sel = document.getElementById("mirror-select");
+  sel.innerHTML = FIRE_ORDER.map(function(k){
+    return '<option value="'+k+'">'+ANIMALS[k].em+' '+ANIMALS[k].name+' — '+ANIMALS[k].fire+' ('+totals[k]+'/12)</option>';
+  }).join("");
+  sel.value = state.mirrorFire || top3[0];
+  sel.onchange = function(){ state.mirrorFire = sel.value; saveState(); };
+
+  ["1","2","3","4","5"].forEach(function(i){
+    var el = document.getElementById("mirror-"+i);
+    el.value = (state.mirror && state.mirror[i]) || "";
+    el.oninput = function(){ state.mirror = state.mirror||{}; state.mirror[i]=el.value; saveState(); };
+  });
+  var pn = document.getElementById("partner-name"); pn.value = state.partner||"";
+  pn.oninput = function(){ state.partner = pn.value; saveState(); };
+  var ct = document.getElementById("commit-truth"); ct.value = state.commitTruth||"";
+  ct.oninput = function(){ state.commitTruth = ct.value; saveState(); };
+  var ca = document.getElementById("commit-action"); ca.value = state.commitAction||"";
+  ca.oninput = function(){ state.commitAction = ca.value; saveState(); };
+}
+
+function scoreRow(em, label, score, max, band){
+  var row = document.createElement("div");
+  row.className = "scorebar-row";
+  var pct = Math.round(score/max*100);
+  row.innerHTML =
+    '<div class="em">'+em+'</div>'+
+    '<div class="info">'+
+      '<div class="lbl"><b>'+label+'</b><span>'+score+'/'+max+' · '+band.label+'</span></div>'+
+      '<div class="scorebar-track"><div class="scorebar-fill" style="width:'+pct+'%;background:'+band.color+'"></div></div>'+
+    '</div>';
+  return row;
+}
+
+function buildAccordion(key, score, openByDefault){
+  var a = ANIMALS[key];
+  var band = fireBand(score);
+  var div = document.createElement("div");
+  div.className = "acc" + (openByDefault ? " open highlight" : "");
+  div.innerHTML =
+    '<div class="acc-head">'+
+      '<div class="em">'+a.em+'</div>'+
+      '<div class="ttl"><b>'+a.name+' — '+a.fire+'</b><small>'+score+'/12 · '+band.label+'</small></div>'+
+      '<div class="chev">▾</div>'+
+    '</div>'+
+    '<div class="acc-body"><div class="acc-body-inner">'+
+      field("🎁 ของประทาน", a.gift)+
+      field("⚠️ เมื่อกดดัน", a.pressure)+
+      field("🌑 เงาที่ต้องระวัง", a.shadow)+
+      field("💡 จิตวิทยา", a.psych)+
+      field("❓ คำถามตรวจใจ", a.q)+
+      field("✝️ ข่าวประเสริฐ", a.gospel)+
+      '<div class="field"><div class="k">📖 พระคัมภีร์</div><div class="verse-box"><div class="ref">'+a.verseRef+'</div>'+a.verse+'</div></div>'+
+      field("🎯 การเชื่อฟังสัปดาห์นี้", a.obey)+
+      '<div class="field"><div class="k">🙏 อธิษฐาน</div><div class="prayer-box">"'+a.prayer+'"</div></div>'+
+    '</div></div>';
+  div.querySelector(".acc-head").addEventListener("click", function(){
+    div.classList.toggle("open");
+  });
+  return div;
+}
+function field(k, v){
+  return '<div class="field"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>';
+}
+
+/* ---------------- ACTIONS ---------------- */
+function firstUnanswered(){
+  for(var i=0;i<QUESTIONS.length;i++){
+    var n = QUESTIONS[i].n;
+    if(state.answers[n]===undefined) return n;
+  }
+  return null;
+}
+
+document.getElementById("btn-start").addEventListener("click", function(){
+  showScreen("screen-quiz");
+  renderQuiz();
+});
+document.getElementById("btn-back-intro").addEventListener("click", function(){
+  showScreen("screen-intro");
+});
+document.getElementById("btn-submit").addEventListener("click", function(){
+  var missing = firstUnanswered();
+  if(missing){
+    document.querySelectorAll(".qcard").forEach(function(c){ c.classList.remove("unanswered-flag"); });
+    var el = document.getElementById("qcard-"+missing);
+    el.classList.add("unanswered-flag");
+    el.scrollIntoView({behavior:"smooth", block:"center"});
+    showToast("กรุณาตอบให้ครบทุกข้อ (ยังเหลือข้อ "+missing+")");
+    return;
+  }
+  state.finishedAt = Date.now();
+  saveState();
+  showScreen("screen-results");
+  renderResults();
+});
+document.getElementById("btn-restart").addEventListener("click", function(){
+  if(!confirm("ล้างคำตอบทั้งหมดและเริ่มทำแบบสำรวจใหม่?")) return;
+  state = {answers:{}, mirror:{}, mirrorFire:null, partner:"", commitTruth:"", commitAction:"", finishedAt:null};
+  saveState();
+  showScreen("screen-intro");
+  checkResume();
+});
+document.getElementById("btn-print").addEventListener("click", function(){ window.print(); });
+
+document.getElementById("btn-copy-share").addEventListener("click", function(){
+  var sel = document.getElementById("mirror-select");
+  var a = ANIMALS[sel.value];
+  var lines = [
+    "🚗 theAll Life Check — สรุปเพื่อแบ่งปันกับคู่หนุนใจ",
+    "ไฟที่เลือก: "+a.em+" "+a.name+" ("+a.fire+")",
+    "ความจริงเรื่องพระคริสต์ที่จะยึด: "+(state.commitTruth || a.gospel),
+    "สิ่งที่จะเชื่อฟังภายใน 48 ชั่วโมง: "+(state.commitAction || a.obey),
+    state.partner ? ("คู่หนุนใจ: "+state.partner) : ""
+  ].filter(Boolean).join("\n");
+  copyText(lines);
+});
+
+function copyText(text){
+  function ok(){ showToast("คัดลอกแล้ว — วางในแชท LINE หรือข้อความหาคู่หนุนใจได้เลย"); }
+  function fail(){
+    var ta=document.createElement("textarea");
+    ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand("copy"); ok(); }catch(e){ showToast("คัดลอกไม่สำเร็จ ลองเลือกข้อความเอง"); }
+    document.body.removeChild(ta);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(ok).catch(fail);
+  } else { fail(); }
+}
+function showToast(msg){
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(function(){ t.classList.remove("show"); }, 2600);
+}
+
+function checkResume(){
+  var answered = Object.keys(state.answers).length;
+  var btn = document.getElementById("btn-resume");
+  if(answered>0){
+    btn.style.display = "block";
+    btn.textContent = (answered>=30 && state.finishedAt) ? "↺ ดูผลล่าสุด" : "↺ ทำต่อ ("+answered+"/30 ข้อ)";
+    btn.onclick = function(){
+      if(answered>=30 && state.finishedAt){ showScreen("screen-results"); renderResults(); }
+      else { showScreen("screen-quiz"); renderQuiz(); }
+    };
+  } else {
+    btn.style.display = "none";
+  }
+}
+
+checkResume();
+})();
+</script>
+</body>
+</html>

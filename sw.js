@@ -1,5 +1,5 @@
 /* sw.js — service worker ให้แอปทำงานออฟไลน์ (cache-first) */
-const CACHE = 'growthct-v8';
+const CACHE = 'growthct-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './life-check.html',
 ];
 
 self.addEventListener('install', (e) => {
