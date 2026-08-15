@@ -1,0 +1,22 @@
+{
+  "name": "ricktheall-workspace",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "pnpm --filter theall-bible-coffee dev",
+    "build": "pnpm --filter theall-bible-coffee build",
+    "start": "pnpm --filter theall-bible-coffee start",
+    "lint": "pnpm --filter theall-bible-coffee lint",
+    "typecheck": "pnpm --filter theall-bible-coffee typecheck",
+    "validate:content": "pnpm --filter theall-bible-coffee validate:content",
+    "test": "pnpm --filter theall-bible-coffee test",
+    "test:e2e": "pnpm --filter theall-bible-coffee test:e2e"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "unrs-resolver",
+      "sharp"
+    ]
+  }
+}
