@@ -80,7 +80,11 @@
       "navLabel": "บริบท",
       "title": "บริบททางประวัติศาสตร์",
       "kind": "context",
-      "sourceIds": ["acts-19", "artemis-ephesus", "eph-1-1-variant"],
+      "sourceIds": [
+        "acts-19",
+        "artemis-ephesus",
+        "eph-1-1-variant"
+      ],
       "blocks": [
         {
           "type": "paragraph",
@@ -137,7 +141,9 @@
       "navLabel": "คำอธิบายเชิงลึก",
       "title": "คำอธิบายเชิงลึก",
       "kind": "explanation",
-      "sourceIds": ["greek-terms"],
+      "sourceIds": [
+        "greek-terms"
+      ],
       "blocks": [
         {
           "type": "heading",
@@ -320,7 +326,7 @@
         {
           "type": "application",
           "stage": "knowing",
-          "title": "รู้",
+          "title": "ลำดับที่ถูกต้องเปลี่ยนทุกอย่าง",
           "text": "สิ่งที่ต้องรู้จากบทนี้ไม่ใช่ข้อมูลใหม่ แต่คือลำดับที่ถูกต้อง พระเจ้าทรงลงมือก่อน แล้วเราจึงตอบสนอง ไม่ใช่เราลงมือก่อนแล้วพระเจ้าจึงยอมรับ",
           "prompts": [
             "อ่านเอเฟซัส 1:3–14 อีกครั้ง แล้วขีดเส้นใต้ทุกกริยาที่มีพระเจ้าเป็นผู้กระทำ",
@@ -330,7 +336,7 @@
         {
           "type": "application",
           "stage": "doing",
-          "title": "ทำ",
+          "title": "อธิษฐานแบบเปาโลสักหนึ่งสัปดาห์",
           "text": "เปาโลไม่ได้อธิษฐานขอสิ่งที่ขาด เขาอธิษฐานขอให้ผู้อ่านมองเห็นสิ่งที่มีอยู่แล้ว ลองเปลี่ยนคำอธิษฐานของคุณสัปดาห์นี้ตามแบบนั้น",
           "prompts": [
             "สัปดาห์นี้ ให้เริ่มคำอธิษฐานด้วยการขอบคุณสามอย่างจากเอเฟซัส 1 ก่อนจะทูลขอสิ่งใด",
@@ -340,7 +346,7 @@
         {
           "type": "application",
           "stage": "sharing",
-          "title": "บอกต่อ",
+          "title": "พูดเรื่องนี้กับคนหนึ่งคน",
           "text": "คนรอบตัวคุณจำนวนมากกำลังเหนื่อยกับการพิสูจน์คุณค่าของตัวเอง เอเฟซัส 1 พูดกับความเหนื่อยนั้นได้โดยไม่ต้องเทศนา",
           "prompts": [
             "เล่าภาพ “เงินมัดจำ” ให้เพื่อนหนึ่งคนฟังด้วยคำพูดของคุณเอง",
@@ -356,16 +362,44 @@
     "helpText": "เลือกให้ครบสามคำ ทั้งสามคำปรากฏอยู่ในเนื้อหาที่คุณเพิ่งอ่าน",
     "requiredSelections": 3,
     "options": [
-      { "id": "eph-01-word-chosen", "word": "เลือกสรร" },
-      { "id": "eph-01-word-inheritance", "word": "มรดก" },
-      { "id": "eph-01-word-deposit", "word": "มัดจำ" },
-      { "id": "eph-01-word-circumcision", "word": "การเข้าสุหนัต" },
-      { "id": "eph-01-word-synagogue", "word": "ธรรมศาลา" },
-      { "id": "eph-01-word-sabbath", "word": "วันสะบาโต" },
-      { "id": "eph-01-word-tithe", "word": "สิบลด" },
-      { "id": "eph-01-word-vow", "word": "คำปฏิญาณของนาศีร์" }
+      {
+        "id": "eph-01-word-chosen",
+        "word": "เลือกสรร"
+      },
+      {
+        "id": "eph-01-word-inheritance",
+        "word": "มรดก"
+      },
+      {
+        "id": "eph-01-word-deposit",
+        "word": "มัดจำ"
+      },
+      {
+        "id": "eph-01-word-circumcision",
+        "word": "การเข้าสุหนัต"
+      },
+      {
+        "id": "eph-01-word-synagogue",
+        "word": "ธรรมศาลา"
+      },
+      {
+        "id": "eph-01-word-sabbath",
+        "word": "วันสะบาโต"
+      },
+      {
+        "id": "eph-01-word-tithe",
+        "word": "สิบลด"
+      },
+      {
+        "id": "eph-01-word-vow",
+        "word": "คำปฏิญาณของนาศีร์"
+      }
     ],
-    "correctOptionIds": ["eph-01-word-chosen", "eph-01-word-inheritance", "eph-01-word-deposit"],
+    "correctOptionIds": [
+      "eph-01-word-chosen",
+      "eph-01-word-inheritance",
+      "eph-01-word-deposit"
+    ],
     "successMessage": "ถูกต้องทั้งสามคำ คุณอ่านอย่างตั้งใจจริง ๆ",
     "retryMessage": "ยังไม่ครบทั้งสามคำ ไม่เป็นไรเลย ลองกลับไปอ่านส่วน “คำอธิบายเชิงลึก” อีกรอบ แล้วค่อยกลับมา"
   },
