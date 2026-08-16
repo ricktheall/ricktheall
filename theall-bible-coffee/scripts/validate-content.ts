@@ -7,13 +7,40 @@
  *   2. no distractor accidentally appears there
  * It also reports (without failing) when the chapter is still `draft`.
  */
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
 import { chapterSchema, type Block, type Chapter } from "../src/lib/content/schema";
 
-const CONTENT_FILES = ["content/books/ephesians/th/chapter-01.json"];
+const CONTENT_ROOT = "content/books";
+const CHAPTER_FILE = /^chapter-(\d{2,3})\.json$/;
+
+/** Discovered, not listed by hand — adding a chapter must not mean editing this script. */
+async function discoverContent(): Promise<{ files: string[]; bookIds: string[] }> {
+  const files: string[] = [];
+  const bookIds: string[] = [];
+  let books: string[] = [];
+  try {
+    books = await readdir(CONTENT_ROOT);
+  } catch {
+    return { files, bookIds };
+  }
+  for (const bookId of books.sort()) {
+    const dir = path.join(CONTENT_ROOT, bookId, "th");
+    let entries: string[] = [];
+    try {
+      entries = await readdir(dir);
+    } catch {
+      continue;
+    }
+    const chapters = entries.filter((name) => CHAPTER_FILE.test(name)).sort();
+    if (chapters.length === 0) continue;
+    bookIds.push(bookId);
+    for (const name of chapters) files.push(path.join(dir, name));
+  }
+  return { files, bookIds };
+}
 
 function blockText(block: Block): string[] {
   switch (block.type) {
@@ -126,11 +153,42 @@ async function validateFile(relativePath: string): Promise<string[]> {
   return errors;
 }
 
-async function main(): Promise<void> {
+/**
+ * The library marks a book "ready" from `BOOKS_WITH_LESSONS` in canon.ts,
+ * which is client-safe and so cannot read the filesystem. This keeps the two
+ * honest: a book may never be advertised as ready without content, and content
+ * may never sit unpublished because someone forgot the canon entry.
+ */
+async function validateReadyBooks(bookIds: readonly string[]): Promise<string[]> {
+  const { BIBLE_BOOKS } = await import("../src/lib/books/canon");
+
+  const declared = new Set(
+    BIBLE_BOOKS.filter((book) => book.lessonStatus === "ready").map((book) => book.id),
+  );
+  const onDisk = new Set(bookIds);
   const errors: string[] = [];
-  for (const file of CONTENT_FILES) {
+
+  for (const id of declared) {
+    if (!onDisk.has(id)) {
+      errors.push(`canon.ts marks "${id}" as ready, but content/books/${id}/th has no chapters`);
+    }
+  }
+  for (const id of onDisk) {
+    if (!declared.has(id)) {
+      errors.push(`content exists for "${id}", but canon.ts does not list it in BOOKS_WITH_LESSONS`);
+    }
+  }
+  return errors;
+}
+
+async function main(): Promise<void> {
+  const { files, bookIds } = await discoverContent();
+  const errors: string[] = [];
+  for (const file of files) {
     errors.push(...(await validateFile(file)));
   }
+  errors.push(...(await validateReadyBooks(bookIds)));
+  console.log(`\nChecked ${files.length} chapter file(s) across ${bookIds.length} book(s).`);
 
   if (errors.length > 0) {
     console.error("\nContent validation failed:");

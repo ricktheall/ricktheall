@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ChapterOneCallToAction } from "@/components/chapter-one-cta";
 import { EPHESIANS } from "@/lib/content/book";
+import { listPublishedChapters } from "@/lib/content/index";
 import { loadEphesians1 } from "@/lib/content/loader";
 
 export const metadata: Metadata = {
@@ -11,6 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default async function EphesiansOverviewPage() {
+  // Which chapters are open is decided by the content on disk, never by a flag
+  // someone has to remember to flip.
+  const published = await listPublishedChapters(EPHESIANS.id);
   const chapter = await loadEphesians1();
 
   return (
@@ -55,16 +59,16 @@ export default async function EphesiansOverviewPage() {
           โครงของทั้งหกบท
         </h2>
         <p className="mt-2 text-sm text-[var(--foreground-subtle)]">
-          ในรุ่นทดสอบนี้ เปิดให้อ่านเฉพาะบทที่ 1 บทอื่นแสดงไว้เพื่อให้เห็นภาพรวมเท่านั้น
-          และยังเขียนไม่เสร็จ
+          บทที่เปิดให้อ่านแล้วจะกดเข้าไปได้ทันที ส่วนบทที่เหลือแสดงไว้ให้เห็นภาพรวมของทั้งเล่ม
+          และกำลังทยอยเตรียมทีละบท
         </p>
 
         <ol className="mt-5 space-y-px">
           {EPHESIANS.chapters.map((item) => (
             <li key={item.number}>
-              {item.available ? (
+              {published.includes(item.number) ? (
                 <Link
-                  href="/th/books/ephesians/1"
+                  href={`/th/books/ephesians/${item.number}`}
                   className="flex items-baseline gap-4 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-4"
                 >
                   <span className="font-serif text-lg font-semibold text-[var(--accent)]">
