@@ -134,6 +134,19 @@
     const last = P.lastOpened();
     let personal = '';
 
+    // แก้ววันนี้ — ทำให้ "1 Coffee. 1 Bible. 1 Day." เป็นจริงในแต่ละวัน
+    // เชิญชวน ไม่ตำหนิ: ถ้ายังไม่ได้อ่านวันนี้ ก็แค่บอกว่าแก้วยังรออยู่
+    let today = '';
+    if (s.hasAnyProgress) {
+      const readToday = P.readToday();
+      today = '<p class="today ' + (readToday ? 'today--done' : '') + '">' +
+        '<span class="today__label">' + esc(T('todayLabel')) + '</span>' +
+        '<span>' + (readToday ? '<span aria-hidden="true">✓ </span>' : '') +
+          esc(readToday ? T('todayDone') : T('todayInvite')) + '</span>' +
+        (s.streak > 1 ? '<span class="today__streak">' + esc(T('streak', { n: s.streak })) + '</span>' : '') +
+        '</p>';
+    }
+
     if (s.hasAnyProgress && last) {
       const book = B.byCode(last.bookCode);
       if (book) {
@@ -166,6 +179,7 @@
         '<p class="hero__sub">' + esc(T('taglineSub')) + '</p>' +
         '<p class="rhythm"><span>' + esc(T('brew')) + '</span><span>' + esc(T('read')) + '</span><span>' + esc(T('live')) + '</span></p>' +
       '</section>' +
+      today +
       personal +
       '<a class="btn btn--primary btn--block" href="#/library">' +
         esc(s.hasAnyProgress ? T('openLibrary') : T('startFirstCup')) + '</a>' +
@@ -261,13 +275,17 @@
   }
 
   /* ── หน้าเล่ม ───────────────────────────────────────────── */
+  /* เล่มที่ยังไม่มีบทเรียน แต่ผู้ใช้เลือกอ่านเองแล้ว ต้องเปิดได้ตามปกติ
+   * ความพร้อมของบทเรียนไม่ควรกั้นใครไม่ให้เดินทางผ่านพระคัมภีร์ทั้งเล่ม */
+  function isOpenable(book) {
+    return L.isReady(book.code) || !!P.bookMeta(book.code).startedAt || P.completedChapterCount(book.code) > 0;
+  }
+
   function viewBook(slug) {
     const book = B.bySlug(slug);
     if (!book) return viewNotFound();
 
-    if (!L.isReady(book.code) && !P.completedChapterCount(book.code)) {
-      return viewComingSoonPage(book);
-    }
+    if (!isOpenable(book)) return viewComingSoonPage(book);
 
     P.touchBook(book.code);
     const st = cupState(book);
@@ -297,7 +315,9 @@
         '<div>' +
           '<h1>' + esc(global.I18n.bookName(book)) + '</h1>' +
           '<div class="book-head__en">' + esc(global.I18n.bookNameAlt(book)) + '</div>' +
-          '<div class="book-head__meta">' + esc(T('chaptersLong', { n: book.chapterCount })) + ' · ' + badgeFor(st) + '</div>' +
+          '<div class="book-head__meta">' + esc(T('chaptersLong', { n: book.chapterCount })) + ' · ' + badgeFor(st) +
+            (L.isReady(book.code) ? '' : ' <span class="badge badge--coming">' + esc(T('selfGuidedBadge')) + '</span>') +
+          '</div>' +
         '</div>' +
       '</div>' +
       '<section class="progress-block" aria-label="' + esc(T('yourProgress')) + '">' +
@@ -335,6 +355,8 @@
         '<h2 style="font-size:19px">' + esc(T('comingSoonTitle')) + '</h2>' +
         '<p style="white-space:pre-line;color:var(--cream-2)">' + esc(T('comingSoonBody')) + '</p>' +
         '<a class="btn btn--primary btn--block" href="#/library">' + esc(T('chooseReadyCup')) + '</a>' +
+        '<button type="button" class="btn btn--quiet btn--block" data-selfguided="' + esc(book.code) + '">' +
+          esc(T('selfGuidedStart')) + '</button>' +
       '</div>';
     chrome('library');
     track('coming_soon_book_clicked', { book: book.code });
@@ -346,9 +368,7 @@
     if (!book) return viewNotFound();
     const n = Math.max(1, Math.min(book.chapterCount, parseInt(chapterNum, 10) || 1));
 
-    if (!L.isReady(book.code) && !P.completedChapterCount(book.code)) {
-      return viewComingSoonPage(book);
-    }
+    if (!isOpenable(book)) return viewComingSoonPage(book);
 
     P.openChapter(book.code, n);
     const done = P.isChapterCompleted(book.code, n);
@@ -375,7 +395,9 @@
         '<div class="rhythm-step"><h3>' + esc(T('read')) + '</h3><p>' + esc(readText) + '</p></div>' +
         '<div class="rhythm-step"><h3>' + esc(T('live')) + '</h3><p>' + esc(liveText) + '</p></div>' +
       '</section>' +
-      (lesson ? '' : '<p class="pending-note">' + esc(T('lessonPending')) + '</p>') +
+      (lesson ? ''
+        : '<p class="pending-note">' +
+            esc(L.isReady(book.code) ? T('lessonPending') : T('selfGuidedNote')) + '</p>') +
       '<label class="sr-only" for="note">' + esc(T('reflection')) + '</label>' +
       '<p style="font-size:12px;color:var(--cream-dim);margin-bottom:6px">' + esc(T('reflectionHint')) + '</p>' +
       '<textarea id="note" class="note-field" data-note="' + esc(book.code) + ':' + n + '">' +
@@ -444,7 +466,16 @@
         '<span><i class="l-reading"></i>' + esc(T('legendReading')) + '</span>' +
         '<span><i class="l-done"></i>' + esc(T('legendDone')) + '</span>' +
       '</div>' +
-      '<div class="cup-grid">' + cups + '</div>';
+      '<div class="cup-grid">' + cups + '</div>' +
+      '<section class="card backup">' +
+        '<h2 style="font-size:16px">' + esc(T('backupTitle')) + '</h2>' +
+        '<p style="font-size:13px;color:var(--cream-dim)">' + esc(T('backupBody')) + '</p>' +
+        '<div class="backup__actions">' +
+          '<button type="button" class="btn btn--ghost" data-export="1">' + esc(T('exportBtn')) + '</button>' +
+          '<button type="button" class="btn btn--ghost" data-import="1">' + esc(T('importBtn')) + '</button>' +
+        '</div>' +
+        '<input type="file" id="importFile" accept="application/json,.json" class="sr-only" />' +
+      '</section>';
 
     chrome('journey');
     track('journey_dashboard_opened', {});
@@ -489,6 +520,8 @@
         esc(book.code + ' · ' + global.I18n.bookName(book) + ' · ' + T('chaptersLong', { n: book.chapterCount })) + '</p>' +
       '<div class="modal__actions">' +
         '<a class="btn btn--primary" href="#/library" data-close="1">' + esc(T('chooseReadyCup')) + '</a>' +
+        '<button type="button" class="btn btn--ghost" data-selfguided="' + esc(book.code) + '">' +
+          esc(T('selfGuidedStart')) + '</button>' +
         '<button type="button" class="btn btn--quiet" data-close="1">' + esc(T('close')) + '</button>' +
       '</div>');
     track('coming_soon_book_clicked', { book: book.code });
@@ -563,6 +596,17 @@
     const comingBtn = e.target.closest('[data-coming]');
     if (comingBtn) { comingSoonModal(B.byCode(comingBtn.getAttribute('data-coming'))); return; }
 
+    // เริ่มอ่านเล่มที่ยังไม่มีบทเรียนด้วยตัวเอง
+    const selfGuided = e.target.closest('[data-selfguided]');
+    if (selfGuided) {
+      const book = B.byCode(selfGuided.getAttribute('data-selfguided'));
+      closeModal();
+      P.startBook(book.code, 1)
+        .then(function () { location.hash = '#/book/' + book.slug; })
+        .catch(function () { toast(T('saveFailed')); });
+      return;
+    }
+
     const filter = e.target.closest('[data-filter]');
     if (filter) {
       libraryFilter = filter.getAttribute('data-filter');
@@ -601,6 +645,25 @@
       return;
     }
 
+    if (e.target.closest('[data-export]')) {
+      const blob = new Blob([P.exportJson()], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'bible-coffee-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      return;
+    }
+
+    if (e.target.closest('[data-import]')) {
+      const input = document.getElementById('importFile');
+      if (input) input.click();
+      return;
+    }
+
     const uncomplete = e.target.closest('[data-uncomplete]');
     if (uncomplete) {
       const ctx = global.__ctx;
@@ -625,6 +688,23 @@
     return P.saveNote(n.code, n.chapter, n.text).catch(function () { toast(T('saveFailed')); });
   }
 
+  /** นำไฟล์สำรองเข้า — รวมข้อมูลเสมอ ไม่มีทางลบความคืบหน้าเดิม */
+  function onImportFile(e) {
+    const input = e.target.closest('#importFile');
+    if (!input || !input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      P.importJson(String(reader.result))
+        .then(function (added) {
+          toast(added > 0 ? T('importDone', { n: added }) : T('importNothing'));
+          viewJourney();
+        })
+        .catch(function () { toast(T('importFailed')); });
+    };
+    reader.onerror = function () { toast(T('importFailed')); };
+    reader.readAsText(input.files[0]);
+  }
+
   function onInput(e) {
     const field = e.target.closest('[data-note]');
     if (!field) return;
@@ -635,7 +715,21 @@
   }
 
   function onKey(e) {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') { closeModal(); return; }
+
+    // กักโฟกัสไว้ในโมดัล เพื่อไม่ให้ผู้ใช้คีย์บอร์ด/สกรีนรีดเดอร์หลุดไปหลังฉาก
+    if (e.key !== 'Tab') return;
+    const panel = document.querySelector('.modal__panel');
+    if (!panel) return;
+    const focusable = panel.querySelectorAll('a[href], button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === panel)) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
   }
 
   /* ── เริ่มทำงาน ─────────────────────────────────────────── */
@@ -650,6 +744,7 @@
       document.addEventListener('click', onClick);
       document.addEventListener('input', onInput);
       document.addEventListener('change', flushNote);   // ออกจากช่องพิมพ์ = บันทึกทันที
+      document.addEventListener('change', onImportFile);
       document.addEventListener('keydown', onKey);
       window.addEventListener('pagehide', flushNote);   // ปิดแท็บ/ออกจากหน้าแล้วบันทึกไม่หาย
       window.addEventListener('hashchange', function () { flushNote(); navigate(); });

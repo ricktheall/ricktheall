@@ -9,7 +9,8 @@ npx http-server -p 8123 -c-1 .
 
 # 2. รันชุดทดสอบ (อีกหน้าต่างหนึ่ง)
 npx playwright install chromium     # ครั้งแรกเท่านั้น
-node test/qa.mjs
+node test/qa.mjs                    # 65 ข้อ — รายการ QA หลักของ V2
+node test/qa-extras.mjs             # 17 ข้อ — อ่านด้วยตัวเอง · แก้ววันนี้ · สำรองข้อมูล
 ```
 
-ผ่านทั้งหมดจะขึ้น `65/65 checks passed` และบันทึกภาพหน้าจอไว้ที่ `test/shots/`
+ผ่านทั้งหมดจะขึ้น `65/65` และ `17/17` และบันทึกภาพหน้าจอไว้ที่ `test/shots/`

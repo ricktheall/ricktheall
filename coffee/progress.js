@@ -360,6 +360,51 @@
       return repo.commit(function (s) { s.celebrated[code] = true; });
     },
 
+    /** อ่านวันนี้แล้วหรือยัง — ใช้กับ "แก้ววันนี้" บนหน้าแรก */
+    readToday: function () {
+      return !!(repo.state.activity || {})[todayKey()];
+    },
+
+    /* ── สำรอง / กู้คืนข้อมูล ────────────────────────────── */
+
+    exportJson: function () {
+      return JSON.stringify(repo.state, null, 2);
+    },
+
+    /**
+     * รวมข้อมูลจากไฟล์สำรอง — รวมเสมอ ไม่เขียนทับ
+     * บทที่อ่านจบของทั้งสองฝั่งจะถูกเก็บไว้ทั้งหมด ผู้ใช้ไม่มีทางเสียความคืบหน้า
+     * @returns {number} จำนวนบทที่เพิ่มขึ้น
+     */
+    importJson: function (json) {
+      const incoming = migrate(typeof json === 'string' ? JSON.parse(json) : json);
+      let added = 0;
+      return repo.commit(function (s) {
+        Object.keys(incoming.books || {}).forEach(function (code) {
+          const from = incoming.books[code];
+          const to = bookEntry(s, code);
+          Object.keys(from.chapters || {}).forEach(function (ch) {
+            if (!to.chapters[ch]) { to.chapters[ch] = from.chapters[ch]; added++; }
+          });
+          // เก็บวันที่เริ่มที่เก่าที่สุด และวันที่อ่านจบครั้งแรกที่เก่าที่สุด
+          ['startedAt', 'firstCompletedAt'].forEach(function (k) {
+            if (from[k] && (!to[k] || from[k] < to[k])) to[k] = from[k];
+          });
+          ['completedAt', 'lastOpenedAt'].forEach(function (k) {
+            if (from[k] && (!to[k] || from[k] > to[k])) to[k] = from[k];
+          });
+        });
+        Object.keys(incoming.notes || {}).forEach(function (k) {
+          if (!s.notes[k]) s.notes[k] = incoming.notes[k];
+        });
+        Object.keys(incoming.activity || {}).forEach(function (d) { s.activity[d] = true; });
+        Object.keys(incoming.celebrated || {}).forEach(function (c) { s.celebrated[c] = true; });
+        if (incoming.lastOpened && (!s.lastOpened || incoming.lastOpened.at > s.lastOpened.at)) {
+          s.lastOpened = incoming.lastOpened;
+        }
+      }).then(function () { return added; });
+    },
+
     /** ล้างข้อมูลทั้งหมด (ใช้ในการทดสอบ) */
     reset: function () {
       return repo.commit(function (s) {

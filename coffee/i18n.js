@@ -89,6 +89,10 @@
     comingSoonTitle:  { th: 'แก้วนี้กำลังเตรียมอยู่', en: 'This cup is still being prepared' },
     comingSoonBody:   { th: 'เรากำลังเตรียมบทเรียนของพระคัมภีร์เล่มนี้อย่างตั้งใจ\nระหว่างนี้ เลือกแก้วที่พร้อมอ่านได้เลย',
                         en: 'We are carefully preparing the lesson for this book.\nIn the meantime, choose a cup that is ready.' },
+    selfGuidedStart:  { th: 'หรือเริ่มอ่านเล่มนี้ด้วยตัวเอง', en: 'Or start reading it on your own' },
+    selfGuidedNote:   { th: 'เล่มนี้ยังไม่มีบทเรียน คุณกำลังอ่านจากพระคัมภีร์ของคุณเอง — ความคืบหน้าถูกบันทึกตามปกติ',
+                        en: 'No lesson for this book yet — you are reading from your own Bible. Your progress is saved as usual.' },
+    selfGuidedBadge:  { th: 'อ่านด้วยตัวเอง', en: 'Self-guided' },
 
     // ── การเดินทางของฉัน ────────────────────────────────────
     journeyTitle:     { th: 'การเดินทางของฉัน', en: 'My Journey' },
@@ -108,6 +112,13 @@
     legendDone:       { th: 'คว่ำแก้วแล้ว', en: 'Cup turned over' },
     streak:           { th: 'กลับมาหาพระคำต่อเนื่อง {n} วัน', en: 'Back in the Word {n} days running' },
 
+    // ── แก้ววันนี้ ──────────────────────────────────────────
+    todayLabel:       { th: 'แก้ววันนี้', en: "Today's cup" },
+    todayInvite:      { th: 'วันนี้ยังไม่ได้ชง — ให้เวลาสักครู่กับพระคำ',
+                        en: 'Not brewed yet today — give the Word a few quiet minutes' },
+    todayDone:        { th: 'วันนี้คุณได้อยู่กับพระคำแล้ว', en: 'You have been with the Word today' },
+    todayFirst:       { th: 'ชงแก้วแรกของคุณวันนี้', en: 'Brew your first cup today' },
+
     // ── หน้าแรก ─────────────────────────────────────────────
     yourJourney:      { th: 'การเดินทางของคุณ', en: 'Your journey' },
     homeInvite:       { th: 'พระคัมภีร์ 66 เล่ม คือกาแฟ 66 แก้ว ที่รอคุณอยู่',
@@ -120,6 +131,20 @@
                         en: "Another book of God's Word has travelled through your life." },
     bookDoneCount:    { th: '{done} / 66 เล่ม', en: '{done} / 66 books' },
     nextSuggestion:   { th: 'เล่มถัดไปที่พร้อมอ่าน', en: 'Next book ready for you' },
+
+    // ── สำรองข้อมูล ─────────────────────────────────────────
+    backupTitle:      { th: 'สำรองการเดินทางของคุณ', en: 'Back up your journey' },
+    backupBody:       { th: 'ความคืบหน้าเก็บอยู่ในเครื่องนี้เท่านั้น บันทึกไฟล์สำรองไว้ ' +
+                            'เพื่อย้ายไปเครื่องใหม่ หรือกันไว้เผื่อล้างข้อมูลเบราว์เซอร์',
+                        en: 'Your progress lives only on this device. Save a backup file to move to a new ' +
+                            'device, or to be safe if you ever clear your browser.' },
+    exportBtn:        { th: 'บันทึกไฟล์สำรอง', en: 'Save backup file' },
+    importBtn:        { th: 'นำไฟล์สำรองเข้า', en: 'Restore from backup' },
+    importDone:       { th: 'รวมข้อมูลแล้ว — เพิ่มขึ้น {n} บท', en: 'Merged — {n} chapters added' },
+    importNothing:    { th: 'ไฟล์นี้ไม่มีอะไรใหม่ ข้อมูลเดิมของคุณยังอยู่ครบ',
+                        en: 'Nothing new in that file — your progress is untouched.' },
+    importFailed:     { th: 'อ่านไฟล์นี้ไม่ได้ ข้อมูลเดิมของคุณยังอยู่ครบ',
+                        en: "Couldn't read that file — your progress is untouched." },
 
     // ── ระบบ ────────────────────────────────────────────────
     savedLocally:     { th: 'บันทึกไว้ในเครื่องแล้ว ระบบจะซิงก์อีกครั้งเมื่อพร้อม',
