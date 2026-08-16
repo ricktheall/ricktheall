@@ -1,0 +1,179 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  TheAll Bible Coffee — semantic design tokens.
+  Warm espresso / cream / muted gold. Restrained, adult, reading-first.
+*/
+:root {
+  --cream-50: #fbf7f1;
+  --cream-100: #f5eee3;
+  --cream-200: #e9ddcb;
+  --espresso-900: #1d1512;
+  --espresso-800: #2a1f19;
+  --espresso-700: #3a2b22;
+  --espresso-600: #4d392e;
+  --gold-600: #8a6a2f;
+  --gold-500: #a5822f;
+  --gold-400: #c9a24a;
+
+  --background: var(--cream-50);
+  --surface: #ffffff;
+  --surface-muted: var(--cream-100);
+  --border: #e2d5c2;
+  --border-strong: #cdbba1;
+
+  --foreground: var(--espresso-900);
+  --foreground-muted: #6b5849;
+  --foreground-subtle: #8a7565;
+
+  --accent: var(--gold-600);
+  --accent-foreground: #ffffff;
+  --accent-soft: #f2e6cf;
+
+  --primary: var(--espresso-800);
+  --primary-foreground: var(--cream-50);
+
+  --coffee-liquid: #6f4a2c;
+  --coffee-crema: #c08a52;
+  --cup-outline: #7a6353;
+
+  --ring: var(--gold-600);
+  --danger: #9b2c2c;
+
+  --reading-scale: 1;
+  --content-width: 40rem;
+
+  color-scheme: light;
+}
+
+.dark {
+  --background: #14100e;
+  --surface: #1d1714;
+  --surface-muted: #241d19;
+  --border: #362b25;
+  --border-strong: #4a3a30;
+
+  --foreground: #f3ebe1;
+  --foreground-muted: #c3b2a2;
+  --foreground-subtle: #9d8a79;
+
+  --accent: var(--gold-400);
+  --accent-foreground: #1d1512;
+  --accent-soft: #33281c;
+
+  --primary: var(--cream-100);
+  --primary-foreground: #1d1512;
+
+  --coffee-liquid: #8a5c34;
+  --coffee-crema: #d9a76a;
+  --cup-outline: #b3a294;
+
+  --ring: var(--gold-400);
+  --danger: #f0a0a0;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-subtle: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-thai-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-thai-serif), var(--font-thai-sans), ui-serif, Georgia, serif;
+}
+
+/* Reader font-size control: four honest steps, applied to body copy only. */
+:root[data-font-size="sm"] { --reading-scale: 0.94; }
+:root[data-font-size="md"] { --reading-scale: 1; }
+:root[data-font-size="lg"] { --reading-scale: 1.13; }
+:root[data-font-size="xl"] { --reading-scale: 1.26; }
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    /* Thai needs more room between lines than Latin. */
+    line-height: 1.85;
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  h1, h2, h3, h4 {
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--foreground);
+  }
+}
+
+@layer components {
+  /* Body copy inside the reader responds to the font-size control. */
+  .reading-text {
+    font-size: calc(1.0625rem * var(--reading-scale));
+    line-height: 1.95;
+  }
+
+  .reading-lead {
+    font-size: calc(1.1875rem * var(--reading-scale));
+    line-height: 1.85;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    color: var(--foreground);
+    border: 1px solid var(--border-strong);
+    border-radius: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
