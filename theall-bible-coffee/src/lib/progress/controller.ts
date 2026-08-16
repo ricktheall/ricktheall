@@ -1,7 +1,12 @@
+import { findBook, parseChapterKey } from "@/lib/books/canon";
+
+import { withChapterRead } from "./book-logic";
 import { mergeReadingPercent, withChapterCompleted } from "./logic";
 import {
   createInitialState,
+  emptyBookProgress,
   emptyChapterProgress,
+  type BookProgress,
   type ChapterProgress,
   type Feedback,
   type FontSizePreference,
@@ -106,8 +111,40 @@ export class ProgressController {
     this.updateChapter(chapterKey, (previous) => ({ ...previous, checkpointPassed: true }));
   }
 
+  book(bookId: string): BookProgress {
+    return this.getSnapshot().books[bookId] ?? emptyBookProgress;
+  }
+
+  /**
+   * Finishing a chapter also advances the book it belongs to, so the 66-cup
+   * journey stays in step with the reader without any call site changing.
+   */
   completeChapter(chapterKey: string): void {
     this.updateChapter(chapterKey, withChapterCompleted);
+
+    const parsed = parseChapterKey(chapterKey);
+    if (parsed === null) return;
+    const book = findBook(parsed.bookId);
+    if (book === undefined) return;
+
+    this.update((previous) => {
+      const current = previous.books[book.id] ?? emptyBookProgress;
+      const next = withChapterRead(book, current, parsed.chapterNumber, new Date().toISOString());
+      if (next === current) return previous;
+      return { ...previous, books: { ...previous.books, [book.id]: next } };
+    });
+  }
+
+  /** The completion moment is shown once per book, and never again. */
+  markBookCelebrated(bookId: string): void {
+    this.update((previous) => {
+      const current = previous.books[bookId] ?? emptyBookProgress;
+      if (current.celebrated) return previous;
+      return {
+        ...previous,
+        books: { ...previous.books, [bookId]: { ...current, celebrated: true } },
+      };
+    });
   }
 
   setTheme(theme: ThemePreference): void {

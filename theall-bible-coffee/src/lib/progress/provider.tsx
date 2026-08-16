@@ -13,6 +13,7 @@ import {
 
 import { ProgressController } from "./controller";
 import type {
+  BookProgress,
   ChapterProgress,
   Feedback,
   FontSizePreference,
@@ -26,12 +27,15 @@ interface ProgressContextValue {
   hydrated: boolean;
   state: ProgressState;
   chapter(chapterKey: string): ChapterProgress;
+  /** Book-level progress for the 66-cup journey. */
+  book(bookId: string): BookProgress;
   /** Progress as it was when the page opened; does not move while reading. */
   entryChapter(chapterKey: string): ChapterProgress;
   reportReadingPercent(chapterKey: string, observed: number): void;
   reportSection(chapterKey: string, sectionId: string): void;
   setCheckpointPassed(chapterKey: string): void;
   completeChapter(chapterKey: string): void;
+  markBookCelebrated(bookId: string): void;
   setTheme(theme: ThemePreference): void;
   setFontSize(fontSize: FontSizePreference): void;
   saveFeedback(feedback: Feedback): void;
@@ -94,6 +98,7 @@ export function ProgressProvider({
   }, [theme, fontSize]);
 
   const chapter = useCallback((chapterKey: string) => controller.chapter(chapterKey), [controller]);
+  const book = useCallback((bookId: string) => controller.book(bookId), [controller]);
   const entryChapter = useCallback(
     (chapterKey: string) => controller.entryChapter(chapterKey),
     [controller],
@@ -104,18 +109,20 @@ export function ProgressProvider({
       hydrated,
       state,
       chapter,
+      book,
       entryChapter,
       reportReadingPercent: (chapterKey, observed) =>
         controller.reportReadingPercent(chapterKey, observed),
       reportSection: (chapterKey, sectionId) => controller.reportSection(chapterKey, sectionId),
       setCheckpointPassed: (chapterKey) => controller.setCheckpointPassed(chapterKey),
       completeChapter: (chapterKey) => controller.completeChapter(chapterKey),
+      markBookCelebrated: (bookId) => controller.markBookCelebrated(bookId),
       setTheme: (nextTheme) => controller.setTheme(nextTheme),
       setFontSize: (nextFontSize) => controller.setFontSize(nextFontSize),
       saveFeedback: (feedback) => controller.saveFeedback(feedback),
       resetAll: () => controller.resetAll(),
     }),
-    [chapter, controller, entryChapter, hydrated, state],
+    [book, chapter, controller, entryChapter, hydrated, state],
   );
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;

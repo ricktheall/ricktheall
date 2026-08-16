@@ -19,6 +19,20 @@ export const chapterProgressSchema = z.object({
   chapterCompleted: z.boolean().catch(false),
 });
 
+/**
+ * Book-level progress for the 66-cup journey.
+ *
+ * Chapter completion remains the single source of truth: the percentage and the
+ * "finished" state are always derived from `completedChapters`, never stored.
+ */
+export const bookProgressSchema = z.object({
+  completedChapters: z.array(z.number().int().positive()).catch([]),
+  startedAt: z.string().nullable().catch(null),
+  completedAt: z.string().nullable().catch(null),
+  /** The completion moment is shown once, and stays shown-once after an undo. */
+  celebrated: z.boolean().catch(false),
+});
+
 export const feedbackSchema = z.object({
   understanding: z.number().int().min(1).max(5).nullable(),
   returnIntent: returnIntentSchema.nullable(),
@@ -29,6 +43,12 @@ export const feedbackSchema = z.object({
 export const progressStateSchema = z.object({
   version: z.literal(1),
   chapters: z.record(z.string(), chapterProgressSchema),
+  /**
+   * Added after the first readers already had saved state, so it must tolerate
+   * being absent: `.default` covers the missing key, `.catch` covers a damaged
+   * one. Neither may ever discard the `chapters` a reader has already earned.
+   */
+  books: z.record(z.string(), bookProgressSchema).default({}).catch({}),
   preferences: z.object({
     theme: themePreferenceSchema.catch("system"),
     fontSize: fontSizePreferenceSchema.catch("md"),
@@ -40,6 +60,7 @@ export type ThemePreference = z.infer<typeof themePreferenceSchema>;
 export type FontSizePreference = z.infer<typeof fontSizePreferenceSchema>;
 export type ReturnIntent = z.infer<typeof returnIntentSchema>;
 export type ChapterProgress = z.infer<typeof chapterProgressSchema>;
+export type BookProgress = z.infer<typeof bookProgressSchema>;
 export type Feedback = z.infer<typeof feedbackSchema>;
 export type ProgressState = z.infer<typeof progressStateSchema>;
 
@@ -51,10 +72,18 @@ export const emptyChapterProgress: ChapterProgress = {
   chapterCompleted: false,
 };
 
+export const emptyBookProgress: BookProgress = {
+  completedChapters: [],
+  startedAt: null,
+  completedAt: null,
+  celebrated: false,
+};
+
 export function createInitialState(): ProgressState {
   return {
     version: 1,
     chapters: {},
+    books: {},
     preferences: { theme: "system", fontSize: "md" },
     feedback: null,
   };

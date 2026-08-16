@@ -12,17 +12,32 @@ export default function ThaiLayout({ children }: { children: ReactNode }) {
       </a>
       <div className="flex min-h-dvh flex-col">
         <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--background)_96%,transparent)] backdrop-blur">
-          <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
+          {/* Wraps to two rows on narrow phones so the wordmark never breaks. */}
+          <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3">
             <Link
               href="/th"
-              className="flex items-baseline gap-2 rounded-md text-[0.95rem] font-semibold tracking-tight"
+              className="flex items-baseline gap-2 whitespace-nowrap rounded-md text-[0.95rem] font-semibold tracking-tight"
             >
               <span>TheAll Bible Coffee</span>
               <span className="rounded-full border border-[var(--border-strong)] px-2 py-0.5 text-[0.65rem] font-medium text-[var(--foreground-subtle)]">
                 Technical Beta
               </span>
             </Link>
-            <BetaMenu />
+            <div className="ml-auto flex items-center gap-1 whitespace-nowrap">
+              <Link
+                href="/th/library"
+                className="rounded-full px-3 py-2 text-[0.8rem] font-medium text-[var(--foreground-muted)] hover:text-[var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+              >
+                66 แก้ว
+              </Link>
+              <Link
+                href="/th/journey"
+                className="rounded-full px-3 py-2 text-[0.8rem] font-medium text-[var(--foreground-muted)] hover:text-[var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+              >
+                การเดินทางของฉัน
+              </Link>
+              <BetaMenu />
+            </div>
           </div>
         </header>
 
