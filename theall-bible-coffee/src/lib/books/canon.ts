@@ -8,6 +8,8 @@
  * already finished by a reader working from their own Bible.
  */
 
+import type { PrimaryGenre } from "@/lib/content/genre";
+
 export type Testament = "old" | "new";
 export type LessonStatus = "ready" | "coming-soon";
 
@@ -21,7 +23,65 @@ export interface BibleBook {
   readonly testament: Testament;
   readonly chapterCount: number;
   readonly lessonStatus: LessonStatus;
+  /**
+   * The book's dominant literary form, used as the default reading model.
+   * A movement or chapter may override it — see `continuityMode`. The label is
+   * a default, not a claim that the whole book is one genre.
+   */
+  readonly primaryGenre: PrimaryGenre;
 }
+
+/**
+ * Genre by book. Books not listed default to narrative, which is asserted
+ * against the canon in the tests so a new book can never silently inherit it.
+ */
+const GENRE_BY_BOOK: Readonly<Record<string, PrimaryGenre>> = {
+  leviticus: "law",
+  deuteronomy: "law",
+  job: "wisdom",
+  psalms: "poetry",
+  proverbs: "wisdom",
+  ecclesiastes: "wisdom",
+  "song-of-songs": "poetry",
+  lamentations: "poetry",
+  isaiah: "prophecy",
+  jeremiah: "prophecy",
+  ezekiel: "prophecy",
+  daniel: "prophecy",
+  hosea: "prophecy",
+  joel: "prophecy",
+  amos: "prophecy",
+  obadiah: "prophecy",
+  micah: "prophecy",
+  nahum: "prophecy",
+  habakkuk: "prophecy",
+  zephaniah: "prophecy",
+  haggai: "prophecy",
+  zechariah: "prophecy",
+  malachi: "prophecy",
+  romans: "argument",
+  "1-corinthians": "argument",
+  "2-corinthians": "argument",
+  galatians: "argument",
+  ephesians: "argument",
+  philippians: "argument",
+  colossians: "argument",
+  "1-thessalonians": "argument",
+  "2-thessalonians": "argument",
+  "1-timothy": "argument",
+  "2-timothy": "argument",
+  titus: "argument",
+  philemon: "argument",
+  hebrews: "argument",
+  james: "argument",
+  "1-peter": "argument",
+  "2-peter": "argument",
+  "1-john": "argument",
+  "2-john": "argument",
+  "3-john": "argument",
+  jude: "argument",
+  revelation: "apocalyptic",
+};
 
 /**
  * Books with at least one prepared chapter. Verified against
@@ -114,6 +174,7 @@ function toBook(row: Row, testament: Testament): BibleBook {
     testament,
     chapterCount,
     lessonStatus: BOOKS_WITH_LESSONS.has(id) ? "ready" : "coming-soon",
+    primaryGenre: GENRE_BY_BOOK[id] ?? "narrative",
   };
 }
 

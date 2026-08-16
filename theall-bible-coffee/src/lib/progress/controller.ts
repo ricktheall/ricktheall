@@ -1,7 +1,7 @@
 import { findBook, parseChapterKey } from "@/lib/books/canon";
 
-import { withChapterRead } from "./book-logic";
-import { mergeReadingPercent, withChapterCompleted } from "./logic";
+import { withChapterRead as withBookChapterRead } from "./book-logic";
+import { mergeReadingPercent, withChapterCompleted, withChapterMarkedRead } from "./logic";
 import {
   createInitialState,
   emptyBookProgress,
@@ -90,7 +90,8 @@ export class ProgressController {
         next.lastSectionId === current.lastSectionId &&
         next.checkpointPassed === current.checkpointPassed &&
         next.reflectionCompleted === current.reflectionCompleted &&
-        next.chapterCompleted === current.chapterCompleted;
+        next.chapterCompleted === current.chapterCompleted &&
+        next.chapterRead === current.chapterRead;
       if (unchanged) return previous;
       return { ...previous, chapters: { ...previous.chapters, [chapterKey]: next } };
     });
@@ -122,6 +123,10 @@ export class ProgressController {
   completeChapter(chapterKey: string): void {
     this.updateChapter(chapterKey, withChapterCompleted);
 
+    this.advanceBook(chapterKey);
+  }
+
+  private advanceBook(chapterKey: string): void {
     const parsed = parseChapterKey(chapterKey);
     if (parsed === null) return;
     const book = findBook(parsed.bookId);
@@ -129,10 +134,52 @@ export class ProgressController {
 
     this.update((previous) => {
       const current = previous.books[book.id] ?? emptyBookProgress;
-      const next = withChapterRead(book, current, parsed.chapterNumber, new Date().toISOString());
+      const next = withBookChapterRead(book, current, parsed.chapterNumber, new Date().toISOString());
       if (next === current) return previous;
       return { ...previous, books: { ...previous.books, [book.id]: next } };
     });
+  }
+
+  /**
+   * The reader's own "I have read this chapter" — the action that advances the
+   * 66-cup journey. It requires no checkpoint and no reflection.
+   */
+  markChapterRead(chapterKey: string): void {
+    this.updateChapter(chapterKey, withChapterMarkedRead);
+    this.advanceBook(chapterKey);
+  }
+
+  /** Records a finished movement, so it can be celebrated exactly once. */
+  markMovementCompleted(bookId: string, movementId: string): void {
+    this.update((previous) => {
+      const current = previous.books[bookId] ?? emptyBookProgress;
+      if (current.completedMovements.includes(movementId)) return previous;
+      return {
+        ...previous,
+        books: {
+          ...previous.books,
+          [bookId]: {
+            ...current,
+            completedMovements: [...current.completedMovements, movementId],
+          },
+        },
+      };
+    });
+  }
+
+  /**
+   * Records that the reader asked for something not yet published. The request
+   * is stored; availability is never faked.
+   */
+  recordIntent(intentId: string): void {
+    this.update((previous) => {
+      if (previous.intents[intentId] !== undefined) return previous;
+      return { ...previous, intents: { ...previous.intents, [intentId]: new Date().toISOString() } };
+    });
+  }
+
+  hasIntent(intentId: string): boolean {
+    return this.getSnapshot().intents[intentId] !== undefined;
   }
 
   /** The completion moment is shown once per book, and never again. */

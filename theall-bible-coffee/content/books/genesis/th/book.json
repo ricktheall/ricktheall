@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "locale": "th",
+  "bookId": "genesis",
+  "primaryGenre": "narrative",
+  "overview": "ปฐมกาลเล่าจุดเริ่มต้นของทุกอย่าง — โลกที่พระเจ้าทรงสร้างให้ดี ความสัมพันธ์ที่แตกหัก และการที่พระเจ้าไม่ทรงทิ้งโลกนี้ไป ครึ่งแรกเล่าเรื่องของทั้งโลก ครึ่งหลังแคบลงมาที่ครอบครัวเดียว",
+  "whyItMatters": "ถ้าไม่รู้ว่าเรื่องเริ่มอย่างไร เรื่องที่เหลือทั้งเล่มจะอ่านไม่รู้เรื่อง ปฐมกาลวางคำถามที่พระคัมภีร์ทั้งเล่มพยายามตอบ",
+  "movements": [
+    {
+      "id": "genesis-movement-1",
+      "order": 1,
+      "title": "จุดเริ่มต้นของเรื่องใหญ่",
+      "subtitle": "จากการทรงสร้าง ถึงบาเบล",
+      "fromChapter": 1,
+      "toChapter": 11,
+      "status": "planned",
+      "units": [
+        {
+          "id": "genesis-creation",
+          "title": "การทรงสร้าง",
+          "fromChapter": 1,
+          "toChapter": 2
+        },
+        {
+          "id": "genesis-rebellion",
+          "title": "การกบฏ และการลุกลามของบาป",
+          "fromChapter": 3,
+          "toChapter": 5
+        },
+        {
+          "id": "genesis-flood",
+          "title": "น้ำท่วม และพันธสัญญา",
+          "fromChapter": 6,
+          "toChapter": 9
+        },
+        {
+          "id": "genesis-nations",
+          "title": "ประชาชาติ และบาเบล",
+          "fromChapter": 10,
+          "toChapter": 11
+        }
+      ]
+    },
+    {
+      "id": "genesis-movement-2",
+      "order": 2,
+      "title": "อับราฮัม",
+      "subtitle": "จากประชาชาติทั้งโลก มาสู่ครอบครัวเดียว",
+      "fromChapter": 12,
+      "toChapter": 25,
+      "status": "planned",
+      "units": []
+    },
+    {
+      "id": "genesis-movement-3",
+      "order": 3,
+      "title": "อิสอัค และยาโคบ",
+      "fromChapter": 26,
+      "toChapter": 36,
+      "status": "planned",
+      "units": []
+    },
+    {
+      "id": "genesis-movement-4",
+      "order": 4,
+      "title": "โยเซฟ",
+      "subtitle": "ครอบครัวหนึ่งในอียิปต์",
+      "fromChapter": 37,
+      "toChapter": 50,
+      "status": "planned",
+      "units": []
+    }
+  ],
+  "sources": [
+    {
+      "id": "movement-structure",
+      "label": "โครงสี่ movements ของปฐมกาล",
+      "note": "การแบ่งปฐมกาลเป็นสี่ movements เป็นการวิเคราะห์เชิงวรรณกรรมที่ BibleProject นำเสนอ และเป็นความรู้ร่วมทางวิชาการเรื่องโครงสร้างของปฐมกาล บันทึกไว้เป็นหนี้เชิงโครงสร้าง ไม่ใช่การอ้างคำพูด"
+    }
+  ]
+}

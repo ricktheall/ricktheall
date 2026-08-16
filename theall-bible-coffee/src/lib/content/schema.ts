@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { continuitySchema } from "./genre";
+
 /**
  * Minimal content schema for the TheAll Bible Coffee validation MVP.
  *
@@ -139,6 +141,71 @@ export const completionSchema = z.object({
   invitation: nonEmpty,
 });
 
+/**
+ * The 60-second orientation shown immediately after Scripture.
+ *
+ * Four questions, not five: the section's name is a promise to the reader, and
+ * five answers of one to two sentences no longer fits in sixty seconds.
+ * "What do we see about humanity" belongs in Deep Brew.
+ */
+export const sixtySecondSummarySchema = z.object({
+  whatHappened: nonEmpty,
+  bigIdea: nonEmpty,
+  whatWeSeeAboutGod: nonEmpty,
+  wholeBibleDirection: nonEmpty,
+});
+
+/**
+ * One lightweight response per ordinary chapter — ten to thirty seconds.
+ * Three questions every chapter turns a coffee rhythm into homework.
+ */
+export const microResponseSchema = z.object({
+  prompt: nonEmpty,
+  options: z
+    .array(z.object({ id: stableId, label: nonEmpty }))
+    .min(2)
+    .max(6),
+  allowNote: z.boolean().default(false),
+});
+
+/**
+ * Scripture layer. Kept structurally apart from Bible Coffee's editorial words
+ * so rights, attribution and licence travel with the text they belong to — and
+ * so a future translation swap never touches a lesson.
+ *
+ * `text` may only be present when `rightsStatus` is "licensed", and licensed
+ * text must carry its translation id, attribution and licence.
+ */
+export const scriptureLayerSchema = z
+  .object({
+    reference: nonEmpty,
+    translationId: z.string().nullable(),
+    text: z.string().nullable(),
+    rightsStatus: z.enum(["reference-only", "licensed"]),
+    attribution: z.string().nullable(),
+    license: z.string().nullable(),
+    copyrightNotice: z.string().nullable(),
+  })
+  .superRefine((scripture, ctx) => {
+    if (scripture.rightsStatus === "reference-only" && scripture.text !== null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "reference-only scripture must not carry text",
+      });
+    }
+    if (scripture.rightsStatus === "licensed") {
+      const missing = (["text", "translationId", "attribution", "license"] as const).filter(
+        (key) => scripture[key] === null,
+      );
+      if (missing.length > 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: `licensed scripture requires ${missing.join(", ")}`,
+        });
+      }
+    }
+  });
+
 export const chapterSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -161,6 +228,18 @@ export const chapterSchema = z
     reflection: reflectionSchema,
     completion: completionSchema,
     sources: z.array(sourceSchema).default([]),
+
+    /* ── Editorial layer (all optional so existing chapters stay valid) ──
+     * These are Bible Coffee's own words. They are deliberately kept apart
+     * from `scripture` below, which carries someone else's licensed text. */
+    contentVersion: z.number().int().positive().default(1),
+    chapterOrientation: z.string().trim().optional(),
+    sixtySecondSummary: sixtySecondSummarySchema.optional(),
+    continuity: continuitySchema.optional(),
+    response: microResponseSchema.optional(),
+
+    /** Scripture layer — rights-bearing text, never merged with the editorial layer. */
+    scripture: scriptureLayerSchema.optional(),
   })
   .superRefine((chapter, ctx) => {
     const sectionIds = new Set<string>();

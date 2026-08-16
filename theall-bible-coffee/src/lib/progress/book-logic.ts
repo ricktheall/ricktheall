@@ -62,6 +62,7 @@ export function withChapterRead(
 
   return {
     completedChapters,
+    completedMovements: previous.completedMovements,
     startedAt: previous.startedAt ?? now,
     completedAt: finished ? now : previous.completedAt,
     celebrated: previous.celebrated,

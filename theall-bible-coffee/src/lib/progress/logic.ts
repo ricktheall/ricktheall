@@ -31,6 +31,26 @@ export function isChapterComplete(progress: ChapterProgress): boolean {
 }
 
 /**
+ * Whether the reader has said they read this chapter.
+ *
+ * This is deliberately independent of {@link isChapterComplete}: reading is a
+ * declaration, not a course to pass. The checkpoint and the reflection are
+ * optional, and a reader who skips both has still genuinely read the chapter.
+ *
+ * Readers whose state predates `chapterRead` fall back to the old completion
+ * flag, so nobody's finished chapter is reset to unread by this change.
+ */
+export function isChapterRead(progress: ChapterProgress): boolean {
+  return progress.chapterRead ?? progress.chapterCompleted;
+}
+
+/** Applies the explicit "ฉันอ่านบทนี้จบแล้ว" action. Nothing else is implied. */
+export function withChapterMarkedRead(progress: ChapterProgress): ChapterProgress {
+  if (progress.chapterRead === true) return progress;
+  return { ...progress, chapterRead: true };
+}
+
+/**
  * Applies a completed chapter: reading is topped up to 90 so the cup reads a
  * true 100%, and the completion flags are set.
  */

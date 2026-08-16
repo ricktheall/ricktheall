@@ -159,6 +159,41 @@ async function validateFile(relativePath: string): Promise<string[]> {
  * honest: a book may never be advertised as ready without content, and content
  * may never sit unpublished because someone forgot the canon entry.
  */
+/** Book maps are content too, and must fail the gate when malformed. */
+async function validateBookMaps(): Promise<string[]> {
+  const { bookContentSchema } = await import("../src/lib/content/book-schema");
+  const errors: string[] = [];
+  let books: string[] = [];
+  try {
+    books = await readdir(CONTENT_ROOT);
+  } catch {
+    return errors;
+  }
+  let checked = 0;
+  for (const bookId of books.sort()) {
+    const file = path.join(CONTENT_ROOT, bookId, "th", "book.json");
+    let raw: string;
+    try {
+      raw = await readFile(file, "utf8");
+    } catch {
+      continue;
+    }
+    checked += 1;
+    const parsed = bookContentSchema.safeParse(JSON.parse(raw) as unknown);
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        errors.push(`${file}: ${issue.path.join(".")}: ${issue.message}`);
+      }
+      continue;
+    }
+    if (parsed.data.bookId !== bookId) {
+      errors.push(`${file}: bookId "${parsed.data.bookId}" does not match its directory`);
+    }
+  }
+  if (checked > 0) console.log(`Checked ${checked} book map(s).`);
+  return errors;
+}
+
 async function validateReadyBooks(bookIds: readonly string[]): Promise<string[]> {
   const { BIBLE_BOOKS } = await import("../src/lib/books/canon");
 
@@ -187,6 +222,7 @@ async function main(): Promise<void> {
   for (const file of files) {
     errors.push(...(await validateFile(file)));
   }
+  errors.push(...(await validateBookMaps()));
   errors.push(...(await validateReadyBooks(bookIds)));
   console.log(`\nChecked ${files.length} chapter file(s) across ${bookIds.length} book(s).`);
 

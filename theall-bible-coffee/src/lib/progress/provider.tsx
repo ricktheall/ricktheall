@@ -36,6 +36,12 @@ interface ProgressContextValue {
   setCheckpointPassed(chapterKey: string): void;
   completeChapter(chapterKey: string): void;
   markBookCelebrated(bookId: string): void;
+  /** "I have read this chapter" — independent of checkpoint and reflection. */
+  markChapterRead(chapterKey: string): void;
+  markMovementCompleted(bookId: string, movementId: string): void;
+  /** Records a request for content that does not exist yet. */
+  recordIntent(intentId: string): void;
+  hasIntent(intentId: string): boolean;
   setTheme(theme: ThemePreference): void;
   setFontSize(fontSize: FontSizePreference): void;
   saveFeedback(feedback: Feedback): void;
@@ -117,6 +123,10 @@ export function ProgressProvider({
       setCheckpointPassed: (chapterKey) => controller.setCheckpointPassed(chapterKey),
       completeChapter: (chapterKey) => controller.completeChapter(chapterKey),
       markBookCelebrated: (bookId) => controller.markBookCelebrated(bookId),
+      markChapterRead: (chapterKey) => controller.markChapterRead(chapterKey),
+      markMovementCompleted: (bookId, movementId) => controller.markMovementCompleted(bookId, movementId),
+      recordIntent: (intentId) => controller.recordIntent(intentId),
+      hasIntent: (intentId) => controller.hasIntent(intentId),
       setTheme: (nextTheme) => controller.setTheme(nextTheme),
       setFontSize: (nextFontSize) => controller.setFontSize(nextFontSize),
       saveFeedback: (feedback) => controller.saveFeedback(feedback),

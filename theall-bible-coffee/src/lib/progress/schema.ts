@@ -17,6 +17,16 @@ export const chapterProgressSchema = z.object({
   checkpointPassed: z.boolean().catch(false),
   reflectionCompleted: z.boolean().catch(false),
   chapterCompleted: z.boolean().catch(false),
+  /**
+   * "I have read this chapter" — the reader's own declaration, independent of
+   * the checkpoint and the reflection. Both of those are optional; reading is
+   * not a course to pass.
+   *
+   * Left optional rather than defaulted so state written before this field
+   * existed is not misread as unread — see `isChapterRead`, which falls back to
+   * the old `chapterCompleted` flag.
+   */
+  chapterRead: z.boolean().optional(),
 });
 
 /**
@@ -27,6 +37,8 @@ export const chapterProgressSchema = z.object({
  */
 export const bookProgressSchema = z.object({
   completedChapters: z.array(z.number().int().positive()).catch([]),
+  /** Movement ids the reader has walked all the way through. */
+  completedMovements: z.array(z.string()).default([]).catch([]),
   startedAt: z.string().nullable().catch(null),
   completedAt: z.string().nullable().catch(null),
   /** The completion moment is shown once, and stays shown-once after an undo. */
@@ -49,6 +61,12 @@ export const progressStateSchema = z.object({
    * one. Neither may ever discard the `chapters` a reader has already earned.
    */
   books: z.record(z.string(), bookProgressSchema).default({}).catch({}),
+  /**
+   * Things the reader has asked for that do not exist yet — currently only
+   * "I want to read Abraham next". Recording the request is honest; pretending
+   * the content exists is not.
+   */
+  intents: z.record(z.string(), z.string()).default({}).catch({}),
   preferences: z.object({
     theme: themePreferenceSchema.catch("system"),
     fontSize: fontSizePreferenceSchema.catch("md"),
@@ -74,6 +92,7 @@ export const emptyChapterProgress: ChapterProgress = {
 
 export const emptyBookProgress: BookProgress = {
   completedChapters: [],
+  completedMovements: [],
   startedAt: null,
   completedAt: null,
   celebrated: false,
@@ -84,6 +103,7 @@ export function createInitialState(): ProgressState {
     version: 1,
     chapters: {},
     books: {},
+    intents: {},
     preferences: { theme: "system", fontSize: "md" },
     feedback: null,
   };

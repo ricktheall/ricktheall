@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { HomeContinueCard } from "@/components/home-continue-card";
+import { ResumeCard } from "@/components/resume-card";
 import { EPHESIANS } from "@/lib/content/book";
 import { loadEphesians1 } from "@/lib/content/loader";
 
@@ -16,6 +17,9 @@ export default async function ThaiHomePage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-10 sm:pt-16">
+      {/* Returning readers see their cup first; new visitors see the hero. */}
+      <ResumeCard />
+
       <section aria-labelledby="promise">
         <p className="text-sm font-medium tracking-wide text-[var(--accent)]">
           อ่านพระคัมภีร์ช้า ๆ วันละแก้ว
