@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th" data-lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0907" />
+  <meta name="color-scheme" content="dark" />
+  <title>TheAll Bible Coffee · 66 แก้ว · 66 เล่ม · เรื่องเดียว</title>
+  <meta name="description" content="TheAll Bible Coffee — 1 Coffee. 1 Bible. 1 Day. พระคัมภีร์ 66 เล่ม คือกาแฟ 66 แก้ว ติดตามการเดินทางของคุณผ่านพระคำทั้งเล่ม" />
+  <meta property="og:title" content="TheAll Bible Coffee" />
+  <meta property="og:description" content="1 Coffee. 1 Bible. 1 Day. — 66 แก้ว · การเดินทางหนึ่งชีวิต" />
+  <meta property="og:type" content="website" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/cup.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/cup-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" id="skipLink" href="#app">ข้ามไปยังเนื้อหา</a>
+
+  <header class="topbar">
+    <a class="topbar__brand" href="#/">
+      <span class="topbar__mark" aria-hidden="true"></span>
+      <span id="brandName">TheAll Bible Coffee</span>
+    </a>
+    <button type="button" class="lang-btn" id="langBtn" aria-label="Switch language">EN</button>
+  </header>
+
+  <nav class="tabbar" id="tabbar" aria-label="หลัก"></nav>
+
+  <main class="shell" id="app" tabindex="-1"></main>
+
+  <script src="books.js"></script>
+  <script src="lessons.js"></script>
+  <script src="i18n.js"></script>
+  <script src="cups.js"></script>
+  <script src="progress.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' })
+          .catch(function () { /* ออฟไลน์ไม่พร้อมก็ยังใช้งานได้ตามปกติ */ });
+      });
+    }
+  </script>
+</body>
+</html>
