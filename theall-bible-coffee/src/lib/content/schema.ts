@@ -97,6 +97,12 @@ export const sectionSchema = z.object({
     "metaphor",
     "connections",
     "application",
+    // Kinds introduced by the Scripture-first model
+    "research",
+    "teaching",
+    "christ",
+    "eternal",
+    "share",
   ]),
   blocks: z.array(blockSchema).min(1),
   sourceIds: z.array(stableId).default([]),
@@ -224,9 +230,14 @@ export const chapterSchema = z
       attribution: z.string().nullable(),
     }),
     sections: z.array(sectionSchema).min(1),
-    checkpoint: checkpointSchema,
-    reflection: reflectionSchema,
-    completion: completionSchema,
+    /*
+     * Optional since the checkpoint moved to the end of a movement rather than
+     * the end of every chapter. Reading a chapter is a declaration, not a
+     * course to pass, so an ordinary chapter carries none of these three.
+     */
+    checkpoint: checkpointSchema.nullable().default(null),
+    reflection: reflectionSchema.nullable().default(null),
+    completion: completionSchema.nullable().default(null),
     sources: z.array(sourceSchema).default([]),
 
     /* ── Editorial layer (all optional so existing chapters stay valid) ──
@@ -264,17 +275,20 @@ export const chapterSchema = z
       }
     }
 
-    const optionIds = new Set(chapter.checkpoint.options.map((option) => option.id));
-    if (optionIds.size !== chapter.checkpoint.options.length) {
-      ctx.addIssue({ code: "custom", message: "Checkpoint option ids must be unique" });
-    }
-    for (const correctId of chapter.checkpoint.correctOptionIds) {
-      if (!optionIds.has(correctId)) {
-        ctx.addIssue({ code: "custom", message: `correctOptionIds references unknown option "${correctId}"` });
+    // Checkpoints now belong to the end of a movement, so most chapters have none.
+    if (chapter.checkpoint !== null) {
+      const optionIds = new Set(chapter.checkpoint.options.map((option) => option.id));
+      if (optionIds.size !== chapter.checkpoint.options.length) {
+        ctx.addIssue({ code: "custom", message: "Checkpoint option ids must be unique" });
       }
-    }
-    if (new Set(chapter.checkpoint.correctOptionIds).size !== 3) {
-      ctx.addIssue({ code: "custom", message: "correctOptionIds must contain three distinct ids" });
+      for (const correctId of chapter.checkpoint.correctOptionIds) {
+        if (!optionIds.has(correctId)) {
+          ctx.addIssue({ code: "custom", message: `correctOptionIds references unknown option "${correctId}"` });
+        }
+      }
+      if (new Set(chapter.checkpoint.correctOptionIds).size !== 3) {
+        ctx.addIssue({ code: "custom", message: "correctOptionIds must contain three distinct ids" });
+      }
     }
 
     if (chapter.mainVerse.rightsStatus === "reference-only") {

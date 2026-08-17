@@ -44,7 +44,7 @@ describe("the canon", () => {
 
   it("marks only books that actually have prepared content as ready", () => {
     const ready = BIBLE_BOOKS.filter((b) => b.lessonStatus === "ready").map((b) => b.id);
-    expect(ready).toEqual(["ephesians"]);
+    expect(ready).toEqual(["genesis", "ephesians"]);
   });
 });
 

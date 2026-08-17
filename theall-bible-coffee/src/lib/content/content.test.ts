@@ -47,6 +47,7 @@ describe("Ephesians 1 content", () => {
       "connections",
       "application",
     ]);
+    if (parsed.data.checkpoint === null || parsed.data.completion === null) throw new Error("expected a lesson chapter");
     expect(parsed.data.checkpoint.options.length).toBeGreaterThanOrEqual(6);
     expect(parsed.data.completion.centralTruth.length).toBeGreaterThan(0);
   });
@@ -62,6 +63,7 @@ describe("Ephesians 1 content", () => {
     if (!parsed.success) throw parsed.error;
     const chapter = parsed.data;
     const text = visibleText(chapter);
+    if (chapter.checkpoint === null) throw new Error("Ephesians 1 should still carry its checkpoint");
     const correct = new Set(chapter.checkpoint.correctOptionIds);
 
     expect(correct.size).toBe(3);

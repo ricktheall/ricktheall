@@ -87,7 +87,7 @@ const GENRE_BY_BOOK: Readonly<Record<string, PrimaryGenre>> = {
  * Books with at least one prepared chapter. Verified against
  * `content/books/**` — do not add a book here before its content exists.
  */
-const BOOKS_WITH_LESSONS = new Set<string>(["ephesians"]);
+const BOOKS_WITH_LESSONS = new Set<string>(["ephesians", "genesis"]);
 
 type Row = readonly [order: number, code: string, th: string, en: string, chapters: number, id: string];
 

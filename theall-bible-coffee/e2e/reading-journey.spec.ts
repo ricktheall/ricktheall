@@ -11,8 +11,13 @@ const chapter = JSON.parse(
   readFileSync(path.join(here, "../content/books/ephesians/th/chapter-01.json"), "utf8"),
 ) as Chapter;
 
-const correctWords = chapter.checkpoint.correctOptionIds.map((id) => {
-  const option = chapter.checkpoint.options.find((item) => item.id === id);
+if (chapter.checkpoint === null || chapter.completion === null) {
+  throw new Error("Ephesians 1 must keep its checkpoint and completion");
+}
+const { checkpoint, completion } = chapter;
+
+const correctWords = checkpoint.correctOptionIds.map((id) => {
+  const option = checkpoint.options.find((item) => item.id === id);
   if (!option) throw new Error(`missing checkpoint option ${id}`);
   return option.word;
 });
@@ -53,14 +58,14 @@ test("a reader can go from the homepage to a copied piece of feedback", async ({
     await page.getByRole("checkbox", { name: word }).check();
   }
   await page.getByRole("button", { name: "ตรวจคำตอบ" }).click();
-  await expect(page.getByText(chapter.checkpoint.successMessage).first()).toBeVisible();
+  await expect(page.getByText(checkpoint.successMessage).first()).toBeVisible();
 
   // 7. Reflection
   await page.getByRole("textbox").fill("ตอนนี้กำลังพยายามพิสูจน์ตัวเองเรื่องงาน");
   await page.getByRole("button", { name: "ส่งคำตอบและอ่านจบบทนี้" }).click();
 
   // 8. Completion at 100%
-  await expect(page.getByRole("heading", { name: chapter.completion.title })).toBeVisible();
+  await expect(page.getByRole("heading", { name: completion.title })).toBeVisible();
   await expect(page.getByText("100%").first()).toBeVisible();
 
   // 9. Validation feedback
@@ -80,7 +85,7 @@ test("a reader can go from the homepage to a copied piece of feedback", async ({
 
   // Progress survives a reload on the same device.
   await page.reload();
-  await expect(page.getByRole("heading", { name: chapter.completion.title })).toBeVisible();
+  await expect(page.getByRole("heading", { name: completion.title })).toBeVisible();
   await expect(page.getByText("100%").first()).toBeVisible();
 
   expect(consoleErrors).toEqual([]);

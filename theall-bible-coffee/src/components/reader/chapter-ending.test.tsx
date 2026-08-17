@@ -9,16 +9,21 @@ import { ProgressProvider } from "@/lib/progress/provider";
 
 const chapter = chapterSchema.parse(chapterJson);
 
+const { checkpoint, completion } = chapter;
+if (checkpoint === null || completion === null || chapter.reflection === null) {
+  throw new Error("The Ephesians 1 fixture must keep its checkpoint, reflection and completion");
+}
+
 const wordFor = (optionId: string): string => {
-  const option = chapter.checkpoint.options.find((item) => item.id === optionId);
+  const option = checkpoint.options.find((item) => item.id === optionId);
   if (!option) throw new Error(`missing option ${optionId}`);
   return option.word;
 };
 
-const correctWords = chapter.checkpoint.correctOptionIds.map(wordFor);
+const correctWords = checkpoint.correctOptionIds.map(wordFor);
 const distractorWord = wordFor(
-  chapter.checkpoint.options.find(
-    (option) => !chapter.checkpoint.correctOptionIds.includes(option.id),
+  checkpoint.options.find(
+    (option) => !checkpoint.correctOptionIds.includes(option.id),
   )!.id,
 );
 
@@ -61,10 +66,10 @@ describe("chapter ending flow", () => {
     await user.click(check(distractorWord));
     await user.click(await screen.findByRole("button", { name: "ตรวจคำตอบ" }));
 
-    expect(screen.getByText(chapter.checkpoint.retryMessage)).toBeInTheDocument();
+    expect(screen.getByText(checkpoint.retryMessage)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "กลับไปทบทวน" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "ลองอีกครั้ง" })).toBeInTheDocument();
-    expect(screen.queryByText(chapter.completion.title)).not.toBeInTheDocument();
+    expect(screen.queryByText(completion.title)).not.toBeInTheDocument();
   });
 
   it("requires a reflection answer before the chapter completes", async () => {
@@ -80,7 +85,7 @@ describe("chapter ending flow", () => {
     await user.click(submitReflection);
 
     expect(await screen.findByRole("alert")).toBeInTheDocument();
-    expect(screen.queryByText(chapter.completion.title)).not.toBeInTheDocument();
+    expect(screen.queryByText(completion.title)).not.toBeInTheDocument();
   });
 
   it("fills the cup to 100% after the checkpoint and the reflection", async () => {
@@ -96,7 +101,7 @@ describe("chapter ending flow", () => {
     );
     await user.click(screen.getByRole("button", { name: "ส่งคำตอบและอ่านจบบทนี้" }));
 
-    expect(await screen.findByText(chapter.completion.title)).toBeInTheDocument();
+    expect(await screen.findByText(completion.title)).toBeInTheDocument();
     expect(screen.getByText("100%")).toBeInTheDocument();
     expect(
       screen.getByText("คุณอ่านเอเฟซัสบทที่ 1 จบแล้ว ความคืบหน้า 100 เปอร์เซ็นต์"),

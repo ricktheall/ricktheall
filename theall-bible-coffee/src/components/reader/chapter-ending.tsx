@@ -18,6 +18,12 @@ import { useProgress } from "@/lib/progress/provider";
  * validation feedback. Each step only appears once the previous one is done.
  */
 export function ChapterEnding({ chapter }: { chapter: Chapter }) {
+  /*
+   * The classic lesson ending only applies to chapters authored with a
+   * checkpoint, reflection and completion. Chapters written against the
+   * Scripture-first model carry none of the three and never reach this reader.
+   */
+  const { checkpoint, reflection, completion } = chapter;
   const { chapter: chapterProgress, hydrated, setCheckpointPassed, completeChapter } = useProgress();
   const progress = chapterProgress(EPHESIANS_1_CHAPTER_KEY);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -34,10 +40,12 @@ export function ChapterEnding({ chapter }: { chapter: Chapter }) {
     });
   };
 
+  if (checkpoint === null || reflection === null || completion === null) return null;
+
   if (!progress.checkpointPassed) {
     return (
       <ThreeWordsCheck
-        checkpoint={chapter.checkpoint}
+        checkpoint={checkpoint}
         onPassed={() => setCheckpointPassed(EPHESIANS_1_CHAPTER_KEY)}
         onReview={scrollToExplanation}
       />
@@ -52,14 +60,14 @@ export function ChapterEnding({ chapter }: { chapter: Chapter }) {
           className="mt-16 rounded-2xl border border-[var(--accent)] bg-[var(--accent-soft)] p-5 sm:p-7"
         >
           <h2 id="checkpoint-passed" className="text-lg font-semibold tracking-tight">
-            {chapter.checkpoint.successMessage}
+            {checkpoint.successMessage}
           </h2>
           <p className="mt-2 text-sm text-[var(--foreground-muted)]">
             เหลืออีกหนึ่งคำถามให้คุณตอบกับตัวเอง แล้วแก้วกาแฟจะเต็ม
           </p>
         </section>
         <ReflectionForm
-          reflection={chapter.reflection}
+          reflection={reflection}
           onCompleted={() => completeChapter(EPHESIANS_1_CHAPTER_KEY)}
         />
       </>
@@ -89,15 +97,15 @@ export function ChapterEnding({ chapter }: { chapter: Chapter }) {
           id="completion-title"
           className="mt-6 font-serif text-2xl font-semibold tracking-tight sm:text-3xl"
         >
-          {chapter.completion.title}
+          {completion.title}
         </h2>
 
         <p className="reading-lead mx-auto mt-5 max-w-xl text-[var(--foreground)]">
-          {chapter.completion.centralTruth}
+          {completion.centralTruth}
         </p>
 
         <p className="mx-auto mt-5 max-w-xl text-sm text-[var(--foreground-muted)]">
-          {chapter.completion.invitation}
+          {completion.invitation}
         </p>
 
         {!showFeedback ? (

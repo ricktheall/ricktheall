@@ -85,6 +85,19 @@ async function validateFile(relativePath: string): Promise<string[]> {
 
   const chapter = parsed.data;
   const text = visibleText(chapter);
+
+  // Only movement-end chapters carry a checkpoint; ordinary ones stop here.
+  if (chapter.checkpoint === null) {
+    console.log(`✓ schema valid: ${relativePath}`);
+    console.log(`  status: ${chapter.status}`);
+    console.log(`  sections: ${chapter.sections.length}, sources: ${chapter.sources.length}`);
+    console.log("  checkpoint: none (movement-end checkpoint)");
+    if (chapter.status !== "final") {
+      console.log(`  ! ${relativePath} is "${chapter.status}" — not ready for validation with real readers`);
+    }
+    return errors;
+  }
+
   const correctIds = new Set(chapter.checkpoint.correctOptionIds);
 
   for (const option of chapter.checkpoint.options) {
@@ -137,7 +150,9 @@ async function validateFile(relativePath: string): Promise<string[]> {
   console.log(`  status: ${chapter.status}`);
   console.log(`  sections: ${chapter.sections.length}, sources: ${chapter.sources.length}`);
   console.log(
-    `  checkpoint: ${chapter.checkpoint.options.length} options, ${chapter.checkpoint.correctOptionIds.length} correct`,
+    chapter.checkpoint === null
+      ? "  checkpoint: none (movement-end checkpoint)"
+      : `  checkpoint: ${chapter.checkpoint.options.length} options, ${chapter.checkpoint.correctOptionIds.length} correct`,
   );
 
   if (chapter.status !== "final") {
