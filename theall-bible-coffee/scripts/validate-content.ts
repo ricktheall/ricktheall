@@ -70,6 +70,52 @@ function visibleText(chapter: Chapter): string {
   return parts.join("\n");
 }
 
+/**
+ * The section kinds a chapter must carry to be readable end to end.
+ *
+ * Two chapter shapes exist, and each has its own minimum. A chapter carrying a
+ * `scripture` layer is written for the Scripture-first reader, whose pages are
+ * *derived* from section kinds — so the rule is that every page it produces has
+ * something on it, not that it matches a fixed eight-section list. A chapter
+ * without a `scripture` layer is the original Ephesians shape, and keeps the
+ * section list that reader was built to render.
+ */
+function structuralErrors(chapter: Chapter, relativePath: string): string[] {
+  const errors: string[] = [];
+  const kinds = new Set(chapter.sections.map((section) => section.kind));
+
+  const requiredKinds =
+    chapter.scripture === undefined
+      ? ([
+          "main-verse",
+          "story",
+          "context",
+          "outline",
+          "explanation",
+          "metaphor",
+          "connections",
+          "application",
+        ] as const)
+      : (["story", "context", "application"] as const);
+
+  for (const kind of requiredKinds) {
+    if (!kinds.has(kind)) {
+      errors.push(`${relativePath}: missing required section kind "${kind}"`);
+    }
+  }
+
+  if (chapter.scripture !== undefined) {
+    const bodyKinds = ["outline", "explanation", "metaphor", "teaching"] as const;
+    if (!bodyKinds.some((kind) => kinds.has(kind))) {
+      errors.push(
+        `${relativePath}: a Scripture-first chapter needs at least one of ${bodyKinds.join(", ")} so its Deep Brew page is not empty`,
+      );
+    }
+  }
+
+  return errors;
+}
+
 async function validateFile(relativePath: string): Promise<string[]> {
   const errors: string[] = [];
   const absolute = path.join(process.cwd(), relativePath);
@@ -85,6 +131,23 @@ async function validateFile(relativePath: string): Promise<string[]> {
 
   const chapter = parsed.data;
   const text = visibleText(chapter);
+
+  // Reference-only Scripture must never carry a translated body or attribution.
+  for (const section of chapter.sections) {
+    for (const block of section.blocks) {
+      if (
+        block.type === "scriptureReference" &&
+        block.rightsStatus === "reference-only" &&
+        (block.text !== null || block.attribution !== null)
+      ) {
+        errors.push(
+          `${relativePath}: section ${section.id} carries Bible text or attribution while marked reference-only`,
+        );
+      }
+    }
+  }
+
+  errors.push(...structuralErrors(chapter, relativePath));
 
   // Only movement-end chapters carry a checkpoint; ordinary ones stop here.
   if (chapter.checkpoint === null) {
@@ -111,38 +174,6 @@ async function validateFile(relativePath: string): Promise<string[]> {
       errors.push(
         `${relativePath}: distractor "${option.word}" (${option.id}) appears in the visible chapter text — it would be an unfair option`,
       );
-    }
-  }
-
-  // Reference-only Scripture must never carry a translated body or attribution.
-  for (const section of chapter.sections) {
-    for (const block of section.blocks) {
-      if (
-        block.type === "scriptureReference" &&
-        block.rightsStatus === "reference-only" &&
-        (block.text !== null || block.attribution !== null)
-      ) {
-        errors.push(
-          `${relativePath}: section ${section.id} carries Bible text or attribution while marked reference-only`,
-        );
-      }
-    }
-  }
-
-  const kinds = chapter.sections.map((section) => section.kind);
-  const requiredKinds = [
-    "main-verse",
-    "story",
-    "context",
-    "outline",
-    "explanation",
-    "metaphor",
-    "connections",
-    "application",
-  ] as const;
-  for (const kind of requiredKinds) {
-    if (!kinds.includes(kind)) {
-      errors.push(`${relativePath}: missing required section kind "${kind}"`);
     }
   }
 
