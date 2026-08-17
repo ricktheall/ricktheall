@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { ChapterFlow } from "@/components/reader/chapter-flow";
 import { ChapterReader } from "@/components/reader/chapter-reader";
 import { findBook } from "@/lib/books/canon";
 import { listBooksWithContent, listPublishedChapters } from "@/lib/content/index";
@@ -47,5 +48,18 @@ export default async function ChapterPage({ params }: RouteParams) {
   if (resolved === null) notFound();
 
   const chapter = await loadChapter(resolved.book.id, resolved.chapterNumber);
-  return <ChapterReader chapter={chapter} />;
+
+  /*
+   * Chapters written against the Scripture-first model opt in simply by
+   * carrying a `scripture` layer. Everything written before it — Ephesians 1 —
+   * keeps the reader it was authored for, unchanged.
+   */
+  if (chapter.scripture === undefined) {
+    return <ChapterReader chapter={chapter} />;
+  }
+
+  const published = await listPublishedChapters(resolved.book.id);
+  const nextChapter = published.find((n) => n > resolved.chapterNumber) ?? null;
+
+  return <ChapterFlow book={resolved.book} chapter={chapter} nextChapter={nextChapter} />;
 }
