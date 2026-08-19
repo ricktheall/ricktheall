@@ -8,27 +8,44 @@ import { ReflectionForm } from "@/components/reader/reflection-form";
 import { ThreeWordsCheck } from "@/components/reader/three-words-check";
 import { ValidationFeedback } from "@/components/reader/validation-feedback";
 import { Button } from "@/components/ui/button";
-import { EPHESIANS_1_CHAPTER_KEY } from "@/lib/content/book";
 import type { Chapter } from "@/lib/content/schema";
-import { computeCupPercent } from "@/lib/progress/logic";
+import { computeCupPercent, computePoints } from "@/lib/progress/logic";
 import { useProgress } from "@/lib/progress/provider";
+import { POINTS } from "@/lib/progress/schema";
 
 /**
  * Orchestrates the end of the chapter: checkpoint → reflection → completion →
  * validation feedback. Each step only appears once the previous one is done.
  */
-export function ChapterEnding({ chapter }: { chapter: Chapter }) {
-  const { chapter: chapterProgress, hydrated, setCheckpointPassed, completeChapter } = useProgress();
-  const progress = chapterProgress(EPHESIANS_1_CHAPTER_KEY);
+export function ChapterEnding({
+  chapter,
+  chapterKey,
+  explanationId,
+  bookTitle,
+}: {
+  chapter: Chapter;
+  chapterKey: string;
+  explanationId: string | null;
+  bookTitle: string;
+}) {
+  const {
+    chapter: chapterProgress,
+    hydrated,
+    setCheckpointPassed,
+    recordCheckpointMiss,
+    completeChapter,
+  } = useProgress();
+  const progress = chapterProgress(chapterKey);
   const [showFeedback, setShowFeedback] = useState(false);
   const reduceMotion = useReducedMotion();
 
   if (!hydrated) {
-    return <div className="mt-16 h-40" aria-hidden="true" />;
+    return <div className="mt-20 h-40" aria-hidden="true" />;
   }
 
   const scrollToExplanation = () => {
-    document.getElementById("ephesians-01-explanation")?.scrollIntoView({
+    if (!explanationId) return;
+    document.getElementById(explanationId)?.scrollIntoView({
       behavior: reduceMotion ? "auto" : "smooth",
       block: "start",
     });
@@ -38,7 +55,8 @@ export function ChapterEnding({ chapter }: { chapter: Chapter }) {
     return (
       <ThreeWordsCheck
         checkpoint={chapter.checkpoint}
-        onPassed={() => setCheckpointPassed(EPHESIANS_1_CHAPTER_KEY)}
+        onPassed={() => setCheckpointPassed(chapterKey)}
+        onMissed={() => recordCheckpointMiss(chapterKey)}
         onReview={scrollToExplanation}
       />
     );
@@ -49,9 +67,9 @@ export function ChapterEnding({ chapter }: { chapter: Chapter }) {
       <>
         <section
           aria-labelledby="checkpoint-passed"
-          className="mt-16 rounded-2xl border border-[var(--accent)] bg-[var(--accent-soft)] p-5 sm:p-7"
+          className="mt-20 rounded-sm border border-[var(--accent)] bg-[var(--accent-soft)] p-5 sm:p-7"
         >
-          <h2 id="checkpoint-passed" className="text-lg font-semibold tracking-tight">
+          <h2 id="checkpoint-passed" className="font-display text-xl font-semibold">
             {chapter.checkpoint.successMessage}
           </h2>
           <p className="mt-2 text-sm text-[var(--foreground-muted)]">
@@ -60,54 +78,71 @@ export function ChapterEnding({ chapter }: { chapter: Chapter }) {
         </section>
         <ReflectionForm
           reflection={chapter.reflection}
-          onCompleted={() => completeChapter(EPHESIANS_1_CHAPTER_KEY)}
+          onCompleted={() => completeChapter(chapterKey)}
         />
       </>
     );
   }
 
   const cupPercent = computeCupPercent(progress);
+  const points = computePoints(progress);
+  const perfect = points === POINTS.reading + POINTS.checkpointFirstTry + POINTS.reflection;
 
   return (
-    <div className="mt-16">
+    <div className="mt-20">
       <motion.section
         aria-labelledby="completion-title"
-        initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduceMotion ? 0 : 0.5, ease: "easeOut" }}
-        className="rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] p-6 text-center sm:p-9"
+        transition={{ duration: reduceMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="rounded-sm border border-[var(--border-strong)] bg-[var(--surface)] p-6 text-center sm:p-10"
       >
         <div className="flex justify-center">
-          <CoffeeCup percent={cupPercent} size="large" label="อ่านเอเฟซัสบทที่ 1 แล้ว" />
+          <CoffeeCup percent={cupPercent} size="large" label="อ่านบทนี้แล้ว" />
         </div>
 
         <p role="status" aria-live="polite" className="sr-only">
-          {`คุณอ่านเอเฟซัสบทที่ 1 จบแล้ว ความคืบหน้า ${cupPercent} เปอร์เซ็นต์`}
+          {`คุณอ่านบทนี้จบแล้ว ความคืบหน้า ${cupPercent} เปอร์เซ็นต์ ได้ ${points} แต้ม`}
         </p>
 
-        <h2
-          id="completion-title"
-          className="mt-6 font-serif text-2xl font-semibold tracking-tight sm:text-3xl"
-        >
+        {/* Medallion, not a scoreboard: one number, stated plainly. */}
+        <div className="mt-7 flex justify-center">
+          <div className="flex size-24 flex-col items-center justify-center rounded-full border border-[var(--accent)] text-[var(--accent)]">
+            <span className="font-display text-2xl font-semibold tabular-nums">{points}</span>
+            <span className="text-[0.65rem] tracking-widest">แต้ม</span>
+          </div>
+        </div>
+        <p className="mt-3 text-sm text-[var(--foreground-subtle)]">
+          {perfect ? "เต็มทุกส่วนของบทนี้" : `จาก 100 แต้มของบทนี้`}
+        </p>
+
+        <hr className="rule-gold my-8" />
+
+        <h2 id="completion-title" className="font-display text-2xl font-semibold sm:text-3xl">
           {chapter.completion.title}
         </h2>
 
-        <p className="reading-lead mx-auto mt-5 max-w-xl text-[var(--foreground)]">
+        <p className="reading-lead mx-auto mt-6 max-w-xl text-[var(--foreground)]">
           {chapter.completion.centralTruth}
         </p>
 
-        <p className="mx-auto mt-5 max-w-xl text-sm text-[var(--foreground-muted)]">
+        <p className="mx-auto mt-6 max-w-xl text-sm text-[var(--foreground-muted)]">
           {chapter.completion.invitation}
         </p>
 
         {!showFeedback ? (
-          <Button type="button" size="lg" className="mt-7" onClick={() => setShowFeedback(true)}>
+          <Button type="button" size="lg" className="mt-8" onClick={() => setShowFeedback(true)}>
             ช่วยเราทำบทต่อไปให้ดีขึ้น
           </Button>
         ) : null}
       </motion.section>
 
-      {showFeedback ? <ValidationFeedback /> : null}
+      {showFeedback ? (
+        <ValidationFeedback
+          chapterLabel={`${bookTitle} ${chapter.chapterNumber}`}
+          nextLabel={`บทที่ ${chapter.chapterNumber + 1}`}
+        />
+      ) : null}
     </div>
   );
 }

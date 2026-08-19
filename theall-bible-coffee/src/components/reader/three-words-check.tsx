@@ -10,10 +10,11 @@ import { cn } from "@/lib/utils";
 interface ThreeWordsCheckProps {
   checkpoint: Checkpoint;
   onPassed: () => void;
+  onMissed: () => void;
   onReview: () => void;
 }
 
-export function ThreeWordsCheck({ checkpoint, onPassed, onReview }: ThreeWordsCheckProps) {
+export function ThreeWordsCheck({ checkpoint, onPassed, onMissed, onReview }: ThreeWordsCheckProps) {
   const [selected, setSelected] = useState<string[]>([]);
   const [result, setResult] = useState<"idle" | "correct" | "incorrect">("idle");
   // This component only mounts after hydration, so shuffling here is safe:
@@ -41,18 +42,17 @@ export function ThreeWordsCheck({ checkpoint, onPassed, onReview }: ThreeWordsCh
       onPassed();
     } else {
       setResult("incorrect");
+      onMissed();
     }
   };
 
   return (
     <section
       aria-labelledby="checkpoint-title"
-      className="mt-16 rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7"
+      className="mt-20 rounded-sm border border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7"
     >
-      <p className="text-xs font-semibold uppercase tracking-widest text-[var(--accent)]">
-        ทบทวนท้ายบท
-      </p>
-      <h2 id="checkpoint-title" className="mt-2 font-serif text-2xl font-semibold tracking-tight">
+      <p className="label">ทบทวนท้ายบท</p>
+      <h2 id="checkpoint-title" className="font-display mt-3 text-[1.7rem] font-semibold">
         {checkpoint.prompt}
       </h2>
       <p className="mt-2 text-sm text-[var(--foreground-muted)]">{checkpoint.helpText}</p>
@@ -67,7 +67,7 @@ export function ThreeWordsCheck({ checkpoint, onPassed, onReview }: ThreeWordsCh
               <label
                 key={option.id}
                 className={cn(
-                  "flex min-h-[3.25rem] cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-[0.95rem] transition-colors",
+                  "flex min-h-[3.25rem] cursor-pointer items-center gap-3 rounded-sm border px-4 py-3 text-[0.95rem] transition-colors",
                   isSelected
                     ? "border-[var(--accent)] bg-[var(--accent-soft)] font-semibold"
                     : "border-[var(--border)] hover:bg-[var(--surface-muted)]",
@@ -102,12 +102,12 @@ export function ThreeWordsCheck({ checkpoint, onPassed, onReview }: ThreeWordsCh
 
       <div role="status" aria-live="polite" className="mt-5">
         {result === "correct" ? (
-          <p className="rounded-xl border border-[var(--accent)] bg-[var(--accent-soft)] p-4 text-[0.95rem]">
+          <p className="rounded-sm border border-[var(--accent)] bg-[var(--accent-soft)] p-4 text-[0.95rem]">
             {checkpoint.successMessage}
           </p>
         ) : null}
         {result === "incorrect" ? (
-          <div className="rounded-xl border border-[var(--border-strong)] bg-[var(--surface-muted)] p-4">
+          <div className="rounded-sm border border-[var(--border-strong)] bg-[var(--surface-muted)] p-4">
             <p className="text-[0.95rem] text-[var(--foreground-muted)]">
               {checkpoint.retryMessage}
             </p>

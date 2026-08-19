@@ -15,13 +15,13 @@ const RETURN_INTENT_LABELS: ReadonlyArray<{ value: ReturnIntent; label: string }
 
 const RATINGS = [1, 2, 3, 4, 5] as const;
 
-export function buildFeedbackSummary(feedback: Feedback): string {
+export function buildFeedbackSummary(feedback: Feedback, chapterLabel: string, nextLabel: string): string {
   const intent = RETURN_INTENT_LABELS.find((item) => item.value === feedback.returnIntent);
   return [
     "TheAll Bible Coffee — MVP Feedback",
     "",
-    `ความเข้าใจเอเฟซัส 1: ${feedback.understanding ?? "-"}/5`,
-    `ความอยากอ่านบทที่ 2: ${intent?.label ?? "-"}`,
+    `ความเข้าใจ${chapterLabel}: ${feedback.understanding ?? "-"}/5`,
+    `ความอยากอ่าน${nextLabel}: ${intent?.label ?? "-"}`,
     "",
     "สิ่งที่ช่วยมากที่สุดหรือเกือบทำให้หยุด:",
     feedback.freeText.trim(),
@@ -41,7 +41,14 @@ async function copyText(text: string): Promise<boolean> {
   return false;
 }
 
-export function ValidationFeedback() {
+interface ValidationFeedbackProps {
+  /** e.g. "เอเฟซัส 1" — used verbatim in the copied summary. */
+  chapterLabel: string;
+  /** e.g. "บทที่ 2" */
+  nextLabel: string;
+}
+
+export function ValidationFeedback({ chapterLabel, nextLabel }: ValidationFeedbackProps) {
   const { state, saveFeedback } = useProgress();
   const stored = state.feedback;
 
@@ -55,12 +62,11 @@ export function ValidationFeedback() {
   const freeTextId = useId();
   const errorId = `${freeTextId}-error`;
 
-  const summary = buildFeedbackSummary({
-    understanding,
-    returnIntent,
-    freeText,
-    submitted: true,
-  });
+  const summary = buildFeedbackSummary(
+    { understanding, returnIntent, freeText, submitted: true },
+    chapterLabel,
+    nextLabel,
+  );
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -82,9 +88,9 @@ export function ValidationFeedback() {
   return (
     <section
       aria-labelledby="feedback-title"
-      className="mt-8 rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7"
+      className="mt-8 rounded-sm border border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7"
     >
-      <h2 id="feedback-title" className="font-serif text-2xl font-semibold tracking-tight">
+      <h2 id="feedback-title" className="font-display text-[1.7rem] font-semibold">
         ช่วยเราทำบทต่อไปให้ดีขึ้น
       </h2>
       <p className="mt-2 text-sm text-[var(--foreground-muted)]">
@@ -95,7 +101,7 @@ export function ValidationFeedback() {
       <form onSubmit={submit} className="mt-6" noValidate>
         <fieldset className="border-0 p-0">
           <legend className="text-[0.95rem] font-medium">
-            1. หลังอ่านจบ คุณเข้าใจเอเฟซัสบทที่ 1 มากขึ้นแค่ไหน?
+{`1. หลังอ่านจบ คุณเข้าใจ${chapterLabel} มากขึ้นแค่ไหน?`}
           </legend>
           <p className="mt-1 text-xs text-[var(--foreground-subtle)]">
             1 คือเข้าใจน้อยที่สุด 5 คือเข้าใจมากที่สุด
@@ -105,7 +111,7 @@ export function ValidationFeedback() {
               <label
                 key={value}
                 className={cn(
-                  "flex min-h-[3rem] flex-1 cursor-pointer items-center justify-center rounded-xl border text-base tabular-nums",
+                  "flex min-h-[3rem] flex-1 cursor-pointer items-center justify-center rounded-sm border text-base tabular-nums",
                   understanding === value
                     ? "border-[var(--accent)] bg-[var(--accent-soft)] font-semibold"
                     : "border-[var(--border)] hover:bg-[var(--surface-muted)]",
@@ -131,14 +137,14 @@ export function ValidationFeedback() {
 
         <fieldset className="mt-7 border-0 p-0">
           <legend className="text-[0.95rem] font-medium">
-            2. ถ้าเอเฟซัสบทที่ 2 พร้อมพรุ่งนี้ คุณอยากกลับมาอ่านต่อแค่ไหน?
+{`2. ถ้า${nextLabel}พร้อมพรุ่งนี้ คุณอยากกลับมาอ่านต่อแค่ไหน?`}
           </legend>
           <div className="mt-3 grid gap-2.5">
             {RETURN_INTENT_LABELS.map((option) => (
               <label
                 key={option.value}
                 className={cn(
-                  "flex min-h-[3rem] cursor-pointer items-center gap-3 rounded-xl border px-4 text-[0.95rem]",
+                  "flex min-h-[3rem] cursor-pointer items-center gap-3 rounded-sm border px-4 text-[0.95rem]",
                   returnIntent === option.value
                     ? "border-[var(--accent)] bg-[var(--accent-soft)] font-semibold"
                     : "border-[var(--border)] hover:bg-[var(--surface-muted)]",
@@ -177,7 +183,7 @@ export function ValidationFeedback() {
             placeholder="เขียนสั้น ๆ ตามที่รู้สึกจริง ๆ"
             aria-invalid={error !== null}
             aria-describedby={error ? errorId : undefined}
-            className="reading-text mt-2 w-full rounded-xl border border-[var(--border-strong)] bg-[var(--background)] p-4"
+            className="reading-text mt-2 w-full rounded-sm border border-[var(--border-strong)] bg-[var(--background)] p-4"
           />
         </div>
 
@@ -201,18 +207,18 @@ export function ValidationFeedback() {
               ข้อความนี้ไม่มีชื่อ ไม่มีอีเมล และไม่มีรหัสประจำเครื่อง
             </p>
             {copyState === "copied" ? (
-              <p className="mt-3 rounded-xl border border-[var(--accent)] bg-[var(--accent-soft)] p-3 text-sm">
+              <p className="mt-3 rounded-sm border border-[var(--accent)] bg-[var(--accent-soft)] p-3 text-sm">
                 คัดลอกเรียบร้อยแล้ว
               </p>
             ) : null}
             {copyState === "manual" ? (
-              <p className="mt-3 rounded-xl border border-[var(--border-strong)] bg-[var(--surface-muted)] p-3 text-sm">
+              <p className="mt-3 rounded-sm border border-[var(--border-strong)] bg-[var(--surface-muted)] p-3 text-sm">
                 เบราว์เซอร์นี้ไม่อนุญาตให้คัดลอกอัตโนมัติ กรุณาเลือกข้อความด้านล่างแล้วคัดลอกเอง
               </p>
             ) : null}
           </div>
 
-          <pre className="mt-4 max-h-64 overflow-auto whitespace-pre-wrap rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 font-sans text-sm">
+          <pre className="mt-4 max-h-64 overflow-auto whitespace-pre-wrap rounded-sm border border-[var(--border)] bg-[var(--surface-muted)] p-4 font-sans text-sm">
             {summary}
           </pre>
 

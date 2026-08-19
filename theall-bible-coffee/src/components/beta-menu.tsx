@@ -70,7 +70,7 @@ export function BetaMenu() {
       {open ? (
         <div
           id={panelId}
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[17.5rem] rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] p-4 shadow-lg"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[17.5rem] rounded-sm border border-[var(--border-strong)] bg-[var(--surface)] p-4 shadow-[var(--shadow-deep)]"
         >
           <fieldset className="border-0 p-0">
             <legend className="mb-2 text-xs font-semibold text-[var(--foreground-subtle)]">
@@ -81,7 +81,7 @@ export function BetaMenu() {
                 <label
                   key={option.value}
                   className={cn(
-                    "flex min-h-[2.75rem] flex-1 cursor-pointer items-center justify-center rounded-xl border px-2 text-sm",
+                    "flex min-h-[2.75rem] flex-1 cursor-pointer items-center justify-center rounded-sm border px-2 text-sm",
                     hydrated && theme === option.value
                       ? "border-[var(--accent)] bg-[var(--accent-soft)] font-semibold"
                       : "border-[var(--border)]",
@@ -110,7 +110,7 @@ export function BetaMenu() {
                 <label
                   key={option.value}
                   className={cn(
-                    "flex min-h-[2.75rem] cursor-pointer items-center justify-center rounded-xl border px-1 text-[0.8rem]",
+                    "flex min-h-[2.75rem] cursor-pointer items-center justify-center rounded-sm border px-1 text-[0.8rem]",
                     hydrated && fontSize === option.value
                       ? "border-[var(--accent)] bg-[var(--accent-soft)] font-semibold"
                       : "border-[var(--border)]",

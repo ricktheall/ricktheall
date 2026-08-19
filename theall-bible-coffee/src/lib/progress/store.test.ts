@@ -15,11 +15,12 @@ function savedState(): ProgressState {
         maxReadingPercent: 64,
         lastSectionId: "ephesians-01-metaphor",
         checkpointPassed: true,
+        checkpointMisses: 0,
         reflectionCompleted: false,
         chapterCompleted: false,
       },
     },
-    preferences: { theme: "dark", fontSize: "lg" },
+    preferences: { theme: "dark", fontSize: "lg", speechRate: 1 },
     feedback: null,
   };
 }

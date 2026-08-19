@@ -84,6 +84,7 @@ export class ProgressController {
         next.maxReadingPercent === current.maxReadingPercent &&
         next.lastSectionId === current.lastSectionId &&
         next.checkpointPassed === current.checkpointPassed &&
+        next.checkpointMisses === current.checkpointMisses &&
         next.reflectionCompleted === current.reflectionCompleted &&
         next.chapterCompleted === current.chapterCompleted;
       if (unchanged) return previous;
@@ -106,6 +107,14 @@ export class ProgressController {
     this.updateChapter(chapterKey, (previous) => ({ ...previous, checkpointPassed: true }));
   }
 
+  /** A wrong answer costs points, never progress. */
+  recordCheckpointMiss(chapterKey: string): void {
+    this.updateChapter(chapterKey, (previous) => ({
+      ...previous,
+      checkpointMisses: previous.checkpointMisses + 1,
+    }));
+  }
+
   completeChapter(chapterKey: string): void {
     this.updateChapter(chapterKey, withChapterCompleted);
   }
@@ -121,6 +130,13 @@ export class ProgressController {
     this.update((previous) => ({
       ...previous,
       preferences: { ...previous.preferences, fontSize },
+    }));
+  }
+
+  setSpeechRate(speechRate: number): void {
+    this.update((previous) => ({
+      ...previous,
+      preferences: { ...previous.preferences, speechRate },
     }));
   }
 

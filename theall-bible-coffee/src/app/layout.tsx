@@ -1,22 +1,38 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans_Thai, Trirong } from "next/font/google";
+import { Bodoni_Moda, IBM_Plex_Sans_Thai, Noto_Serif_Thai, Trirong } from "next/font/google";
 
 import "./globals.css";
 
-/** Interface + body copy: highly readable Thai sans. Only the weights we use. */
-const thaiSans = IBM_Plex_Sans_Thai({
+/** Interface, labels and controls — a clean sans that also carries Thai. */
+const uiThai = IBM_Plex_Sans_Thai({
   subsets: ["thai", "latin"],
   weight: ["400", "500", "600"],
   display: "swap",
-  variable: "--font-thai-sans",
+  variable: "--font-ui-thai",
 });
 
-/** A true Thai serif, reserved for headings and the Scripture moment. */
-const thaiSerif = Trirong({
+/** Reading text — a Thai serif, for the manuscript feel. */
+const readThai = Noto_Serif_Thai({
   subsets: ["thai", "latin"],
-  weight: ["400", "600"],
+  weight: ["400", "500", "600"],
   display: "swap",
-  variable: "--font-thai-serif",
+  variable: "--font-read-thai",
+});
+
+/** Display Latin — high-contrast Didone for numerals and Latin titles. */
+const displayLatin = Bodoni_Moda({
+  subsets: ["latin"],
+  weight: ["600"],
+  display: "swap",
+  variable: "--font-display-latin",
+});
+
+/** Display Thai — high-contrast Thai serif, paired with the Didone. */
+const displayThai = Trirong({
+  subsets: ["thai", "latin"],
+  weight: ["600"],
+  display: "swap",
+  variable: "--font-display-thai",
 });
 
 export const metadata: Metadata = {
@@ -27,20 +43,20 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fbf7f1" },
-    { media: "(prefers-color-scheme: dark)", color: "#14100e" },
+    { media: "(prefers-color-scheme: light)", color: "#f5f0e8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
   ],
 };
 
 /**
  * Applies the stored theme + font size before first paint so readers never see
- * a flash of the wrong theme. Kept deliberately tiny and failure-tolerant.
+ * a flash of the wrong theme. The product default is dark.
  */
 const themeBootstrap = `
 (function () {
   try {
     var raw = localStorage.getItem("theall-bible-coffee:mvp:v1");
-    var theme = "system";
+    var theme = "dark";
     var fontSize = "md";
     if (raw) {
       var parsed = JSON.parse(raw);
@@ -61,11 +77,15 @@ const themeBootstrap = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th" data-font-size="md" suppressHydrationWarning>
+    <html lang="th" className="dark" data-font-size="md" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
-      <body className={`${thaiSans.variable} ${thaiSerif.variable} antialiased`}>{children}</body>
+      <body
+        className={`${uiThai.variable} ${readThai.variable} ${displayLatin.variable} ${displayThai.variable} antialiased`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

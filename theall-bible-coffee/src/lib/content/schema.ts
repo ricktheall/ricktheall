@@ -71,6 +71,40 @@ export const applicationBlockSchema = z.object({
   prompts: z.array(nonEmpty).min(1),
 });
 
+
+/**
+ * A real account: a named person, a place and a time, backed by a source.
+ * `verified` may only be true when a source is attached — enforced below, so
+ * an unverified story can never present itself as fact.
+ */
+export const caseStudyBlockSchema = z.object({
+  type: z.literal("caseStudy"),
+  title: nonEmpty,
+  person: nonEmpty,
+  place: nonEmpty,
+  when: nonEmpty,
+  paragraphs: z.array(nonEmpty).min(1),
+  verified: z.boolean(),
+  sourceId: stableId.nullable(),
+});
+
+/** A research finding. The citation is required — no unsourced statistics. */
+export const researchBlockSchema = z.object({
+  type: z.literal("research"),
+  finding: nonEmpty,
+  citation: nonEmpty,
+  sourceId: stableId,
+});
+
+/** A quotation. Author and attribution are required so nothing floats free. */
+export const quotationBlockSchema = z.object({
+  type: z.literal("quotation"),
+  text: nonEmpty,
+  author: nonEmpty,
+  attribution: nonEmpty.nullable(),
+  sourceId: stableId,
+});
+
 export const blockSchema = z.discriminatedUnion("type", [
   paragraphBlockSchema,
   headingBlockSchema,
@@ -79,6 +113,9 @@ export const blockSchema = z.discriminatedUnion("type", [
   scriptureReferenceBlockSchema,
   greekTermBlockSchema,
   applicationBlockSchema,
+  caseStudyBlockSchema,
+  researchBlockSchema,
+  quotationBlockSchema,
 ]);
 
 export const sectionSchema = z.object({
@@ -179,8 +216,21 @@ export const chapterSchema = z
         }
       }
       for (const block of section.blocks) {
-        if (block.type === "greekTerm" && block.sourceId && !sourceIds.has(block.sourceId)) {
-          ctx.addIssue({ code: "custom", message: `Unknown sourceId "${block.sourceId}" in ${section.id}` });
+        const referenced =
+          block.type === "greekTerm" ||
+          block.type === "caseStudy" ||
+          block.type === "research" ||
+          block.type === "quotation"
+            ? block.sourceId
+            : null;
+        if (referenced && !sourceIds.has(referenced)) {
+          ctx.addIssue({ code: "custom", message: `Unknown sourceId "${referenced}" in ${section.id}` });
+        }
+        if (block.type === "caseStudy" && block.verified && block.sourceId === null) {
+          ctx.addIssue({
+            code: "custom",
+            message: `Case study in ${section.id} is marked verified but carries no source`,
+          });
         }
       }
     }
@@ -223,6 +273,7 @@ export const chapterSchema = z
   });
 
 export type Block = z.infer<typeof blockSchema>;
+export type CaseStudyBlock = z.infer<typeof caseStudyBlockSchema>;
 export type Section = z.infer<typeof sectionSchema>;
 export type Checkpoint = z.infer<typeof checkpointSchema>;
 export type CheckpointOption = z.infer<typeof checkpointOptionSchema>;

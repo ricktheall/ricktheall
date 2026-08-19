@@ -13,7 +13,10 @@ import process from "node:process";
 
 import { chapterSchema, type Block, type Chapter } from "../src/lib/content/schema";
 
-const CONTENT_FILES = ["content/books/ephesians/th/chapter-01.json"];
+const CONTENT_FILES = [
+  "content/books/ephesians/th/chapter-01.json",
+  "content/books/revelation/th/chapter-01.json",
+];
 
 function blockText(block: Block): string[] {
   switch (block.type) {
@@ -30,6 +33,12 @@ function blockText(block: Block): string[] {
       return [block.greek, block.transliteration, block.gloss, block.explanation];
     case "application":
       return [block.title, block.text, ...block.prompts];
+    case "caseStudy":
+      return [block.title, block.person, block.place, block.when, ...block.paragraphs];
+    case "research":
+      return [block.finding, block.citation];
+    case "quotation":
+      return [block.text, block.author, block.attribution ?? ""];
   }
 }
 

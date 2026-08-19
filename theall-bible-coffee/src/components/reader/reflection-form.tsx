@@ -35,12 +35,10 @@ export function ReflectionForm({ reflection, onCompleted }: ReflectionFormProps)
   return (
     <section
       aria-labelledby="reflection-title"
-      className="mt-8 rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7"
+      className="mt-8 rounded-sm border border-[var(--border-strong)] bg-[var(--surface)] p-5 sm:p-7"
     >
-      <p className="text-xs font-semibold uppercase tracking-widest text-[var(--accent)]">
-        ใคร่ครวญ
-      </p>
-      <h2 id="reflection-title" className="mt-2 font-serif text-2xl font-semibold tracking-tight">
+      <p className="label">ใคร่ครวญ</p>
+      <h2 id="reflection-title" className="font-display mt-3 text-[1.7rem] font-semibold">
         {reflection.question}
       </h2>
       <p className="mt-2 text-sm text-[var(--foreground-muted)]">{reflection.helpText}</p>
@@ -61,7 +59,7 @@ export function ReflectionForm({ reflection, onCompleted }: ReflectionFormProps)
           placeholder={reflection.placeholder}
           aria-invalid={error !== null}
           aria-describedby={error ? errorId : undefined}
-          className="reading-text w-full rounded-xl border border-[var(--border-strong)] bg-[var(--background)] p-4 text-[var(--foreground)]"
+          className="reading-text w-full rounded-sm border border-[var(--border-strong)] bg-[var(--background)] p-4 text-[var(--foreground)]"
         />
         <div className="mt-2 flex items-center justify-between text-xs text-[var(--foreground-subtle)]">
           <span>ไม่มีการให้คะแนน</span>

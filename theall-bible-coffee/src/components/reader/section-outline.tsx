@@ -49,14 +49,14 @@ export function SectionOutline({ sections, onNavigate, checkpointAnchor }: Secti
         <nav
           id={panelId}
           aria-label="หัวข้อในบทนี้"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[16rem] rounded-2xl border border-[var(--border-strong)] bg-[var(--surface)] p-2 shadow-lg"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[16rem] rounded-sm border border-[var(--border-strong)] bg-[var(--surface)] p-2 shadow-[var(--shadow-deep)]"
         >
           <ul>
             {sections.map((section, index) => (
               <li key={section.id}>
                 <button
                   type="button"
-                  className="flex w-full items-baseline gap-3 rounded-xl px-3 py-2.5 text-start text-sm hover:bg-[var(--surface-muted)]"
+                  className="flex w-full items-baseline gap-3 rounded-sm px-3 py-2.5 text-start text-sm hover:bg-[var(--surface-muted)]"
                   onClick={() => {
                     onNavigate(section.id);
                     setOpen(false);
@@ -72,7 +72,7 @@ export function SectionOutline({ sections, onNavigate, checkpointAnchor }: Secti
             <li className="mt-1 border-t border-[var(--border)] pt-1">
               <button
                 type="button"
-                className="flex w-full items-baseline gap-3 rounded-xl px-3 py-2.5 text-start text-sm hover:bg-[var(--surface-muted)]"
+                className="flex w-full items-baseline gap-3 rounded-sm px-3 py-2.5 text-start text-sm hover:bg-[var(--surface-muted)]"
                 onClick={() => {
                   onNavigate(checkpointAnchor);
                   setOpen(false);

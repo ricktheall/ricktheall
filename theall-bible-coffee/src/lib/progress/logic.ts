@@ -1,6 +1,7 @@
 import {
   COMPLETION_BONUS_PERCENT,
   MAX_READING_PERCENT,
+  POINTS,
   emptyChapterProgress,
   type ChapterProgress,
 } from "./schema";
@@ -28,6 +29,28 @@ export function computeCupPercent(progress: ChapterProgress): number {
 /** A chapter is complete only when both the checkpoint and the reflection are done. */
 export function isChapterComplete(progress: ChapterProgress): boolean {
   return progress.checkpointPassed && progress.reflectionCompleted;
+}
+
+/**
+ * Points earned so far. Reading is worth less than attention: finishing the
+ * chapter text pays 40, the checkpoint pays 40 on a first-try pass (25 after a
+ * miss), and the reflection pays 20 — a clean run is exactly 100.
+ */
+export function computePoints(progress: ChapterProgress): number {
+  let points = 0;
+  if (progress.maxReadingPercent >= MAX_READING_PERCENT) points += POINTS.reading;
+  if (progress.checkpointPassed) {
+    points += progress.checkpointMisses === 0 ? POINTS.checkpointFirstTry : POINTS.checkpointRetry;
+  }
+  if (progress.reflectionCompleted) points += POINTS.reflection;
+  return points;
+}
+
+/** The best score still reachable, so the UI never promises what is gone. */
+export function maxReachablePoints(progress: ChapterProgress): number {
+  const checkpoint =
+    progress.checkpointMisses === 0 ? POINTS.checkpointFirstTry : POINTS.checkpointRetry;
+  return POINTS.reading + checkpoint + POINTS.reflection;
 }
 
 /**

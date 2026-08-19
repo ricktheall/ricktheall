@@ -19,11 +19,32 @@ ready.
 | Route | What it is |
 | --- | --- |
 | `/th` | Thai homepage — the promise, how a chapter works, the disclosure |
-| `/th/books/ephesians` | Ephesians overview and the six-chapter outline |
-| `/th/books/ephesians/1` | The full chapter 1 reading experience |
+| `/th/books/[bookId]` | Book overview and chapter outline |
+| `/th/books/[bookId]/[chapter]` | The full chapter reading experience |
 
+Open books are `revelation` (the camp chapter) and `ephesians`, both chapter 1.
 `/` redirects to `/th`. The app is Thai-only; the `/th` segment exists so other
 locales can be added later without moving these URLs.
+
+Books and their chapters are declared in `src/lib/content/books.ts`. A chapter
+only becomes a page when it is marked `available: true` **and** a matching
+`content/books/<id>/th/chapter-NN.json` exists.
+
+## Read aloud
+
+Every chapter page carries a read-aloud bar built on the browser's own
+`speechSynthesis`. Nothing is uploaded — the device speaks locally. The chapter
+is split into one utterance per block so a listener can pause, resume, or skip a
+paragraph, and the page highlights and follows whatever is being spoken. Speed is
+adjustable (0.8×–1.5×) and stored with the other preferences. Browsers without
+speech support show a plain notice instead of broken controls.
+
+## Points
+
+A chapter is worth 100 points: 40 for reading the whole text, 40 for passing the
+3 Words Check first try (25 after a wrong attempt), and 20 for the reflection. A
+wrong checkpoint answer costs points, never progress. The rules live in
+`computePoints` in `src/lib/progress/logic.ts`.
 
 ---
 

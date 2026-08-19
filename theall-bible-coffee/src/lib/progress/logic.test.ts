@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  computePoints,
   computeCupPercent,
   isCheckpointCorrect,
   isChapterComplete,
@@ -8,7 +9,7 @@ import {
   mergeReadingPercent,
   withChapterCompleted,
 } from "./logic";
-import { MAX_READING_PERCENT, emptyChapterProgress, type ChapterProgress } from "./schema";
+import { MAX_READING_PERCENT, POINTS, emptyChapterProgress, type ChapterProgress } from "./schema";
 
 const CORRECT = ["eph-01-word-chosen", "eph-01-word-inheritance", "eph-01-word-deposit"] as const;
 
@@ -119,5 +120,59 @@ describe("reflection", () => {
 
   it("accepts any real answer without grading it", () => {
     expect(isReflectionAnswerValid("เรื่องงาน")).toBe(true);
+  });
+});
+
+describe("points", () => {
+  it("gives nothing before the chapter text is finished", () => {
+    expect(computePoints(progress({ maxReadingPercent: 89 }))).toBe(0);
+  });
+
+  it("pays for reading only once the text is fully read", () => {
+    expect(computePoints(progress({ maxReadingPercent: MAX_READING_PERCENT }))).toBe(POINTS.reading);
+  });
+
+  it("pays the full checkpoint bonus on a first-try pass", () => {
+    const scored = progress({
+      maxReadingPercent: MAX_READING_PERCENT,
+      checkpointPassed: true,
+      checkpointMisses: 0,
+    });
+    expect(computePoints(scored)).toBe(POINTS.reading + POINTS.checkpointFirstTry);
+  });
+
+  it("pays less after a wrong attempt, but never zero", () => {
+    const scored = progress({
+      maxReadingPercent: MAX_READING_PERCENT,
+      checkpointPassed: true,
+      checkpointMisses: 2,
+    });
+    expect(computePoints(scored)).toBe(POINTS.reading + POINTS.checkpointRetry);
+  });
+
+  it("totals exactly 100 for a clean run", () => {
+    expect(
+      computePoints(
+        progress({
+          maxReadingPercent: MAX_READING_PERCENT,
+          checkpointPassed: true,
+          checkpointMisses: 0,
+          reflectionCompleted: true,
+        }),
+      ),
+    ).toBe(100);
+  });
+
+  it("never exceeds 100", () => {
+    const scored = computePoints(
+      progress({
+        maxReadingPercent: MAX_READING_PERCENT,
+        checkpointPassed: true,
+        checkpointMisses: 0,
+        reflectionCompleted: true,
+        chapterCompleted: true,
+      }),
+    );
+    expect(scored).toBeLessThanOrEqual(100);
   });
 });

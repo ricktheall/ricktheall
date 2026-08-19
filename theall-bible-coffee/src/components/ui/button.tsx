@@ -4,22 +4,24 @@ import { type ButtonHTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-55",
+  "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-[background-color,color,border-color] duration-200 disabled:cursor-not-allowed disabled:opacity-40",
   {
     variants: {
       variant: {
+        // Outlined gold that inverts on hover — the house call to action.
         primary:
-          "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--espresso-600)] dark:hover:bg-[var(--cream-200)]",
+          "border border-[var(--accent)] bg-transparent text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
         accent:
-          "bg-[var(--accent)] text-[var(--accent-foreground)] hover:brightness-110",
+          "border border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-transparent hover:text-[var(--accent)]",
         outline:
-          "border border-[var(--border-strong)] bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-muted)]",
-        ghost: "text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]",
+          "border border-[var(--border-strong)] bg-transparent text-[var(--foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)]",
+        ghost:
+          "border border-transparent text-[var(--foreground-muted)] hover:text-[var(--accent)]",
       },
       size: {
         // Comfortable touch targets: never below 44px tall.
-        md: "min-h-[2.75rem] px-5 py-2.5 text-[0.95rem]",
-        lg: "min-h-[3.25rem] px-7 py-3 text-base",
+        md: "min-h-[2.75rem] px-5 py-2.5 text-[0.9rem] tracking-wide",
+        lg: "min-h-[3.25rem] px-8 py-3 text-[0.95rem] tracking-wide",
         sm: "min-h-[2.75rem] px-4 py-2 text-sm",
       },
       block: { true: "w-full", false: "" },

@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import chapterJson from "../../../content/books/ephesians/th/chapter-01.json";
+import ephesiansJson from "../../../content/books/ephesians/th/chapter-01.json";
+import revelationJson from "../../../content/books/revelation/th/chapter-01.json";
 import { chapterSchema, type Block, type Chapter } from "./schema";
 
-const parsed = chapterSchema.safeParse(chapterJson);
+const CHAPTERS = [
+  ["เอเฟซัส 1", ephesiansJson],
+  ["วิวรณ์ 1", revelationJson],
+] as const;
 
 function blockText(block: Block): string[] {
   switch (block.type) {
@@ -20,6 +24,12 @@ function blockText(block: Block): string[] {
       return [block.greek, block.transliteration, block.gloss, block.explanation];
     case "application":
       return [block.title, block.text, ...block.prompts];
+    case "caseStudy":
+      return [block.title, block.person, block.place, block.when, ...block.paragraphs];
+    case "research":
+      return [block.finding, block.citation];
+    case "quotation":
+      return [block.text, block.author, block.attribution ?? ""];
   }
 }
 
@@ -29,7 +39,9 @@ function visibleText(chapter: Chapter): string {
     .join("\n");
 }
 
-describe("Ephesians 1 content", () => {
+describe.each(CHAPTERS)("%s content", (_label, json) => {
+  const parsed = chapterSchema.safeParse(json);
+
   it("matches the content schema", () => {
     expect(parsed.success).toBe(true);
   });

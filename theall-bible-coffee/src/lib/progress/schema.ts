@@ -7,6 +7,14 @@ export const STORAGE_KEY = "theall-bible-coffee:mvp:v1";
 export const MAX_READING_PERCENT = 90;
 export const COMPLETION_BONUS_PERCENT = 10;
 
+/** Points awarded per chapter. They total 100 for a clean first-attempt run. */
+export const POINTS = {
+  reading: 40,
+  checkpointFirstTry: 40,
+  checkpointRetry: 25,
+  reflection: 20,
+} as const;
+
 export const themePreferenceSchema = z.enum(["light", "dark", "system"]);
 export const fontSizePreferenceSchema = z.enum(["sm", "md", "lg", "xl"]);
 export const returnIntentSchema = z.enum(["definitely", "maybe", "not-yet"]);
@@ -15,6 +23,8 @@ export const chapterProgressSchema = z.object({
   maxReadingPercent: z.number().min(0).max(MAX_READING_PERCENT).catch(0),
   lastSectionId: z.string().nullable().catch(null),
   checkpointPassed: z.boolean().catch(false),
+  /** Wrong attempts before passing — drives the first-try points bonus. */
+  checkpointMisses: z.number().int().min(0).catch(0),
   reflectionCompleted: z.boolean().catch(false),
   chapterCompleted: z.boolean().catch(false),
 });
@@ -30,8 +40,10 @@ export const progressStateSchema = z.object({
   version: z.literal(1),
   chapters: z.record(z.string(), chapterProgressSchema),
   preferences: z.object({
-    theme: themePreferenceSchema.catch("system"),
+    theme: themePreferenceSchema.catch("dark"),
     fontSize: fontSizePreferenceSchema.catch("md"),
+    /** Read-aloud playback speed. */
+    speechRate: z.number().min(0.5).max(2).catch(1),
   }),
   feedback: feedbackSchema.nullable(),
 });
@@ -47,6 +59,7 @@ export const emptyChapterProgress: ChapterProgress = {
   maxReadingPercent: 0,
   lastSectionId: null,
   checkpointPassed: false,
+  checkpointMisses: 0,
   reflectionCompleted: false,
   chapterCompleted: false,
 };
@@ -55,7 +68,7 @@ export function createInitialState(): ProgressState {
   return {
     version: 1,
     chapters: {},
-    preferences: { theme: "system", fontSize: "md" },
+    preferences: { theme: "dark", fontSize: "md", speechRate: 1 },
     feedback: null,
   };
 }

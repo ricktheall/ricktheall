@@ -25,7 +25,12 @@ const distractorWord = wordFor(
 function renderEnding() {
   return render(
     <ProgressProvider>
-      <ChapterEnding chapter={chapter} />
+      <ChapterEnding
+        chapter={chapter}
+        chapterKey="ephesians-01"
+        explanationId="ephesians-01-explanation"
+        bookTitle="เอเฟซัส"
+      />
     </ProgressProvider>,
   );
 }
@@ -99,7 +104,7 @@ describe("chapter ending flow", () => {
     expect(await screen.findByText(chapter.completion.title)).toBeInTheDocument();
     expect(screen.getByText("100%")).toBeInTheDocument();
     expect(
-      screen.getByText("คุณอ่านเอเฟซัสบทที่ 1 จบแล้ว ความคืบหน้า 100 เปอร์เซ็นต์"),
+      screen.getByText(/ความคืบหน้า 100 เปอร์เซ็นต์/),
     ).toBeInTheDocument();
   });
 

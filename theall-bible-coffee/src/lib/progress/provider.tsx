@@ -34,6 +34,8 @@ interface ProgressContextValue {
   completeChapter(chapterKey: string): void;
   setTheme(theme: ThemePreference): void;
   setFontSize(fontSize: FontSizePreference): void;
+  setSpeechRate(rate: number): void;
+  recordCheckpointMiss(chapterKey: string): void;
   saveFeedback(feedback: Feedback): void;
   resetAll(): void;
 }
@@ -112,6 +114,8 @@ export function ProgressProvider({
       completeChapter: (chapterKey) => controller.completeChapter(chapterKey),
       setTheme: (nextTheme) => controller.setTheme(nextTheme),
       setFontSize: (nextFontSize) => controller.setFontSize(nextFontSize),
+      setSpeechRate: (rate) => controller.setSpeechRate(rate),
+      recordCheckpointMiss: (chapterKeyValue) => controller.recordCheckpointMiss(chapterKeyValue),
       saveFeedback: (feedback) => controller.saveFeedback(feedback),
       resetAll: () => controller.resetAll(),
     }),

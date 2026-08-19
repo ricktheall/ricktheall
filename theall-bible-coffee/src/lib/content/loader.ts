@@ -32,7 +32,3 @@ export async function loadChapter(bookId: string, chapterNumber: number): Promis
 
   return parsed.data;
 }
-
-export function loadEphesians1(): Promise<Chapter> {
-  return loadChapter("ephesians", 1);
-}
