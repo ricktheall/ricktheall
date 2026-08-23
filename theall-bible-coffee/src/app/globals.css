@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  TheAll Bible Coffee — "Onyx & Gold".
+  Dark-first, editorial, deliberately unadorned: deep onyx ground, marble
+  white type, antique gold reserved for accents only. Coffee brown survives
+  as the brand anchor in the cup. Gold is never a fill for large surfaces.
+*/
+:root {
+  /* Onyx ground */
+  --onyx-900: #0a0a0a;
+  --onyx-800: #111111;
+  --onyx-700: #1a1a1a;
+  --marble-100: #f5f0e8;
+  --marble-200: #e6dfd3;
+  --gold-600: #8a6c1a;
+  --gold-500: #c9a227;
+  --gold-400: #d4af37;
+  --coffee-700: #6f4e37;
+
+  /* Semantic — light ("marble") theme */
+  --background: #f5f0e8;
+  --surface: #fbf8f2;
+  --surface-muted: #ece5d9;
+  --border: rgba(10, 10, 10, 0.12);
+  --border-strong: rgba(10, 10, 10, 0.26);
+
+  --foreground: #14120f;
+  --foreground-muted: #4a453d;
+  --foreground-subtle: #6b6560;
+
+  --accent: var(--gold-600);
+  --accent-foreground: #f5f0e8;
+  --accent-soft: rgba(138, 108, 26, 0.12);
+
+  --primary: #14120f;
+  --primary-foreground: #f5f0e8;
+
+  --coffee-liquid: var(--coffee-700);
+  --coffee-crema: #a9763f;
+  --cup-outline: #4a453d;
+
+  --ring: var(--gold-600);
+  --danger: #8b0000;
+
+  --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-gold: 0 4px 24px rgba(138, 108, 26, 0.14);
+
+  --reading-scale: 1;
+
+  --ease-reverent: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-dramatic: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: light;
+}
+
+.dark {
+  --background: var(--onyx-900);
+  --surface: var(--onyx-700);
+  --surface-muted: var(--onyx-800);
+  --border: rgba(245, 240, 232, 0.09);
+  --border-strong: rgba(201, 162, 39, 0.32);
+
+  --foreground: var(--marble-100);
+  --foreground-muted: #b8b0a0;
+  --foreground-subtle: #857f76;
+
+  --accent: var(--gold-500);
+  --accent-foreground: #0a0a0a;
+  --accent-soft: rgba(201, 162, 39, 0.1);
+
+  --primary: var(--marble-100);
+  --primary-foreground: #0a0a0a;
+
+  --coffee-liquid: #7b5636;
+  --coffee-crema: #c08a52;
+  --cup-outline: rgba(201, 162, 39, 0.65);
+
+  --ring: var(--gold-400);
+  --danger: #e8a0a0;
+
+  --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 4px 24px rgba(201, 162, 39, 0.15);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-subtle: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-danger: var(--danger);
+  /* UI/labels: clean sans that also carries Thai. */
+  --font-sans: var(--font-ui-thai), ui-sans-serif, system-ui, sans-serif;
+  /* Reading: Thai serif for the manuscript feel. */
+  --font-serif: var(--font-read-thai), var(--font-ui-thai), ui-serif, Georgia, serif;
+  /* Display: high-contrast Didone for Latin, Thai serif for Thai glyphs. */
+  --font-display: var(--font-display-latin), var(--font-display-thai), var(--font-read-thai), serif;
+}
+
+:root[data-font-size="sm"] { --reading-scale: 0.94; }
+:root[data-font-size="md"] { --reading-scale: 1; }
+:root[data-font-size="lg"] { --reading-scale: 1.13; }
+:root[data-font-size="xl"] { --reading-scale: 1.26; }
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    line-height: 1.85;
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1, h2, h3, h4 {
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--foreground);
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+  }
+
+  .reading-text {
+    font-family: var(--font-serif);
+    font-size: calc(1.0625rem * var(--reading-scale));
+    line-height: 1.95;
+  }
+
+  .reading-lead {
+    font-family: var(--font-serif);
+    font-size: calc(1.1875rem * var(--reading-scale));
+    line-height: 1.85;
+  }
+
+  /* Thai has no case and suffers from wide tracking, so keep it modest. */
+  .label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    color: var(--accent);
+  }
+
+  /* Hairline gold rule used between major sections. */
+  .rule-gold {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--accent) 55%, transparent),
+      transparent
+    );
+    border: 0;
+  }
+
+  /* Drop cap for the opening of a reading section. */
+  .dropcap::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.4em;
+    line-height: 0.82;
+    float: inline-start;
+    padding-inline-end: 0.12em;
+    padding-block-start: 0.08em;
+    color: var(--accent);
+  }
+
+  /* Currently spoken paragraph while read-aloud is running. */
+  .speaking {
+    background-color: var(--accent-soft);
+    box-shadow: inset 3px 0 0 var(--accent);
+    border-radius: 2px;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    color: var(--foreground);
+    border: 1px solid var(--border-strong);
+    border-radius: 0.25rem;
+  }
+}
+
+/* Slow candlelight breath on gold accents only. */
+@keyframes gold-breath {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.72; }
+}
+
+.gold-breath {
+  animation: gold-breath 4.5s var(--ease-reverent) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
