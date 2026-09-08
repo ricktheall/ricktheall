@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F0F1F6">
+<meta name="description" content="แบบประเมินของประทาน APEST ภาษาไทย ค้นหาของประทานและความสามารถที่พระเจ้าให้คุณ ตามเอเฟซัส 4:11-12">
+<title>ค้นของประทาน APEST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Trirong:ital,wght@0,500;0,600;1,500&display=swap">
+<style>
+  :root{
+    --bg:#F0F1F6; --surface:#FFFFFF; --surface-2:#E7E9F1; --ink:#151829; --muted:#565C74;
+    --line:#D7DBE7; --line-soft:#E6E9F1;
+    --accent:#232E68; --accent-ink:#FFFFFF; --accent-soft:#DDE2F7;
+    --g-a:#C8560E; --g-p:#6A3FC7; --g-e:#B41A66; --g-s:#0C7554; --g-t:#1A5FD0;
+    --shadow:0 1px 2px rgba(21,24,41,.06), 0 8px 24px -16px rgba(21,24,41,.30);
+    --display:"Trirong", Georgia, serif;
+    --body:"IBM Plex Sans Thai", "Noto Sans Thai", system-ui, sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0D0F17; --surface:#161A26; --surface-2:#1E2331; --ink:#E9EBF3; --muted:#9AA1B8;
+      --line:#2A3042; --line-soft:#222736;
+      --accent:#93A6FF; --accent-ink:#0D0F17; --accent-soft:#232A44;
+      --g-a:#F79A50; --g-p:#AC8CF6; --g-e:#F2679F; --g-s:#40C99B; --g-t:#7FAAFF;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0D0F17; --surface:#161A26; --surface-2:#1E2331; --ink:#E9EBF3; --muted:#9AA1B8;
+    --line:#2A3042; --line-soft:#222736;
+    --accent:#93A6FF; --accent-ink:#0D0F17; --accent-soft:#232A44;
+    --g-a:#F79A50; --g-p:#AC8CF6; --g-e:#F2679F; --g-s:#40C99B; --g-t:#7FAAFF;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.8);
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px; margin:0 auto; padding:32px 20px 72px}
+  h1,h2,h3{font-family:var(--display); font-weight:600; text-wrap:balance; margin:0; line-height:1.3}
+  h1{font-size:clamp(30px,6vw,44px); letter-spacing:-.01em}
+  h2{font-size:clamp(21px,3.4vw,26px)}
+  h3{font-size:18px}
+  p{margin:0}
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+  .lede{font-size:17px; color:var(--muted); max-width:62ch}
+  .stack{display:flex; flex-direction:column; gap:14px}
+  .stack-lg{display:flex; flex-direction:column; gap:34px}
+  .rule{height:1px; background:var(--line); border:0; margin:0}
+
+  header.hero{display:flex; flex-direction:column; gap:16px; padding-bottom:8px}
+  .verse{font-family:var(--display); font-style:italic; font-size:17px; color:var(--ink);
+    border-left:2px solid var(--accent); padding:2px 0 2px 16px; max-width:56ch}
+  .verse span{display:block; font-style:normal; font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:6px; letter-spacing:.06em}
+
+  .spine{display:flex; flex-direction:column; border-top:1px solid var(--line)}
+  .spine-row{display:grid; grid-template-columns:44px 1fr; gap:14px; align-items:baseline;
+    padding:14px 2px; border-bottom:1px solid var(--line-soft)}
+  .letter{font-family:var(--mono); font-weight:500; font-size:26px; line-height:1; color:var(--gc)}
+  .spine-name{font-weight:600}
+  .spine-en{font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-inline-start:8px}
+  .spine-desc{color:var(--muted); font-size:15px}
+
+  .steps{display:flex; flex-direction:column; gap:10px; counter-reset:s}
+  .step{display:grid; grid-template-columns:26px 1fr; gap:12px; align-items:baseline; font-size:15px; color:var(--muted)}
+  .step b{font-family:var(--mono); font-size:13px; color:var(--ink); font-weight:500}
+  .step i{font-style:normal; color:var(--ink)}
+
+  .btnrow{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+  .btn{font-family:var(--body); font-size:15px; font-weight:500; padding:12px 20px; border-radius:2px;
+    border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink); cursor:pointer;
+    transition:transform .12s ease, opacity .12s ease}
+  .btn:hover{opacity:.9}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent; color:var(--ink); border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--accent); color:var(--accent)}
+  .btn.small{padding:8px 14px; font-size:14px}
+  .btn[disabled]{opacity:.4; cursor:not-allowed}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  .bar-top{position:sticky; top:0; z-index:5; background:var(--bg); padding:10px 0 12px; margin-bottom:6px;
+    border-bottom:1px solid var(--line)}
+  .bar-top .meta{display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:13.5px; color:var(--muted)}
+  .track{height:3px; background:var(--surface-2); margin-top:8px}
+  .track > i{display:block; height:100%; background:var(--accent); transition:width .25s ease}
+
+  .chipgrid{display:flex; flex-wrap:wrap; gap:8px}
+  .chip{font-family:var(--body); font-size:15px; padding:9px 14px; border-radius:999px; cursor:pointer;
+    background:var(--surface); color:var(--ink); border:1px solid var(--line); transition:background .12s ease, border-color .12s ease}
+  .chip:hover{border-color:var(--accent)}
+  .chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:500}
+
+  .qlist{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line)}
+  .q{border:0; margin:0; padding:16px 0; border-bottom:1px solid var(--line-soft); display:flex; flex-direction:column; gap:10px}
+  .q legend{padding:0; display:flex; gap:12px; align-items:baseline}
+  .q .num{font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .q .qtext{font-size:16px}
+  .scale{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; max-width:420px}
+  .scale label{position:relative; display:block}
+  .scale input{position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer}
+  .scale span{display:block; text-align:center; font-family:var(--mono); font-size:14px; padding:10px 0;
+    border:1px solid var(--line); background:var(--surface); color:var(--muted); transition:all .12s ease}
+  .scale label:hover span{border-color:var(--accent)}
+  .scale input:checked + span{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+  .scale input:focus-visible + span{outline:2px solid var(--accent); outline-offset:2px}
+  .scale-key{display:flex; justify-content:space-between; max-width:420px; font-size:12.5px; color:var(--muted)}
+
+  .bars{display:flex; flex-direction:column; gap:2px}
+  .bar-row{display:grid; grid-template-columns:22px 1fr; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid var(--line-soft)}
+  .rank{font-family:var(--mono); font-size:13px; color:var(--muted)}
+  .bar-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px}
+  .bar-head b{font-weight:600}
+  .bar-head .pct{font-family:var(--mono); font-size:14px; font-variant-numeric:tabular-nums; color:var(--gc)}
+  .bar-track{height:10px; background:var(--surface-2); position:relative}
+  .bar-fill{height:100%; background:var(--gc); width:0; transition:width .5s cubic-bezier(.2,.7,.3,1)}
+
+  .panel{background:var(--surface); border:1px solid var(--line); padding:24px; box-shadow:var(--shadow)}
+  .panel.lead{border-top:3px solid var(--gc)}
+  .tag{display:inline-block; align-self:flex-start; font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--gc); border:1px solid currentColor; padding:3px 8px; border-radius:2px}
+  .pull{font-family:var(--display); font-size:clamp(20px,3.6vw,25px); font-weight:500; line-height:1.4; text-wrap:balance}
+  .cols{display:grid; grid-template-columns:1fr; gap:22px}
+  @media (min-width:640px){ .cols{grid-template-columns:1fr 1fr} }
+  .mini h4{margin:0 0 8px; font-family:var(--body); font-size:13px; letter-spacing:0; color:var(--muted); font-weight:600}
+  ul.list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px; font-size:15px}
+  ul.list li{display:grid; grid-template-columns:14px 1fr; gap:8px}
+  ul.list li::before{content:"—"; color:var(--gc); font-family:var(--mono); font-size:13px; line-height:1.7}
+  .refs{font-family:var(--body); font-size:13.5px; color:var(--muted); letter-spacing:0}
+
+  details.acc{border-bottom:1px solid var(--line-soft)}
+  details.acc summary{cursor:pointer; padding:14px 2px; display:flex; gap:14px; align-items:baseline; list-style:none}
+  details.acc summary::-webkit-details-marker{display:none}
+  details.acc summary .letter{font-size:20px}
+  details.acc summary .arrow{margin-inline-start:auto; font-family:var(--mono); font-size:12px; color:var(--muted)}
+  details.acc[open] summary .arrow{transform:rotate(90deg)}
+  details.acc .accbody{padding:0 2px 20px 60px; display:flex; flex-direction:column; gap:18px}
+  @media (max-width:520px){ details.acc .accbody{padding-left:2px} }
+
+  .note{font-size:14px; color:var(--muted); background:var(--surface-2); padding:14px 16px; border-radius:2px}
+  .hist{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line)}
+  .hist-row{display:flex; justify-content:space-between; gap:12px; padding:10px 2px; border-bottom:1px solid var(--line-soft);
+    font-size:14.5px; color:var(--muted)}
+  .hist-row b{color:var(--ink); font-weight:500}
+  textarea.share{width:100%; min-height:220px; font-family:var(--mono); font-size:12.5px; line-height:1.7;
+    background:var(--surface); color:var(--ink); border:1px solid var(--line); padding:14px; border-radius:2px}
+  footer.foot{margin-top:44px; padding-top:20px; border-top:1px solid var(--line); font-size:13px; color:var(--muted); display:flex; flex-direction:column; gap:6px}
+  .center{text-align:center}
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+  @media print{ .btnrow, .bar-top{display:none} body{background:#fff; color:#000} }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var GIFTS = {
+    a:{ letter:"A", name:"อัครทูต", en:"Apostle", role:"ผู้บุกเบิก", color:"var(--g-a)",
+        line:"ไปในที่ที่ยังไม่มีใครไป และเริ่มสิ่งที่ยังไม่มี",
+        summary:"คุณถูกสร้างมาเพื่อเริ่มต้น ไม่ใช่แค่ดูแลของเดิม คุณเห็นพื้นที่ว่างก่อนคนอื่น และคุณอยู่ไม่สุขจนกว่าข่าวประเสริฐจะไปถึงที่ที่ยังไม่มีใครไป งานของคุณคือเปิดประตู แล้วส่งคนเข้าไป",
+        strong:["เห็นโอกาสตั้งแต่ยังไม่มีใครเห็น","เริ่มจากศูนย์ได้โดยไม่ต้องรอความพร้อม","สร้างทีมและระบบใหม่ให้ขยายต่อได้","ผลักคริสตจักรออกจากความสบาย"],
+        watch:["เริ่มหลายอย่างจนไม่มีอะไรจบ","ทิ้งคนที่ตามไม่ทันไว้ข้างหลัง","ใจร้อนกับคนที่เดินช้ากว่า","ให้ค่าการเติบโตมากกว่าคน"],
+        next:["เลือกพื้นที่ใหม่หนึ่งแห่งใน 90 วัน แล้วลงมือจริง ไม่ใช่แค่คิด","อย่าไปคนเดียว พาคนไปด้วยอย่างน้อยสองคนเสมอ","ส่งมอบสิ่งที่คุณเริ่มไว้ให้คนอื่นดูแล ก่อนจะเริ่มสิ่งถัดไป"],
+        pair:"ศิษยาภิบาล จะช่วยให้สิ่งที่คุณเริ่มมีคนดูแลจนโต",
+        refs:"เอเฟซัส 4:11-12 · โรม 15:20 · กิจการ 13:1-3",
+        bible:"เปาโล" },
+    p:{ letter:"P", name:"ผู้เผยพระวจนะ", en:"Prophet", role:"ผู้ฟังเสียง", color:"var(--g-p)",
+        line:"พูดความจริงในวันที่คนอื่นเลือกเงียบ",
+        summary:"คุณไวต่อพระสุรเสียงของพระเจ้าและไวต่อสิ่งที่ไม่ถูกต้อง คุณรู้สึกได้ก่อนว่าอะไรกำลังเบี่ยงเบน และคุณยอมพูดแม้จะทำให้บรรยากาศอึดอัด งานของคุณคือเรียกคนกลับมาหาพระเจ้าและกลับมาสัตย์ซื่อ",
+        strong:["อ่านสภาพจิตวิญญาณของกลุ่มออก","กล้าพูดสิ่งที่คนอื่นเลี่ยง","ทนความอยุติธรรมไม่ได้ จึงลงมือ","ดึงทุกคนกลับสู่พระเจ้า ไม่ใช่แค่ระบบ"],
+        watch:["ตรงจนบาดใจคน ความจริงถูกแต่จังหวะพลาด","วิจารณ์มากกว่าอธิษฐาน","โดดเดี่ยวตัวเองเมื่อคนไม่ฟัง","ใจขมเมื่อไม่มีใครเปลี่ยน"],
+        next:["อยู่กับพระเจ้าก่อนพูดกับคนเสมอ จดสิ่งที่ได้ยินก่อนหนึ่งวัน","พูดความจริงพร้อมทางออกและความหวังเสมอ","ให้คนที่ไว้ใจได้หนึ่งคนตรวจน้ำเสียงของคุณก่อนพูดเรื่องหนัก"],
+        pair:"ผู้สอน จะช่วยให้สิ่งที่คุณเห็นถูกอธิบายจนคนรับได้",
+        refs:"เอเฟซัส 4:11-12 · อาโมส 5:24 · 1 โครินธ์ 14:3",
+        bible:"อาโมส และ อากาบัส" },
+    e:{ letter:"E", name:"ผู้ประกาศข่าวประเสริฐ", en:"Evangelist", role:"ผู้เชื่อมคนสู่พระเยซู", color:"var(--g-e)",
+        line:"ทำให้ข่าวดี ฟังดูเป็นข่าวดีจริง ๆ",
+        summary:"คุณพูดกับคนนอกได้อย่างเป็นธรรมชาติ และคุณคิดถึงคนที่ยังไม่รู้จักพระเจ้าอยู่เสมอ คุณเป็นคนที่ทำให้คริสตจักรไม่ลืมว่ายังมีคนอยู่ข้างนอก งานของคุณคือชวนคนให้ก้าวข้ามเส้น",
+        strong:["เข้าหาคนแปลกหน้าได้ง่าย","เล่าเรื่องพระเยซูโดยไม่เขินอาย","ชวนคนตัดสินใจได้จริง ไม่หยุดแค่คุย","ปลุกทีมให้กลับมาสนใจคนข้างนอก"],
+        watch:["เก่งเริ่มแต่ไม่ตามต่อ","วัดผลด้วยตัวเลขจนลืมคน","กดดันคนเกินจังหวะของเขา","สัญญาเกินจริงเรื่องชีวิตคริสเตียน"],
+        next:["เขียนชื่อคนที่ยังไม่เชื่อ 5 คน อธิษฐานเผื่อทุกวัน","ฝึกเล่าเรื่องที่พระเยซูทำในชีวิตคุณให้จบใน 3 นาที","ส่งต่อคนที่ตอบสนองให้ผู้เลี้ยงและผู้สอนดูแลต่อทันที"],
+        pair:"ศิษยาภิบาล และ ผู้สอน จะทำให้คนที่คุณพามาอยู่รอดและโต",
+        refs:"เอเฟซัส 4:11-12 · กิจการ 8:26-40 · 2 ทิโมธี 4:5",
+        bible:"ฟีลิป" },
+    s:{ letter:"S", name:"ศิษยาภิบาล", en:"Shepherd", role:"ผู้ดูแลหัวใจคน", color:"var(--g-s)",
+        line:"อยู่กับคน จนกว่าเขาจะหายดี",
+        summary:"คุณเห็นคนก่อนเห็นงาน คุณรู้ว่าใครหายไป ใครกำลังเจ็บ และคุณอยู่กับเขาได้นานโดยไม่รีบ งานของคุณคือสร้างที่ปลอดภัยที่คนจะเติบโตได้จริง ไม่ใช่แค่สวยจากข้างนอก",
+        strong:["สร้างความปลอดภัยให้คนกล้าเปิดใจ","ฟังได้นานโดยไม่รีบตัดสิน","จำรายละเอียดชีวิตคนได้","ตามหาคนที่หายไปจริง ๆ"],
+        watch:["ดูแลจนหมดแรงและไม่มีขอบเขต","เลี่ยงความขัดแย้งจนปัญหาโต","ทำให้กลุ่มกลายเป็นครอบครัวปิด","เก็บคนไว้กับตัว แทนที่จะปล่อยให้เขาโตและออกไป"],
+        next:["กำหนดวันหยุดและขอบเขตเวลาที่ชัดเจน แล้วรักษาไว้","ฝึกบทสนทนายากหนึ่งครั้งในเดือนนี้ ด้วยความรักและความตรง","มอบหมายให้คนที่คุณดูแลไปดูแลคนอื่นต่อ"],
+        pair:"อัครทูต จะช่วยให้ความรักของคุณไม่หยุดอยู่แค่วงเดิม",
+        refs:"เอเฟซัส 4:11-12 · ยอห์น 10:11-15 · 1 เปโตร 5:1-4",
+        bible:"บารนาบัส" },
+    t:{ letter:"T", name:"ผู้สอน", en:"Teacher", role:"ผู้ทำให้ความจริงชัด", color:"var(--g-t)",
+        line:"ทำให้ความจริงเข้าใจได้ และเอาไปใช้ได้",
+        summary:"คุณรักความถูกต้องของพระวจนะ และคุณมีความสามารถทำเรื่องยากให้คนธรรมดาเข้าใจ คุณเป็นเกราะป้องกันคำสอนผิดของคริสตจักร งานของคุณคือทำให้คนไม่ใช่แค่รู้ แต่รู้จนเดินตามได้",
+        strong:["ทำเรื่องซับซ้อนให้เข้าใจง่าย","จับคำสอนที่คลาดเคลื่อนได้ไว","สร้างโครงความคิดที่คนจำและใช้ได้","ทำให้คนอื่นสอนต่อเป็น"],
+        watch:["รู้เยอะแต่ลงมือน้อย","ถกเถียงเรื่องเล็กจนเสียคน","สอนถึงหัวแต่ไม่ถึงหัวใจ","เตรียมจนสมบูรณ์แบบแล้วไม่ทันคน"],
+        next:["ทุกครั้งที่สอน จบด้วยการลงมือทำหนึ่งอย่างเสมอ","สอนคนที่จะเอาไปสอนต่อ ตาม 2 ทิโมธี 2:2","ลดเนื้อหาลง 30 เปอร์เซ็นต์ เพิ่มการประยุกต์ใช้เข้าไปแทน"],
+        pair:"ผู้เผยพระวจนะ จะทำให้คำสอนของคุณมีไฟและมีคม",
+        refs:"เอเฟซัส 4:11-12 · 2 ทิโมธี 2:2 · เอสรา 7:10",
+        bible:"อปอลโล และ เอสรา" }
+  };
+  var ORDER = ["a","p","e","s","t"];
+
+  var RAW_WORDS = {
+    a:["บุกเบิก","ริเริ่ม","กล้าเสี่ยง","ขยายออกไป","ก่อตั้งสิ่งใหม่","มองภาพใหญ่","ชอบไปที่ใหม่","ระดมคนได้","ไม่ชอบอยู่นิ่ง","ส่งคนออกไป"],
+    p:["ไวต่อเสียงพระเจ้า","ตรงไปตรงมา","รักความจริง","ทนความอยุติธรรมไม่ได้","เรียกคนกลับใจ","อ่านสถานการณ์ออก","ไม่ประนีประนอม","ใจร้อนรน","กล้าท้าทาย","มองทะลุเปลือกนอก"],
+    e:["ชวนคนคุยง่าย","เล่าเรื่องพระเยซูเป็น","รักคนที่ยังไม่เชื่อ","ชวนคนมาเจอพระเจ้า","สร้างมิตรใหม่เร็ว","กระตือรือร้น","โน้มน้าวเก่ง","ห่วงคนหลงหาย","เข้าหาคนแปลกหน้า","สื่อสารข่าวดีได้"],
+    s:["ใจเมตตา","รับฟังได้นาน","สังเกตคนที่เจ็บ","อดทนกับคนที่ช้า","สร้างที่ปลอดภัย","ตามหาคนที่หายไป","ให้กำลังใจเก่ง","ซื่อสัตย์ระยะยาว","ปกป้องคนอ่อนแอ","จำรายละเอียดชีวิตคน"],
+    t:["รักการศึกษาพระคัมภีร์","อธิบายให้เข้าใจง่าย","ชอบค้นคว้า","คิดเป็นระบบ","จับจุดคลาดเคลื่อนได้","ชอบสอน","ละเอียดกับความถูกต้อง","ชอบเตรียมเนื้อหา","ตั้งคำถามที่ดี","เห็นโครงของความจริง"]
+  };
+  var WORDS = [];
+  for (var r=0; r<10; r++){
+    for (var c=0; c<5; c++){
+      var g = ORDER[(c + r*2) % 5];
+      WORDS.push({ t: RAW_WORDS[g][r], g: g });
+    }
+  }
+  WORDS.forEach(function(w,i){ w.i = i; });
+
+  var STATEMENTS = [
+    {t:"ฉันมีชีวิตชีวาเวลาได้เริ่มสิ่งใหม่ มากกว่าดูแลสิ่งที่มีอยู่แล้ว", g:"a"},
+    {t:"ฉันรับรู้ได้เร็วว่ามีบางอย่างไม่ถูกต้องในกลุ่มหรือในองค์กร", g:"p"},
+    {t:"ฉันคุยกับคนแปลกหน้าได้ง่ายและเป็นธรรมชาติ", g:"e"},
+    {t:"ฉันสังเกตเห็นคนที่กำลังเจ็บ หรือคนที่เริ่มหายไปจากกลุ่ม", g:"s"},
+    {t:"ฉันชอบค้นคว้าพระคัมภีร์จนเข้าใจลึก แล้วอธิบายให้คนอื่นฟังได้", g:"t"},
+    {t:"ฉันมองเห็นโอกาสในพื้นที่ที่ยังไม่มีใครไปถึง", g:"a"},
+    {t:"ฉันยอมพูดความจริง แม้รู้ว่าจะทำให้บรรยากาศอึดอัด", g:"p"},
+    {t:"ฉันเล่าเรื่องพระเยซูให้คนที่ยังไม่เชื่อฟังได้โดยไม่เขินอาย", g:"e"},
+    {t:"ฉันฟังคนได้นานโดยไม่รีบให้คำตอบ", g:"s"},
+    {t:"ฉันทำเรื่องซับซ้อนให้เข้าใจง่ายได้", g:"t"},
+    {t:"ฉันยอมเสี่ยงและยอมผิดพลาด ดีกว่าอยู่นิ่งอย่างปลอดภัย", g:"a"},
+    {t:"ความอยุติธรรมทำให้ฉันอยู่เฉยไม่ได้", g:"p"},
+    {t:"ฉันคิดถึงคนที่ยังไม่รู้จักพระเจ้าอยู่บ่อย ๆ", g:"e"},
+    {t:"ฉันอยู่กับคนได้ในระยะยาว แม้เขาจะเปลี่ยนแปลงช้า", g:"s"},
+    {t:"ฉันจับได้เร็วเวลาคำสอนบางอย่างคลาดเคลื่อนไปจากพระคัมภีร์", g:"t"},
+    {t:"ฉันคิดถึงภาพรวมและอนาคต มากกว่ารายละเอียดของวันนี้", g:"a"},
+    {t:"ฉันใช้เวลาอยู่กับพระเจ้าแล้วได้ความชัดเจนมาแบ่งปันกับคนอื่น", g:"p"},
+    {t:"ฉันชอบชวนคนให้ตัดสินใจติดตามพระเยซูจริงจัง", g:"e"},
+    {t:"คนมักเข้ามาเล่าเรื่องส่วนตัวกับฉัน", g:"s"},
+    {t:"ฉันชอบจัดระบบความคิดให้เป็นขั้นเป็นตอน", g:"t"},
+    {t:"คนอื่นมักตามฉันไปในสิ่งที่เขายังไม่เห็นภาพ", g:"a"},
+    {t:"ฉันสนใจใจที่แท้จริงของคน มากกว่าภาพลักษณ์ภายนอก", g:"p"},
+    {t:"เพื่อนที่ยังไม่เชื่อรู้สึกสบายใจเวลาอยู่กับฉัน", g:"e"},
+    {t:"ฉันใส่ใจว่าทุกคนในห้องรู้สึกปลอดภัยและมีที่ยืน", g:"s"},
+    {t:"ฉันรู้สึกพอใจมากเมื่อเห็นคนเข้าใจสิ่งที่เขาเคยงงมาก่อน", g:"t"}
+  ];
+  var SCALE_LABELS = ["ไม่ใช่ฉันเลย","ไม่ค่อยใช่","กลาง ๆ","ค่อนข้างใช่","ใช่ฉันมาก"];
+
+  var KEY = "apest.th.v1";
+  var app = document.getElementById("app");
+  var state = { screen:"intro", picks:{}, answers:{}, result:null, history:load().history || [] };
+
+  function load(){
+    try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){ return {}; }
+  }
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify({ history: state.history.slice(0,8) })); } catch(e){}
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function pickCount(){ var n=0; for (var k in state.picks) if (state.picks[k]) n++; return n; }
+  function answerCount(){ return Object.keys(state.answers).length; }
+
+  function compute(){
+    var words = {}, scale = {}, final = {}, i;
+    ORDER.forEach(function(g){ words[g]=0; scale[g]=0; });
+    WORDS.forEach(function(w){ if (state.picks[w.i]) words[w.g]++; });
+    STATEMENTS.forEach(function(s,idx){ if (state.answers[idx]) scale[s.g] += state.answers[idx]; });
+    var scaleDone = answerCount() === STATEMENTS.length;
+    var rows = ORDER.map(function(g){
+      var wp = words[g] / 10 * 100;
+      var sp = (scale[g] - 5) / 20 * 100;
+      var v = scaleDone ? (wp * 0.5 + sp * 0.5) : wp;
+      return { g:g, pct: Math.max(0, Math.round(v)), words: words[g], scale: scale[g] };
+    });
+    rows.sort(function(x,y){ return y.pct - x.pct; });
+    return { rows: rows, scaleDone: scaleDone, date: new Date() };
+  }
+
+  function fmtDate(d){
+    var m = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+    return d.getDate() + " " + m[d.getMonth()] + " " + (d.getFullYear() + 543);
+  }
+
+  function spineRows(){
+    return ORDER.map(function(g){
+      var G = GIFTS[g];
+      return '<div class="spine-row" style="--gc:' + G.color + '">' +
+        '<div class="letter">' + G.letter + '</div>' +
+        '<div><div class="spine-name">' + G.name + '<span class="spine-en">' + G.en + '</span></div>' +
+        '<div class="spine-desc">' + G.line + '</div></div></div>';
+    }).join("");
+  }
+
+  function viewIntro(){
+    var h = "";
+    h += '<header class="hero">' +
+      '<div class="eyebrow">แบบประเมินของประทาน · APEST</div>' +
+      '<h1>ค้นของประทานและความสามารถที่พระเจ้าให้คุณ</h1>' +
+      '<p class="lede">พระเจ้าไม่ได้ให้ของประทานไว้ให้คุณเก็บ พระองค์ให้ไว้เพื่อเสริมสร้างคนของพระองค์ ' +
+      'ใช้เวลาประมาณ 7 นาที เพื่อดูว่าเสียงไหนในห้าเสียงนี้ดังที่สุดในตัวคุณ และก้าวต่อไปของคุณคืออะไร</p>' +
+      '<div class="verse">พระองค์เองประทานให้บางคนเป็นอัครทูต บางคนเป็นผู้เผยพระวจนะ บางคนเป็นผู้ประกาศข่าวประเสริฐ ' +
+      'บางคนเป็นศิษยาภิบาลและอาจารย์ เพื่อเตรียมธรรมิกชนสำหรับการปรนนิบัติ' +
+      '<span>เอเฟซัส 4:11-12</span></div>' +
+      '</header>';
+
+    if (state.history.length){
+      var last = state.history[0];
+      h += '<div class="note">ผลล่าสุดของคุณเมื่อ ' + esc(last.date) + ' คือ <b>' + esc(GIFTS[last.top].name) +
+           '</b> ที่ ' + last.pct + ' เปอร์เซ็นต์ ทำใหม่ได้ทุกเมื่อ ของประทานถูกเปิดเผยตามฤดูกาลของชีวิต</div>';
+    }
+
+    h += '<section class="stack"><h2>ห้าเสียงในกายเดียว</h2>' +
+      '<p class="lede">ทุกคนมีทั้งห้าเสียงนี้ในระดับต่างกัน คำถามไม่ใช่ว่าคุณมีอะไร แต่คือเสียงไหนที่พระเจ้าให้คุณนำ</p>' +
+      '<div class="spine">' + spineRows() + '</div></section>';
+
+    h += '<section class="stack"><h2>ทำอย่างไร</h2><div class="steps">' +
+      '<div class="step"><b>01</b><i>เลือกคำที่ตรงกับตัวคุณจริง ๆ จาก 50 คำ ไม่ต้องคิดนาน เลือกตามสัญชาตญาณ</i></div>' +
+      '<div class="step"><b>02</b><i>ตอบ 25 ข้อตามความจริง ไม่ใช่ตามที่อยากเป็น ขั้นนี้ข้ามได้แต่ผลจะหยาบขึ้น</i></div>' +
+      '<div class="step"><b>03</b><i>รับผลของประทานหลัก จุดที่ต้องระวัง และก้าวต่อไปที่ลงมือได้จริงสัปดาห์นี้</i></div>' +
+      '</div></section>';
+
+    h += '<div class="btnrow"><button class="btn" data-go="words">เริ่มประเมิน</button>' +
+      (state.history.length ? '<button class="btn ghost" data-go="history">ดูประวัติผล</button>' : '') + '</div>';
+
+    h += '<div class="note">ข้อมูลทั้งหมดเก็บอยู่ในเครื่องของคุณเท่านั้น ไม่มีการส่งออกไปที่ไหน</div>';
+
+    if (state.history.length) h += historyBlock();
+    return h;
+  }
+
+  function historyBlock(){
+    return '<section class="stack" id="history"><h2>ประวัติผลของคุณ</h2><div class="hist">' +
+      state.history.map(function(x){
+        return '<div class="hist-row"><span>' + esc(x.date) + '</span><b>' + esc(GIFTS[x.top].name) + ' · ' + x.pct + '%</b></div>';
+      }).join("") + '</div></section>';
+  }
+
+  function viewWords(){
+    var n = pickCount();
+    var h = '<div class="bar-top"><div class="meta"><span>ขั้นที่ 1 จาก 2 · เลือกคำ</span><span>เลือกแล้ว ' + n + ' คำ</span></div>' +
+      '<div class="track"><i style="width:' + Math.min(100, n/20*100) + '%"></i></div></div>';
+    h += '<section class="stack"><div class="eyebrow">กิจกรรมที่ 1</div>' +
+      '<h2>แตะทุกคำที่ตรงกับตัวคุณ</h2>' +
+      '<p class="lede">เลือกตามที่คุณเป็นจริง ไม่ใช่ตามที่คุณอยากเป็นหรือที่คนคาดหวัง แนะนำให้เลือกประมาณ 12 ถึง 20 คำ ' +
+      'ถ้าลังเลกับคำไหน แปลว่ายังไม่ใช่ ข้ามไปได้เลย</p></section>';
+    h += '<div class="chipgrid" role="group" aria-label="คำที่อธิบายตัวคุณ">' +
+      WORDS.map(function(w){
+        return '<button type="button" class="chip" data-word="' + w.i + '" aria-pressed="' +
+          (state.picks[w.i] ? "true" : "false") + '">' + esc(w.t) + '</button>';
+      }).join("") + '</div>';
+    h += '<div class="btnrow"><button class="btn" data-go="scale"' + (n < 5 ? " disabled" : "") + '>ไปขั้นที่ 2</button>' +
+      '<button class="btn ghost" data-go="resultNow"' + (n < 5 ? " disabled" : "") + '>ข้าม ดูผลเลย</button>' +
+      '<button class="btn ghost" data-go="intro">ย้อนกลับ</button></div>';
+    if (n < 5) h += '<p class="refs">เลือกอย่างน้อย 5 คำเพื่อไปต่อ</p>';
+    return h;
+  }
+
+  function viewScale(){
+    var n = answerCount(), total = STATEMENTS.length;
+    var h = '<div class="bar-top"><div class="meta"><span>ขั้นที่ 2 จาก 2 · คำถาม</span><span>ตอบแล้ว ' + n + ' จาก ' + total + '</span></div>' +
+      '<div class="track"><i style="width:' + (n/total*100) + '%"></i></div></div>';
+    h += '<section class="stack"><div class="eyebrow">กิจกรรมที่ 2</div>' +
+      '<h2>ตอบตามชีวิตจริงใน 6 เดือนที่ผ่านมา</h2>' +
+      '<p class="lede">1 คือไม่ใช่ฉันเลย และ 5 คือใช่ฉันมาก ตอบเร็ว ๆ ตามความจริง คำตอบแรกมักแม่นที่สุด</p></section>';
+    h += '<div class="scale-key"><span>1 ' + SCALE_LABELS[0] + '</span><span>5 ' + SCALE_LABELS[4] + '</span></div>';
+    h += '<div class="qlist">' + STATEMENTS.map(function(s, i){
+      var num = (i+1) < 10 ? "0" + (i+1) : String(i+1);
+      var opts = "";
+      for (var v=1; v<=5; v++){
+        opts += '<label><input type="radio" name="q' + i + '" value="' + v + '" data-q="' + i + '"' +
+          (state.answers[i] === v ? " checked" : "") + ' aria-label="' + v + ' ' + SCALE_LABELS[v-1] + '"><span>' + v + '</span></label>';
+      }
+      return '<fieldset class="q"><legend><span class="num">' + num + '</span><span class="qtext">' + esc(s.t) + '</span></legend>' +
+        '<div class="scale">' + opts + '</div></fieldset>';
+    }).join("") + '</div>';
+    h += '<div class="btnrow"><button class="btn" data-go="resultNow"' + (n < total ? " disabled" : "") + '>ดูผลของประทาน</button>' +
+      '<button class="btn ghost" data-go="words">ย้อนกลับ</button></div>';
+    if (n < total) h += '<p class="refs">เหลืออีก ' + (total - n) + ' ข้อ หรือกดย้อนกลับแล้วเลือกข้ามไปดูผลจากขั้นที่ 1</p>';
+    return h;
+  }
+
+  function barRows(res){
+    return '<div class="bars">' + res.rows.map(function(row, i){
+      var G = GIFTS[row.g];
+      return '<div class="bar-row" style="--gc:' + G.color + '">' +
+        '<div class="rank">' + (i+1) + '</div><div>' +
+        '<div class="bar-head"><b>' + G.name + '</b><span class="pct">' + row.pct + '%</span></div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + row.pct + '%"></div></div>' +
+        '</div></div>';
+    }).join("") + '</div>' +
+    '<p class="refs">คะแนนคือสัดส่วนจากคะแนนเต็มของแต่ละเสียง ไม่ได้แข่งกับใคร แต่ใช้เทียบภายในตัวคุณเอง</p>';
+  }
+
+  function profileBody(G, lead){
+    return '<div class="cols">' +
+      '<div class="mini"><h4>พลังของคุณ</h4><ul class="list">' + G.strong.map(function(x){ return '<li><span>' + x + '</span></li>'; }).join("") + '</ul></div>' +
+      '<div class="mini"><h4>จุดที่ต้องระวัง</h4><ul class="list">' + G.watch.map(function(x){ return '<li><span>' + x + '</span></li>'; }).join("") + '</ul></div>' +
+      '</div>' +
+      '<div class="mini"><h4>ก้าวต่อไปในสัปดาห์นี้</h4><ul class="list">' + G.next.map(function(x){ return '<li><span>' + x + '</span></li>'; }).join("") + '</ul></div>' +
+      '<div class="mini"><h4>คู่ที่ทำให้คุณสมดุล</h4><p>' + G.pair + '</p></div>' +
+      '<p class="refs">' + G.refs + ' · ตัวอย่างในพระคัมภีร์ ' + G.bible + '</p>';
+  }
+
+  function viewResult(){
+    var res = state.result;
+    var top = res.rows[0], second = res.rows[1], low = res.rows[4];
+    var G = GIFTS[top.g], S = GIFTS[second.g], L = GIFTS[low.g];
+
+    var h = '<header class="hero"><div class="eyebrow">ผลของคุณ · ' + fmtDate(res.date) + '</div>' +
+      '<h1>เสียงหลักของคุณคือ ' + G.name + '</h1>' +
+      '<p class="lede">' + G.summary + '</p></header>';
+
+    h += '<section class="stack"><h2>ภาพรวมทั้งห้าเสียง</h2>' + barRows(res) +
+      (res.scaleDone ? "" : '<p class="refs">ผลนี้มาจากขั้นที่ 1 เท่านั้น ทำขั้นที่ 2 เพื่อความแม่นยำมากขึ้น</p>') +
+      '</section>';
+
+    h += '<section class="panel lead" style="--gc:' + G.color + '">' +
+      '<div class="stack"><span class="tag">' + G.letter + ' · ' + G.en + '</span>' +
+      '<p class="pull">' + G.line + '</p>' + profileBody(G) + '</div></section>';
+
+    h += '<section class="stack"><h2>เสียงที่สองของคุณ</h2>' +
+      '<p class="lede"><b>' + S.name + '</b> ที่ ' + second.pct + ' เปอร์เซ็นต์ คือเสียงที่หนุนเสียงหลักของคุณ ' +
+      'คนที่ใช้สองเสียงนี้ร่วมกันได้ จะมีทั้งความคมและความลึกในการรับใช้</p>' +
+      '<div class="note"><b>จุดที่ต้องเติบโต</b> เสียงที่เบาที่สุดของคุณคือ ' + L.name + ' ที่ ' + low.pct + ' เปอร์เซ็นต์ ' +
+      'นี่ไม่ใช่ความล้มเหลว แต่คือเหตุผลที่พระเจ้าให้คุณอยู่ในทีม หาคนที่แข็งในด้านนี้ แล้วเดินด้วยกัน</div></section>';
+
+    h += '<section class="stack"><h2>ทั้งห้าเสียงโดยละเอียด</h2><div>' +
+      res.rows.map(function(row){
+        var g = GIFTS[row.g];
+        return '<details class="acc" style="--gc:' + g.color + '"' + (row.g === top.g ? " open" : "") + '>' +
+          '<summary><span class="letter">' + g.letter + '</span><span><b>' + g.name + '</b> · ' + row.pct + '%</span>' +
+          '<span class="arrow">&#9654;</span></summary>' +
+          '<div class="accbody"><p>' + g.summary + '</p>' + profileBody(g) + '</div></details>';
+      }).join("") + '</div></section>';
+
+    h += '<section class="stack"><h2>ให้คนอื่นยืนยันสิ่งที่คุณเห็น</h2>' +
+      '<p class="lede">ของประทานถูกยืนยันในชุมชน ไม่ใช่ในห้องส่วนตัว ส่งสรุปนี้ให้คนสามคนที่รู้จักคุณจริง ' +
+      'แล้วถามคำถามเดียวว่า สิ่งนี้ตรงกับที่คุณเห็นในตัวฉันไหม</p>' +
+      '<textarea class="share" id="share" readonly>' + esc(summaryText(res)) + '</textarea>' +
+      '<div class="btnrow"><button class="btn" data-go="copy">คัดลอกสรุปผล</button>' +
+      '<button class="btn ghost" data-go="restart">ทำใหม่อีกครั้ง</button>' +
+      '<button class="btn ghost" data-go="intro">กลับหน้าแรก</button></div></section>';
+
+    if (state.history.length > 1) h += historyBlock();
+    return h;
+  }
+
+  function summaryText(res){
+    var lines = [];
+    lines.push("ผลประเมินของประทาน APEST");
+    lines.push("วันที่ " + fmtDate(res.date));
+    lines.push("");
+    res.rows.forEach(function(row, i){
+      lines.push((i+1) + ". " + GIFTS[row.g].name + " " + row.pct + " เปอร์เซ็นต์");
+    });
+    var G = GIFTS[res.rows[0].g];
+    lines.push("");
+    lines.push("เสียงหลัก " + G.name + " คือ " + G.role);
+    lines.push(G.summary);
+    lines.push("");
+    lines.push("ก้าวต่อไป");
+    G.next.forEach(function(x, i){ lines.push((i+1) + ") " + x); });
+    lines.push("");
+    lines.push("จุดที่ต้องระวัง");
+    G.watch.forEach(function(x){ lines.push("- " + x); });
+    lines.push("");
+    lines.push("คำถามที่อยากให้คุณตอบ สิ่งนี้ตรงกับที่คุณเห็นในตัวฉันไหม");
+    return lines.join("\n");
+  }
+
+  function render(){
+    var html = state.screen === "intro" ? viewIntro()
+      : state.screen === "words" ? viewWords()
+      : state.screen === "scale" ? viewScale()
+      : viewResult();
+    app.innerHTML = '<div class="stack-lg">' + html + '</div>' +
+      '<footer class="foot"><span>กรอบ APEST จากเอเฟซัส 4:11-12 · แบบประเมินตนเองสำหรับผู้เชื่อและทีมผู้นำ</span>' +
+      '<span>ของประทานคือเครื่องมือรับใช้ ไม่ใช่ตัวตน คุณมีค่าเพราะพระคริสต์ ไม่ใช่เพราะผลคะแนน</span></footer>';
+    if (state.screen !== "intro") window.scrollTo(0, 0);
+  }
+
+  app.addEventListener("click", function(e){
+    var chip = e.target.closest("[data-word]");
+    if (chip){
+      var i = chip.getAttribute("data-word");
+      state.picks[i] = !state.picks[i];
+      chip.setAttribute("aria-pressed", state.picks[i] ? "true" : "false");
+      var n = pickCount();
+      var meta = app.querySelector(".bar-top .meta span:last-child");
+      if (meta) meta.textContent = "เลือกแล้ว " + n + " คำ";
+      var fill = app.querySelector(".track > i");
+      if (fill) fill.style.width = Math.min(100, n/20*100) + "%";
+      app.querySelectorAll('[data-go="scale"],[data-go="resultNow"]').forEach(function(b){ b.disabled = n < 5; });
+      return;
+    }
+    var go = e.target.closest("[data-go]");
+    if (!go) return;
+    var action = go.getAttribute("data-go");
+
+    if (action === "copy"){
+      var ta = document.getElementById("share");
+      ta.removeAttribute("readonly"); ta.select(); ta.setSelectionRange(0, 99999);
+      var done = false;
+      try { done = document.execCommand("copy"); } catch(err){}
+      ta.setAttribute("readonly", "readonly");
+      if (navigator.clipboard && !done){
+        navigator.clipboard.writeText(ta.value).then(function(){ go.textContent = "คัดลอกแล้ว"; },
+          function(){ go.textContent = "กดค้างที่ข้อความเพื่อคัดลอก"; });
+      } else {
+        go.textContent = done ? "คัดลอกแล้ว" : "กดค้างที่ข้อความเพื่อคัดลอก";
+      }
+      return;
+    }
+    if (action === "restart"){
+      state.picks = {}; state.answers = {}; state.result = null; state.screen = "words"; render(); return;
+    }
+    if (action === "history"){
+      var el = document.getElementById("history");
+      if (el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+      return;
+    }
+    if (action === "resultNow"){
+      state.result = compute();
+      state.history.unshift({ date: fmtDate(state.result.date), top: state.result.rows[0].g, pct: state.result.rows[0].pct });
+      save();
+      state.screen = "result"; render(); return;
+    }
+    state.screen = action; render();
+  });
+
+  app.addEventListener("change", function(e){
+    var q = e.target.closest("[data-q]");
+    if (!q) return;
+    state.answers[Number(q.getAttribute("data-q"))] = Number(q.value);
+    var n = answerCount(), total = STATEMENTS.length;
+    var meta = app.querySelector(".bar-top .meta span:last-child");
+    if (meta) meta.textContent = "ตอบแล้ว " + n + " จาก " + total;
+    var fill = app.querySelector(".track > i");
+    if (fill) fill.style.width = (n/total*100) + "%";
+    var btn = app.querySelector('[data-go="resultNow"]');
+    if (btn) btn.disabled = n < total;
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
