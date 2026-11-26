@@ -1,0 +1,1104 @@
+<title>Forest Room</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: forest-night sidebar + working canvas; POS = menu grid beside a ticket rail, rail becomes a drawer on phones */
+:root{
+  --bg:#ECF0E8; --surface:#F9FBF7; --surface-2:#E1E8DD; --line:#C9D4C4;
+  --ink:#14241A; --muted:#5B6C5F; --fern:#2D6A44; --fern-soft:#D3E4D5; --on-fern:#F4F9F2;
+  --sun:#A86F12; --sun-soft:#F3E3C4; --danger:#A93A2D; --danger-soft:#F4D9D4; --ok:#2D7A4C;
+  --side:#15301F; --side-ink:#D5E3D2; --side-muted:#8FA894; --side-hi:#244A31;
+  --shadow:0 1px 2px rgba(20,36,26,.06),0 6px 20px rgba(20,36,26,.07);
+  --f-display:"Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1611; --surface:#142019; --surface-2:#1B2A21; --line:#2A3C30;
+  --ink:#E2ECDF; --muted:#94A797; --fern:#6BB585; --fern-soft:#1F3A29; --on-fern:#0B1610;
+  --sun:#E2AC52; --sun-soft:#3A2E17; --danger:#E5786A; --danger-soft:#3D1F1B; --ok:#6BB585;
+  --side:#08100B; --side-ink:#CADBC7; --side-muted:#7D9482; --side-hi:#18301F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1611; --surface:#142019; --surface-2:#1B2A21; --line:#2A3C30;
+  --ink:#E2ECDF; --muted:#94A797; --fern:#6BB585; --fern-soft:#1F3A29; --on-fern:#0B1610;
+  --sun:#E2AC52; --sun-soft:#3A2E17; --danger:#E5786A; --danger-soft:#3D1F1B; --ok:#6BB585;
+  --side:#08100B; --side-ink:#CADBC7; --side-muted:#7D9482; --side-hi:#18301F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--fern);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);height:100%}
+.side{background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;gap:4px;padding:18px 12px;padding-left:max(12px,env(safe-area-inset-left,0px));overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.brand-mark{width:36px;height:36px;border-radius:10px;background:var(--side-hi);display:grid;place-items:center;color:#8FD3A4;flex:none}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.1;color:#EEF6EC}
+.brand-sub{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--side-muted)}
+.nav{display:flex;align-items:center;gap:11px;width:100%;padding:10px 10px;border:0;border-radius:10px;background:none;color:var(--side-ink);cursor:pointer;text-align:left;font-size:14.5px}
+.nav svg{width:20px;height:20px;flex:none;opacity:.85}
+.nav:hover{background:var(--side-hi)}
+.nav[aria-current="page"]{background:#E4F1E2;color:#13281A}
+.nav[aria-current="page"] svg{opacity:1}
+.nav .badge{margin-left:auto}
+.side-foot{margin-top:auto;padding:12px 8px 0;font-size:12px;color:var(--side-muted)}
+.side-foot b{color:var(--side-ink);font-weight:500}
+
+main{overflow-y:auto;min-width:0;padding-block:22px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media(min-width:900px){main{padding-left:28px;padding-right:max(28px,env(safe-area-inset-right,0px))}}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.head h1{font-size:26px;font-weight:700}
+.head p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:7px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:500;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--fern);border-color:var(--fern);color:var(--on-fern)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--danger);border-color:var(--danger-soft)}
+.btn.ghost{background:none;border-color:transparent}
+.btn.sm{min-height:32px;padding:4px 10px;font-size:13px}
+.btn.lg{min-height:52px;font-size:17px;border-radius:12px;width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;font-size:11.5px;font-weight:600;background:var(--sun);color:#fff;font-family:var(--f-mono)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-ok{background:var(--fern-soft);color:var(--ok)}
+.p-warn{background:var(--sun-soft);color:var(--sun)}
+.p-bad{background:var(--danger-soft);color:var(--danger)}
+.p-mute{background:var(--surface-2);color:var(--muted)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.pad{padding:16px}
+.label{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--sun-soft);color:var(--ink);border-radius:10px;padding:9px 14px;margin-bottom:16px;font-size:13.5px}
+
+input[type=text],input[type=number],input[type=tel],input[type=date],input[type=time],input[type=search],input[type=email],select,textarea{width:100%;min-height:40px;padding:8px 11px;border-radius:9px;border:1px solid var(--line);background:var(--surface);min-width:0}
+textarea{min-height:64px;resize:vertical}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>span{font-size:13px;color:var(--muted);font-weight:500}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+
+/* KPI strip */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.kpi{padding:14px 16px}
+.kpi .v{font-family:var(--f-display);font-size:24px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+
+/* POS */
+.pos{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.cats{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-height:104px;padding:12px 13px;text-align:left;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);cursor:pointer;box-shadow:var(--shadow);transition:transform .08s}
+.tile:active{transform:scale(.97)}
+.tile .n{font-weight:600;line-height:1.3}
+.tile .pr{font-family:var(--f-mono);font-size:15px;color:var(--fern)}
+.tile .cat-dot{position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:50%}
+.tile .low{font-size:11.5px;color:var(--danger)}
+.tile .qty{position:absolute;top:-7px;right:-7px}
+.ticket{position:sticky;top:0;display:flex;flex-direction:column;max-height:calc(100vh - 60px)}
+.ticket-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.ticket-items{overflow-y:auto;padding:4px 16px;flex:1;min-height:80px}
+.line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.line:last-child{border-bottom:0}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.stepper button{border:0;background:var(--surface-2);width:32px;height:30px;cursor:pointer;font-size:17px}
+.stepper span{min-width:30px;text-align:center;font-family:var(--f-mono)}
+.ticket-foot{padding:14px 16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.sum{display:flex;justify-content:space-between;font-size:14px}
+.sum.total{font-family:var(--f-display);font-size:22px;font-weight:700;padding-top:4px}
+.seg{display:flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:none;border-radius:8px;padding:6px 4px;font-size:13px;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);box-shadow:var(--shadow);font-weight:600}
+.cart-fab{display:none}
+.cart-close{display:none}
+
+/* Kitchen */
+.kds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.kcol h2{font-size:16px;display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.kcard{padding:13px 14px;margin-bottom:10px;border-left-width:4px}
+.kcard.s-new{border-left-color:var(--sun)}
+.kcard.s-cooking{border-left-color:var(--fern)}
+.kcard.s-ready{border-left-color:var(--ok)}
+.kcard ul{margin:8px 0 10px;padding:0;list-style:none}
+.kcard li{display:flex;gap:8px;padding:3px 0;font-size:15px}
+.kcard li b{font-family:var(--f-mono);min-width:26px}
+.late{color:var(--danger);font-weight:600}
+
+/* Rental timeline */
+.tl-wrap{overflow-x:auto}
+.tl{min-width:760px}
+.tl-hours{display:grid;margin-left:150px;font-size:11.5px;color:var(--muted);font-family:var(--f-mono)}
+.tl-row{display:grid;grid-template-columns:150px 1fr;align-items:stretch;border-top:1px solid var(--line);min-height:58px}
+.tl-name{padding:9px 10px 9px 0;font-weight:600;font-size:14px;line-height:1.25}
+.tl-name small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.tl-track{position:relative;background-image:linear-gradient(to right,var(--line) 1px,transparent 1px);background-color:var(--surface-2);border-radius:6px;margin:6px 0}
+.tl-block{position:absolute;top:4px;bottom:4px;border-radius:7px;padding:4px 8px;font-size:12px;line-height:1.25;overflow:hidden;cursor:pointer;border:0;text-align:left;background:var(--fern);color:var(--on-fern)}
+.tl-block.st-checked-in{background:var(--sun);color:#fff}
+.tl-block.st-done{background:var(--muted);color:var(--bg)}
+.tl-now{position:absolute;top:0;bottom:0;width:2px;background:var(--danger)}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+
+/* Plans */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:18px}
+.plan{padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.plan .pp{font-family:var(--f-display);font-size:22px;font-weight:700}
+.plan .pp small{font-size:13px;font-weight:500;color:var(--muted)}
+
+/* Reports */
+.bars{display:flex;align-items:flex-end;gap:4px;height:180px;padding-top:18px}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%;min-width:0}
+.bar i{display:block;width:100%;max-width:38px;background:var(--fern);border-radius:5px 5px 0 0;min-height:2px}
+.bar.peak i{background:var(--sun)}
+.bar span{font-size:10.5px;color:var(--muted);font-family:var(--f-mono);white-space:nowrap}
+.bar em{font-style:normal;font-size:10.5px;font-family:var(--f-mono);color:var(--ink)}
+.hbar{display:grid;grid-template-columns:minmax(90px,140px) 1fr auto;gap:10px;align-items:center;padding:6px 0;font-size:14px}
+.hbar .t{height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.hbar .t i{display:block;height:100%;background:var(--fern);border-radius:5px}
+.r-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:16px}
+.r-grid h2{font-size:16px;margin-bottom:6px}
+
+/* Modal */
+.scrim{position:fixed;inset:0;background:rgba(8,16,11,.5);display:grid;place-items:center;z-index:50;padding:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.modal{width:min(520px,100%);max-height:calc(100% - 20px);overflow-y:auto;background:var(--surface);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.modal.wide{width:min(760px,100%)}
+.modal-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-h h2{font-size:19px}
+.modal-b{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.modal-f{display:flex;gap:8px;justify-content:flex-end;padding:14px 18px;border-top:1px solid var(--line);flex-wrap:wrap}
+.paygrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.paygrid button{padding:12px 4px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:13.5px}
+.paygrid button[aria-pressed="true"]{border-color:var(--fern);background:var(--fern-soft);font-weight:600}
+.bigtotal{text-align:center;font-family:var(--f-display);font-size:38px;font-weight:700;font-variant-numeric:tabular-nums}
+.qr{background:#fff;border-radius:12px;padding:12px;width:min(260px,100%);margin:0 auto}
+.qr svg{width:100%;height:auto;display:block}
+.receipt{font-family:var(--f-mono);font-size:13px;background:var(--surface-2);border-radius:10px;padding:14px}
+.receipt .rl{display:flex;justify-content:space-between;gap:10px}
+.receipt hr{border:0;border-top:1px dashed var(--line);margin:8px 0}
+.err{color:var(--danger);font-size:13.5px}
+.recipe-row{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:6px;align-items:center}
+
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-size:14px;z-index:80;transition:.2s;pointer-events:none;max-width:calc(100% - 32px)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:1100px){.pos{grid-template-columns:minmax(0,1fr) 320px}}
+@media(max-width:900px){
+  .kds{grid-template-columns:1fr}
+}
+@media(max-width:820px){
+  .app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+  .side{order:2;flex-direction:row;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));overflow-x:auto;overflow-y:hidden;gap:2px;border-top:1px solid var(--side-hi)}
+  .brand,.side-foot{display:none}
+  .nav{flex-direction:column;gap:2px;padding:6px 8px;font-size:11px;min-width:64px;flex:1;position:relative;text-align:center}
+  .nav .badge{position:absolute;top:2px;right:6px;margin:0;height:17px;min-width:17px;font-size:10px}
+  main{grid-row:1}
+  .pos{grid-template-columns:1fr}
+  .ticket{display:none;position:fixed;inset:auto 0 0 0;max-height:88%;z-index:40;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .ticket.open{display:flex}
+  .cart-close{display:inline-flex}
+  .cart-fab{display:flex;position:sticky;bottom:10px;margin-top:16px;width:100%;justify-content:space-between;z-index:5}
+  .head h1{font-size:22px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <nav class="side" id="side" aria-label="เมนูหลัก"></nav>
+  <main id="view" aria-live="polite"></main>
+</div>
+<div id="modal-root"></div>
+<div id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const baht = n => "฿" + Number(n || 0).toLocaleString("th-TH", {maximumFractionDigits: 2});
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const z2 = n => String(n).padStart(2, "0");
+const ymd = d => d.getFullYear() + "-" + z2(d.getMonth() + 1) + "-" + z2(d.getDate());
+const today = () => ymd(new Date());
+const addDays = (s, n) => { const d = new Date(s + "T00:00"); d.setDate(d.getDate() + n); return ymd(d); };
+const daysBetween = (a, b) => Math.round((new Date(b + "T00:00") - new Date(a + "T00:00")) / 864e5);
+const thDate = s => s ? new Date(s + "T00:00").toLocaleDateString("th-TH", {day: "numeric", month: "short", year: "2-digit"}) : "-";
+const thDay = s => new Date(s + "T00:00").toLocaleDateString("th-TH", {weekday: "long", day: "numeric", month: "long"});
+const hm = ts => { const d = new Date(ts); return z2(d.getHours()) + ":" + z2(d.getMinutes()); };
+const toMin = t => { const [h, m] = String(t).split(":").map(Number); return h * 60 + (m || 0); };
+const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+
+const ICON = {
+  sell: '<path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/>',
+  kitchen: '<path d="M12 3c2 3 5 4.5 5 9a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2.5-5 .5 1.5 1.2 2.3 2.5 2.8C12 7.5 11.5 5 12 3z"/>',
+  rental: '<path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M3 21h18M14.5 12h.01"/>',
+  cowork: '<path d="M3 11h18M5 11v9M19 11v9M8 11V6.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1V11"/>',
+  stock: '<path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/>',
+  report: '<path d="M4 20V11M10 20V4M16 20v-7M22 20H2"/>',
+  settings: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  tree: '<path d="M12 2.5l5 7h-3l4 6h-5v5.5h-2V15.5H6l4-6H7z" fill="currentColor" stroke="none"/>'
+};
+const svg = (k, sz = 20) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+
+const CATS = [
+  {id: "coffee", name: "กาแฟ", color: "#7A4E2D"},
+  {id: "tea", name: "ไม่ใช่กาแฟ", color: "#4E8A5B"},
+  {id: "food", name: "อาหาร", color: "#B7791F"},
+  {id: "bakery", name: "เบเกอรี่", color: "#C2703D"},
+  {id: "cowork", name: "Co-working", color: "#3C6E8F"}
+];
+const catOf = id => CATS.find(c => c.id === id) || CATS[0];
+const streamOfCat = c => c === "cowork" ? "membership" : "fnb";
+const STREAMS = {fnb: "อาหารและเครื่องดื่ม", rental: "พื้นที่เช่า", membership: "Co-working"};
+const CHANNELS = {dine: "ทานที่ร้าน", take: "กลับบ้าน", grab: "Grab", lineman: "LINE MAN"};
+const METHODS = {cash: "เงินสด", qr: "PromptPay", card: "บัตร", transfer: "โอน"};
+const COLS = ["products", "ingredients", "members", "plans", "spaces", "bookings", "orders"];
+const LS_KEY = "forest-room-v1";
+
+const defaultConfig = () => ({shopName: "Forest Room", promptpay: "", memberDiscount: 5, bahtPerPoint: 25, openHour: 8, closeHour: 22});
+
+/* ---------- state ---------- */
+const S = {
+  mode: "connecting", ready: false, note: "",
+  products: [], ingredients: [], members: [], plans: [], spaces: [], bookings: [], orders: [], config: defaultConfig(),
+  view: "sell", cat: "all", q: "",
+  cart: {items: [], channel: "dine", table: "", memberId: null, note: ""}, cartOpen: false,
+  rentDate: today(), cwFilter: "all", cwQ: "", rPeriod: "today", setTab: "shop"
+};
+
+/* ---------- SEED-START ---------- */
+function makeSampleData(nowMs) {
+  const now = new Date(nowMs);
+  const t = ymd(now);
+  const ad = (n) => { const d = new Date(now); d.setDate(d.getDate() + n); return ymd(d); };
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const S1 = {sample: true};
+  const ing = [
+    ["beans", "เมล็ดกาแฟคั่ว", "g", 2600, 800], ["milk", "นมสด", "ml", 9000, 3000], ["oat", "นมโอ๊ต", "ml", 1800, 1000],
+    ["matcha", "ผงมัทฉะ", "g", 340, 150], ["cocoa", "ผงโกโก้", "g", 700, 200], ["thaitea", "ใบชาไทย", "g", 900, 250],
+    ["croissant", "ครัวซองต์ (แช่แข็ง)", "ชิ้น", 9, 10], ["bread", "ขนมปังโฮลวีต", "แผ่น", 34, 12], ["avocado", "อะโวคาโด", "ลูก", 3, 4],
+    ["egg", "ไข่ไก่", "ฟอง", 42, 15], ["chicken", "อกไก่", "g", 2400, 800], ["cup", "แก้วพร้อมฝา", "ใบ", 180, 60]
+  ].map(([id, name, unit, qty, low]) => ({id: "ing_" + id, name, unit, qty, low, ...S1}));
+  const P = (id, name, cat, price, recipe) => ({id: "p_" + id, name, cat, price, recipe: recipe || [], active: true, ...S1});
+  const r = (...pairs) => pairs.map(([i, q]) => ({ing: "ing_" + i, qty: q}));
+  const products = [
+    P("esp", "เอสเปรสโซ่", "coffee", 60, r(["beans", 18], ["cup", 1])),
+    P("ame", "อเมริกาโน่", "coffee", 70, r(["beans", 18], ["cup", 1])),
+    P("lat", "ลาเต้", "coffee", 85, r(["beans", 18], ["milk", 180], ["cup", 1])),
+    P("cap", "คาปูชิโน่", "coffee", 85, r(["beans", 18], ["milk", 150], ["cup", 1])),
+    P("oatl", "โอ๊ตลาเต้", "coffee", 100, r(["beans", 18], ["oat", 180], ["cup", 1])),
+    P("forest", "Forest Latte (มัทฉะ + ช็อต)", "coffee", 115, r(["beans", 18], ["matcha", 4], ["milk", 160], ["cup", 1])),
+    P("cold", "โคลด์บรูว์", "coffee", 95, r(["beans", 25], ["cup", 1])),
+    P("mat", "มัทฉะลาเต้", "tea", 95, r(["matcha", 5], ["milk", 180], ["cup", 1])),
+    P("coc", "โกโก้", "tea", 80, r(["cocoa", 25], ["milk", 180], ["cup", 1])),
+    P("thai", "ชาไทย", "tea", 75, r(["thaitea", 15], ["milk", 120], ["cup", 1])),
+    P("lemon", "อัญชันมะนาวโซดา", "tea", 80, r(["cup", 1])),
+    P("cro", "ครัวซองต์เนยสด", "bakery", 65, r(["croissant", 1])),
+    P("ban", "บานาน่าเบรด", "bakery", 75),
+    P("avo", "อะโวคาโดโทสต์", "food", 145, r(["bread", 2], ["avocado", 1], ["egg", 1])),
+    P("kra", "ข้าวกะเพราไก่ไข่ดาว", "food", 120, r(["chicken", 150], ["egg", 1])),
+    P("club", "คลับแซนด์วิช", "food", 135, r(["bread", 3], ["chicken", 100], ["egg", 1])),
+    P("gra", "กราโนล่าโยเกิร์ตโบวล์", "food", 125),
+    P("day", "Day Pass (เข้าใช้ 1 วัน)", "cowork", 250),
+    P("hour", "Hour Pass (ต่อชั่วโมง)", "cowork", 60)
+  ];
+  const spaces = [
+    {id: "sp_fern", name: "ห้องประชุม Fern", seats: 8, rate: 400, desc: "จอ TV 65 นิ้ว, ไวท์บอร์ด", ...S1},
+    {id: "sp_moss", name: "ห้องประชุม Moss", seats: 4, rate: 250, desc: "ห้องเล็กสำหรับคุยงาน", ...S1},
+    {id: "sp_garden", name: "ลานกิจกรรม Canopy", seats: 40, rate: 1500, desc: "เวิร์กช็อป, สัมมนา, ปาร์ตี้", ...S1},
+    {id: "sp_pod", name: "Studio Pod", seats: 3, rate: 350, desc: "ห้องอัดพอดแคสต์และวิดีโอ", ...S1}
+  ];
+  const plans = [
+    {id: "pl_flex10", name: "Flex 10 วัน", price: 2000, days: 60, credits: 10, desc: "ใช้ได้ 10 ครั้งภายใน 60 วัน", ...S1},
+    {id: "pl_hot", name: "Hot Desk รายเดือน", price: 3500, days: 30, credits: null, desc: "เข้าได้ไม่จำกัด ที่นั่งอิสระ", ...S1},
+    {id: "pl_ded", name: "Dedicated Desk", price: 5500, days: 30, credits: null, desc: "โต๊ะประจำ + ล็อกเกอร์", ...S1},
+    {id: "pl_team", name: "Team Room รายเดือน", price: 15000, days: 30, credits: null, desc: "ห้องส่วนตัว 4 ที่นั่ง", ...S1}
+  ];
+  const M = (id, name, phone, planId, start, end, credits, points, visits) => ({
+    id: "m_" + id, name, phone, planId, planStart: start, planEnd: end, credits, points,
+    checkins: visits.map(n => new Date(now.getTime() - n * 864e5 - 3600e3 * 2).getTime()), joined: ad(-90), note: "", ...S1
+  });
+  const members = [
+    M("a", "คุณภูผา (ตัวอย่าง)", "081-234-5678", "pl_hot", ad(-12), ad(18), null, 420, [1, 2, 3, 5, 6]),
+    M("b", "คุณใบเตย (ตัวอย่าง)", "089-555-0101", "pl_flex10", ad(-40), ad(20), 3, 260, [0, 4, 9]),
+    M("c", "คุณธาร (ตัวอย่าง)", "086-777-2121", "pl_ded", ad(-26), ad(4), null, 610, [0, 1, 2, 3]),
+    M("d", "คุณขุนเขา (ตัวอย่าง)", "092-111-4545", "pl_hot", ad(-37), ad(-7), null, 90, [12]),
+    M("e", "คุณน้ำฝน (ตัวอย่าง)", "095-303-8080", null, null, null, null, 75, []),
+    M("f", "ทีม Seedling Studio (ตัวอย่าง)", "02-118-9000", "pl_team", ad(-5), ad(25), null, 0, [0, 1, 2])
+  ];
+  const bookings = [
+    {id: "b1", spaceId: "sp_fern", date: t, start: "10:00", end: "12:00", customer: "บริษัท ใบไม้ จำกัด (ตัวอย่าง)", phone: "02-555-1234", people: 6, note: "ขอกาแฟ 6 แก้ว", price: 800, status: "checked-in", paid: false, ...S1},
+    {id: "b2", spaceId: "sp_moss", date: t, start: "13:00", end: "14:30", customer: "คุณธาร (ตัวอย่าง)", phone: "086-777-2121", people: 2, note: "", price: 375, status: "booked", paid: false, ...S1},
+    {id: "b3", spaceId: "sp_garden", date: t, start: "17:00", end: "21:00", customer: "กลุ่มอ่านหนังสือ Rooted (ตัวอย่าง)", phone: "080-999-1111", people: 30, note: "จัดเก้าอี้แบบวงกลม", price: 6000, status: "booked", paid: true, ...S1},
+    {id: "b4", spaceId: "sp_pod", date: t, start: "15:00", end: "17:00", customer: "พอดแคสต์ Morning Dew (ตัวอย่าง)", phone: "087-444-2323", people: 2, note: "", price: 700, status: "booked", paid: false, ...S1},
+    {id: "b5", spaceId: "sp_fern", date: ad(1), start: "09:00", end: "12:00", customer: "คุณภูผา (ตัวอย่าง)", phone: "081-234-5678", people: 5, note: "", price: 1200, status: "booked", paid: false, ...S1}
+  ];
+  const orders = [];
+  const fnb = products.filter(p => p.cat !== "cowork");
+  const chans = ["dine", "dine", "dine", "take", "take", "grab", "lineman"];
+  const meth = ["cash", "qr", "qr", "qr", "card", "transfer"];
+  let no = 0, lastDay = "";
+  for (let d = 6; d >= 0; d--) {
+    const n = 7 + Math.floor(rnd() * 6) - (d === 0 ? 3 : 0);
+    const stamps = [];
+    for (let i = 0; i < n; i++) { const dt = new Date(now); dt.setDate(dt.getDate() - d); dt.setHours(8 + Math.floor(rnd() * 11), Math.floor(rnd() * 60), 0, 0); if (d === 0 && dt > now) dt.setTime(now.getTime() - (i + 1) * 23 * 60e3); stamps.push(dt.getTime()); }
+    stamps.sort((a, b) => a - b);
+    for (const ts of stamps) {
+      const day = ymd(new Date(ts)); if (day !== lastDay) { no = 0; lastDay = day; }
+      const k = 1 + Math.floor(rnd() * 3), items = [];
+      for (let j = 0; j < k; j++) { const p = fnb[Math.floor(rnd() * fnb.length)]; const ex = items.find(x => x.pid === p.id); if (ex) ex.qty++; else items.push({pid: p.id, name: p.name, price: p.price, qty: 1, stream: "fnb", kitchen: true}); }
+      if (rnd() < .15) { const dp = products.find(p => p.id === "p_day"); items.push({pid: dp.id, name: dp.name, price: dp.price, qty: 1, stream: "membership", kitchen: false}); }
+      const sub = items.reduce((s, x) => s + x.price * x.qty, 0);
+      orders.push({id: "o" + ts.toString(36), no: ++no, ts, type: "pos", items, subtotal: sub, discount: 0, total: sub, method: meth[Math.floor(rnd() * meth.length)], channel: chans[Math.floor(rnd() * chans.length)], table: "", memberId: null, status: "served", kitchen: true, ...S1});
+    }
+  }
+  // a few rental + membership payments in the week
+  const extra = [[3, "rental", "ห้องประชุม Fern 3 ชม.", 1200], [2, "membership", "Hot Desk รายเดือน", 3500], [1, "rental", "Studio Pod 2 ชม.", 700], [0, "rental", "ลานกิจกรรม Canopy 4 ชม. (มัดจำ)", 6000], [5, "membership", "Flex 10 วัน", 2000]];
+  for (const [d, stream, name, price] of extra) {
+    const dt = new Date(now); dt.setDate(dt.getDate() - d); dt.setHours(9, 30, 0, 0); if (dt > now) dt.setTime(now.getTime() - 40 * 60e3);
+    orders.push({id: "ox" + d + stream, no: 0, ts: dt.getTime(), type: stream, items: [{pid: null, name, price, qty: 1, stream, kitchen: false}], subtotal: price, discount: 0, total: price, method: "transfer", channel: "dine", table: "", memberId: null, status: "served", kitchen: false, ...S1});
+  }
+  // live kitchen tickets
+  const live = [[4, "new", "dine", "T3", [["p_lat", 2], ["p_avo", 1]]], [9, "cooking", "grab", "", [["p_kra", 2], ["p_thai", 1]]], [15, "ready", "take", "", [["p_cold", 1], ["p_cro", 1]]]];
+  for (const [ago, st, ch, tb, list] of live) {
+    const items = list.map(([pid, q]) => { const p = products.find(x => x.id === pid); return {pid, name: p.name, price: p.price, qty: q, stream: "fnb", kitchen: true}; });
+    const sub = items.reduce((s, x) => s + x.price * x.qty, 0);
+    orders.push({id: "ok" + ago, no: 90 + ago, ts: now.getTime() - ago * 60e3, type: "pos", items, subtotal: sub, discount: 0, total: sub, method: "qr", channel: ch, table: tb, memberId: null, status: st, kitchen: true, ...S1});
+  }
+  return {config: {...defaultConfig(), sample: true}, products, ingredients: ing, members, plans, spaces, bookings, orders};
+}
+/* ---------- SEED-END ---------- */
+
+/* ---------- storage: claude db when available, else this device ---------- */
+const Store = {
+  db: null,
+  async init() {
+    let db = null;
+    if (window.claude && typeof window.claude.use === "function") {
+      try { db = await Promise.race([window.claude.use("db"), new Promise(r => setTimeout(() => r(null), 10000))]); } catch (e) { db = null; }
+    }
+    if (db) { this.db = db; S.mode = "cloud"; this.subscribe(); }
+    else { S.mode = "local"; this.loadLocal(); }
+  },
+  loadLocal() {
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) {}
+    if (!data) { data = makeSampleData(Date.now()); this.writeLocal(data); }
+    COLS.forEach(c => S[c] = data[c] || []);
+    S.config = {...defaultConfig(), ...(data.config || {})};
+    S.ready = true; render();
+  },
+  writeLocal(data) {
+    const d = data || Object.fromEntries([...COLS.map(c => [c, S[c]]), ["config", S.config]]);
+    try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch (e) { toast("บันทึกในเครื่องไม่ได้ (พื้นที่เต็มหรือถูกบล็อก)"); }
+  },
+  subscribe() {
+    const pending = new Set([...COLS, "config"]);
+    const timer = setTimeout(() => { if (!S.ready) { S.ready = true; S.note = "ยังเชื่อมต่อฐานข้อมูลไม่ได้ ข้อมูลที่เห็นอาจไม่ล่าสุด"; render(); } }, 10000);
+    const done = k => { pending.delete(k); if (!pending.size && !S.ready) { S.ready = true; S.note = ""; clearTimeout(timer); } schedule(); };
+    COLS.forEach(c => {
+      let q = this.db.collection(c);
+      if (c === "orders") q = q.orderBy("ts", "desc").limit(1000);
+      q.onSnapshot(snap => {
+        S[c] = snap.docs.map(d => ({...d.data(), id: d.id}));
+        if (!snap.metadata.fromCache) done(c); else schedule();
+      }, err => { S.note = "โหลดข้อมูล " + c + " ไม่สำเร็จ (" + err.code + ")"; done(c); });
+    });
+    this.db.doc("config/settings").onSnapshot(snap => {
+      S.config = snap.exists ? {...defaultConfig(), ...snap.data()} : defaultConfig();
+      if (!snap.metadata.fromCache) done("config"); else schedule();
+    }, err => done("config"));
+  },
+  async put(col, obj) {
+    const i = S[col].findIndex(x => x.id === obj.id);
+    if (i >= 0) S[col][i] = obj; else S[col].push(obj);
+    if (S.mode === "cloud") {
+      const {id, ...body} = obj;
+      try { await this.db.collection(col).doc(id).set(JSON.parse(JSON.stringify(body))); }
+      catch (e) { toast(e.code === "quota_exceeded" ? "พื้นที่ฐานข้อมูลเต็ม ลบข้อมูลเก่าก่อน" : "บันทึกไม่สำเร็จ (" + (e.code || "error") + ")"); }
+    } else this.writeLocal();
+    schedule();
+  },
+  async remove(col, id) {
+    S[col] = S[col].filter(x => x.id !== id);
+    if (S.mode === "cloud") { try { await this.db.collection(col).doc(id).delete(); } catch (e) { toast("ลบไม่สำเร็จ"); } }
+    else this.writeLocal();
+    schedule();
+  },
+  async setConfig(cfg) {
+    S.config = cfg;
+    if (S.mode === "cloud") { try { await this.db.doc("config/settings").set(JSON.parse(JSON.stringify(cfg))); } catch (e) { toast("บันทึกการตั้งค่าไม่สำเร็จ"); } }
+    else this.writeLocal();
+    schedule();
+  }
+};
+
+/* ---------- render loop ---------- */
+let raf = 0;
+function schedule() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; render(); }); }
+function render() {
+  const a = document.activeElement, fid = a && a.id, sel = a && "selectionStart" in a ? [a.selectionStart, a.selectionEnd] : null;
+  renderNav();
+  const v = $("#view");
+  if (!S.ready) { v.innerHTML = `<div class="empty" style="padding-top:80px">${svg("tree", 36)}<p>กำลังเปิด Forest Room…</p></div>`; return; }
+  const fn = VIEWS[S.view] || VIEWS.sell;
+  v.innerHTML = (S.note ? `<div class="banner">${esc(S.note)}</div>` : "") +
+    (S.config.sample ? `<div class="banner"><span>ตอนนี้แสดง <b>ข้อมูลตัวอย่าง</b> เพื่อให้เห็นภาพการใช้งาน ลบได้ทั้งหมดที่หน้าตั้งค่า</span><button class="btn sm" data-act="go" data-v="settings" data-tab="data">ไปที่ข้อมูลร้าน</button></div>` : "") + fn();
+  if (fid) { const el = document.getElementById(fid); if (el) { el.focus(); if (sel && el.setSelectionRange) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
+}
+
+function renderNav() {
+  const openK = S.orders.filter(o => o.kitchen && ["new", "cooking", "ready"].includes(o.status)).length;
+  const low = S.ingredients.filter(i => num(i.qty) <= num(i.low)).length;
+  const exp = S.members.filter(m => ["expiring", "expired"].includes(planStatus(m))).length;
+  const todayBk = S.bookings.filter(b => b.date === today() && b.status !== "cancelled").length;
+  const items = [["sell", "ขายหน้าร้าน", 0], ["kitchen", "ครัว", openK], ["rental", "พื้นที่เช่า", todayBk], ["cowork", "Co-working", exp], ["stock", "สต็อก", low], ["report", "รายงาน", 0], ["settings", "ตั้งค่า", 0]];
+  $("#side").innerHTML = `<div class="brand"><div class="brand-mark">${svg("tree", 22)}</div><div><div class="brand-name">${esc(S.config.shopName || "Forest Room")}</div><div class="brand-sub">café · co-working</div></div></div>` +
+    items.map(([k, label, b]) => `<button class="nav" data-act="go" data-v="${k}" ${S.view === k ? 'aria-current="page"' : ""}>${svg(k)}<span>${label}</span>${b ? `<span class="badge">${b}</span>` : ""}</button>`).join("") +
+    `<div class="side-foot">ข้อมูล: <b>${S.mode === "cloud" ? "ซิงก์ทุกเครื่อง" : S.mode === "local" ? "เก็บในเครื่องนี้" : "กำลังเชื่อมต่อ"}</b></div>`;
+}
+
+/* ---------- domain helpers ---------- */
+const planOf = id => S.plans.find(p => p.id === id);
+const memberOf = id => S.members.find(m => m.id === id);
+const spaceOf = id => S.spaces.find(s => s.id === id);
+function planStatus(m) {
+  if (!m || !m.planId) return "none";
+  const left = daysBetween(today(), m.planEnd);
+  if (left < 0) return "expired";
+  if (m.credits !== null && m.credits !== undefined && m.credits <= 0) return "used";
+  if (left <= 7) return "expiring";
+  return "active";
+}
+const PSTAT = {active: ["ใช้งานอยู่", "p-ok"], expiring: ["ใกล้หมดอายุ", "p-warn"], expired: ["หมดอายุ", "p-bad"], used: ["ใช้ครบแล้ว", "p-bad"], none: ["ไม่มีแพ็กเกจ", "p-mute"]};
+function stockShort(p) {
+  return (p.recipe || []).some(r => { const i = S.ingredients.find(x => x.id === r.ing); return i && num(i.qty) < num(r.qty); });
+}
+function nextOrderNo() {
+  const d = today();
+  return S.orders.filter(o => ymd(new Date(o.ts)) === d && o.no).reduce((m, o) => Math.max(m, o.no), 0) + 1;
+}
+function cartTotals() {
+  const c = S.cart, sub = c.items.reduce((s, x) => s + x.price * x.qty, 0);
+  const disc = c.memberId ? Math.round(sub * num(S.config.memberDiscount) / 100) : 0;
+  return {sub, disc, total: sub - disc};
+}
+
+async function deductStock(items) {
+  const need = {};
+  for (const it of items) { const p = S.products.find(x => x.id === it.pid); if (!p) continue; for (const r of p.recipe || []) need[r.ing] = (need[r.ing] || 0) + num(r.qty) * it.qty; }
+  for (const [id, q] of Object.entries(need)) { const i = S.ingredients.find(x => x.id === id); if (i) await Store.put("ingredients", {...i, qty: Math.round((num(i.qty) - q) * 100) / 100}); }
+}
+
+async function recordOrder(o) {
+  const order = {id: uid(), ts: Date.now(), discount: 0, channel: "dine", table: "", memberId: null, ...o};
+  await Store.put("orders", order);
+  return order;
+}
+
+/* ---------- VIEWS ---------- */
+const VIEWS = {};
+
+VIEWS.sell = () => {
+  const q = S.q.trim().toLowerCase();
+  const list = S.products.filter(p => p.active !== false && (S.cat === "all" || p.cat === S.cat) && (!q || p.name.toLowerCase().includes(q)));
+  const inCart = id => (S.cart.items.find(x => x.pid === id) || {}).qty || 0;
+  const {sub, disc, total} = cartTotals();
+  const count = S.cart.items.reduce((s, x) => s + x.qty, 0);
+  const mem = memberOf(S.cart.memberId);
+  return `
+  <div class="head"><div><h1>ขายหน้าร้าน</h1><p>${thDay(today())} · บิลถัดไป #${z2(nextOrderNo()).padStart(3, "0")}</p></div>
+    <div style="width:min(260px,100%)"><input type="search" id="pos-q" placeholder="ค้นหาเมนู" value="${esc(S.q)}" data-input="q"></div></div>
+  <div class="pos">
+    <section style="min-width:0">
+      <div class="cats" role="group" aria-label="หมวดเมนู">
+        <button class="chip" data-act="cat" data-c="all" aria-pressed="${S.cat === "all"}">ทั้งหมด</button>
+        ${CATS.map(c => `<button class="chip" data-act="cat" data-c="${c.id}" aria-pressed="${S.cat === c.id}">${c.name}</button>`).join("")}
+      </div>
+      ${list.length ? `<div class="menu">${list.map(p => `
+        <button class="tile" data-act="add" data-id="${esc(p.id)}">
+          <span class="cat-dot" style="background:${catOf(p.cat).color}"></span>
+          ${inCart(p.id) ? `<span class="badge qty">${inCart(p.id)}</span>` : ""}
+          <span class="n">${esc(p.name)}</span>
+          <span><span class="pr">${baht(p.price)}</span>${stockShort(p) ? `<br><span class="low">วัตถุดิบใกล้หมด</span>` : ""}</span>
+        </button>`).join("")}</div>`
+      : `<div class="card empty">${S.products.length ? "ไม่พบเมนูที่ค้นหา" : "ยังไม่มีเมนู เพิ่มได้ที่ ตั้งค่า แล้วเลือก เมนูอาหาร"}</div>`}
+      <button class="btn primary lg cart-fab" data-act="cart-open"><span>ตะกร้า ${count} รายการ</span><span class="num">${baht(total)}</span></button>
+    </section>
+    <aside class="card ticket ${S.cartOpen ? "open" : ""}" aria-label="บิลปัจจุบัน">
+      <div class="ticket-head">
+        <div class="row" style="justify-content:space-between"><h2 style="font-size:18px">บิลปัจจุบัน</h2>
+          <div class="row"><button class="btn sm ghost" data-act="cart-clear" ${count ? "" : "disabled"}>ล้าง</button><button class="btn sm ghost cart-close" data-act="cart-close" aria-label="ปิด">✕</button></div></div>
+        <div class="seg" role="group" aria-label="ช่องทาง">${Object.entries(CHANNELS).map(([k, v]) => `<button data-act="channel" data-c="${k}" aria-pressed="${S.cart.channel === k}">${v}</button>`).join("")}</div>
+        <div class="row" style="flex-wrap:nowrap">
+          ${S.cart.channel === "dine" ? `<input type="text" id="cart-table" placeholder="โต๊ะ" value="${esc(S.cart.table)}" data-input="table" style="width:80px;flex:none">` : ""}
+          ${mem ? `<button class="btn sm" style="flex:1;justify-content:space-between" data-act="member-pick"><span>${esc(mem.name)}</span><span class="muted small">${mem.points || 0} แต้ม</span></button><button class="btn sm ghost" data-act="member-clear" aria-label="ไม่ใช้สมาชิก">✕</button>`
+            : `<button class="btn sm" style="flex:1" data-act="member-pick">+ สมาชิก (ลด ${num(S.config.memberDiscount)}%)</button>`}
+        </div>
+      </div>
+      <div class="ticket-items">${S.cart.items.length ? S.cart.items.map((x, i) => `
+        <div class="line"><div><div style="font-weight:600">${esc(x.name)}</div><div class="muted small num">${baht(x.price)} × ${x.qty}</div></div>
+          <div style="text-align:right"><div class="num" style="font-weight:600">${baht(x.price * x.qty)}</div>
+          <div class="stepper" style="margin-top:4px"><button data-act="qty" data-i="${i}" data-d="-1" aria-label="ลด">−</button><span>${x.qty}</span><button data-act="qty" data-i="${i}" data-d="1" aria-label="เพิ่ม">+</button></div></div></div>`).join("")
+        : `<div class="empty small">แตะเมนูทางซ้ายเพื่อเพิ่มลงบิล</div>`}</div>
+      <div class="ticket-foot">
+        <input type="text" id="cart-note" placeholder="หมายเหตุถึงครัว เช่น หวานน้อย" value="${esc(S.cart.note)}" data-input="note">
+        <div class="sum"><span class="muted">ยอดรวม</span><span class="num">${baht(sub)}</span></div>
+        ${disc ? `<div class="sum"><span class="muted">ส่วนลดสมาชิก ${num(S.config.memberDiscount)}%</span><span class="num">−${baht(disc)}</span></div>` : ""}
+        <div class="sum total"><span>สุทธิ</span><span>${baht(total)}</span></div>
+        <button class="btn primary lg" data-act="checkout" ${count ? "" : "disabled"}>ชำระเงิน</button>
+      </div>
+    </aside>
+  </div>`;
+};
+
+VIEWS.kitchen = () => {
+  const open = S.orders.filter(o => o.kitchen && ["new", "cooking", "ready"].includes(o.status)).sort((a, b) => a.ts - b.ts);
+  const col = (st, title, next, label) => {
+    const list = open.filter(o => o.status === st);
+    return `<section class="kcol"><h2>${title} <span class="badge" style="background:var(--muted)">${list.length}</span></h2>
+      ${list.length ? list.map(o => {
+        const mins = Math.floor((Date.now() - o.ts) / 60000);
+        const its = o.items.filter(i => i.kitchen !== false);
+        return `<article class="card kcard s-${st}">
+          <div class="row" style="justify-content:space-between"><b class="num" style="font-size:17px">#${String(o.no || "").padStart(3, "0")}</b>
+          <span class="small ${mins >= 15 ? "late" : "muted"}">${mins} นาที</span></div>
+          <div class="small muted">${CHANNELS[o.channel] || ""}${o.table ? " · โต๊ะ " + esc(o.table) : ""} · ${hm(o.ts)}</div>
+          <ul>${its.map(i => `<li><b>${i.qty}×</b><span>${esc(i.name)}</span></li>`).join("")}</ul>
+          ${o.note ? `<div class="small" style="background:var(--sun-soft);padding:6px 9px;border-radius:7px;margin-bottom:10px">${esc(o.note)}</div>` : ""}
+          <button class="btn ${st === "ready" ? "" : "primary"}" style="width:100%" data-act="k-next" data-id="${esc(o.id)}" data-s="${next}">${label}</button>
+        </article>`;
+      }).join("") : `<div class="card empty small">ไม่มีออเดอร์</div>`}</section>`;
+  };
+  return `<div class="head"><div><h1>จอครัว</h1><p>ออเดอร์จากหน้าร้านและเดลิเวอรี่เข้ามาที่นี่ทันทีหลังชำระเงิน</p></div></div>
+    <div class="kds">${col("new", "ออเดอร์ใหม่", "cooking", "เริ่มทำ")}${col("cooking", "กำลังทำ", "ready", "ทำเสร็จ พร้อมเสิร์ฟ")}${col("ready", "พร้อมเสิร์ฟ", "served", "เสิร์ฟ / ส่งไรเดอร์แล้ว")}</div>`;
+};
+
+VIEWS.rental = () => {
+  const d = S.rentDate, oh = num(S.config.openHour) || 8, ch = num(S.config.closeHour) || 22, span = (ch - oh) * 60;
+  const day = S.bookings.filter(b => b.date === d && b.status !== "cancelled").sort((a, b) => toMin(a.start) - toMin(b.start));
+  const hours = []; for (let h = oh; h < ch; h++) hours.push(h);
+  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  const showNow = d === today() && nowMin >= oh * 60 && nowMin <= ch * 60;
+  const rev = day.reduce((s, b) => s + num(b.price), 0), unpaid = day.filter(b => !b.paid).length;
+  const BST = {booked: ["จองแล้ว", "p-mute"], "checked-in": ["เช็คอินแล้ว", "p-warn"], done: ["เสร็จสิ้น", "p-ok"]};
+  return `<div class="head"><div><h1>พื้นที่เช่า</h1><p>${thDay(d)}</p></div>
+    <div class="row"><button class="btn" data-act="rent-day" data-d="-1" aria-label="วันก่อน">‹</button>
+    <input type="date" id="rent-date" value="${d}" data-input="rentDate" style="width:auto">
+    <button class="btn" data-act="rent-day" data-d="1" aria-label="วันถัดไป">›</button>
+    <button class="btn" data-act="rent-day" data-d="0">วันนี้</button>
+    <button class="btn primary" data-act="book-new">+ จองพื้นที่</button></div></div>
+  <div class="kpis">
+    <div class="card kpi"><div class="label">การจองวันนี้</div><div class="v">${day.length}</div><div class="s">${S.spaces.length} พื้นที่ให้เช่า</div></div>
+    <div class="card kpi"><div class="label">มูลค่าการจอง</div><div class="v">${baht(rev)}</div><div class="s">ของวันที่เลือก</div></div>
+    <div class="card kpi"><div class="label">รอชำระ</div><div class="v">${unpaid}</div><div class="s">รายการ</div></div>
+  </div>
+  <div class="card pad" style="margin-bottom:16px">
+    ${S.spaces.length ? `<div class="tl-wrap"><div class="tl">
+      <div class="tl-hours" style="grid-template-columns:repeat(${hours.length},1fr)">${hours.map(h => `<span>${z2(h)}:00</span>`).join("")}</div>
+      ${S.spaces.map(sp => `<div class="tl-row"><div class="tl-name">${esc(sp.name)}<small>${sp.seats} ที่นั่ง · ${baht(sp.rate)}/ชม.</small></div>
+        <div class="tl-track" style="background-size:calc(100% / ${hours.length}) 100%">
+          ${day.filter(b => b.spaceId === sp.id).map(b => { const l = (toMin(b.start) - oh * 60) / span * 100, w = (toMin(b.end) - toMin(b.start)) / span * 100;
+            return `<button class="tl-block st-${b.status}" style="left:${Math.max(0, l)}%;width:${Math.max(2, w)}%" data-act="book-edit" data-id="${esc(b.id)}" title="${esc(b.customer)} ${b.start}–${b.end}"><b>${b.start}–${b.end}</b><br>${esc(b.customer)}</button>`; }).join("")}
+          ${showNow ? `<span class="tl-now" style="left:${(nowMin - oh * 60) / span * 100}%"></span>` : ""}
+        </div></div>`).join("")}
+    </div></div>` : `<div class="empty">ยังไม่มีพื้นที่ให้เช่า เพิ่มห้องหรือลานได้ที่ ตั้งค่า แล้วเลือก พื้นที่เช่า</div>`}
+  </div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <thead><tr><th>เวลา</th><th>พื้นที่</th><th>ลูกค้า</th><th>สถานะ</th><th class="r">ราคา</th><th></th></tr></thead>
+    <tbody>${day.length ? day.map(b => { const sp = spaceOf(b.spaceId); const st = BST[b.status] || BST.booked;
+      return `<tr><td class="num">${b.start}–${b.end}</td><td>${esc(sp ? sp.name : "-")}</td>
+      <td>${esc(b.customer)}<div class="small muted">${esc(b.phone || "")}${b.people ? " · " + b.people + " คน" : ""}${b.note ? " · " + esc(b.note) : ""}</div></td>
+      <td><span class="pill ${st[1]}">${st[0]}</span> ${b.paid ? `<span class="pill p-ok">ชำระแล้ว</span>` : `<span class="pill p-warn">รอชำระ</span>`}</td>
+      <td class="r num">${baht(b.price)}</td>
+      <td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap">
+        ${b.status === "booked" ? `<button class="btn sm" data-act="book-status" data-id="${esc(b.id)}" data-s="checked-in">เช็คอิน</button>` : ""}
+        ${b.status === "checked-in" ? `<button class="btn sm" data-act="book-status" data-id="${esc(b.id)}" data-s="done">เช็คเอาท์</button>` : ""}
+        ${!b.paid ? `<button class="btn sm primary" data-act="book-pay" data-id="${esc(b.id)}">รับชำระ</button>` : ""}
+        <button class="btn sm ghost" data-act="book-edit" data-id="${esc(b.id)}">แก้ไข</button></div></td></tr>`; }).join("")
+      : `<tr><td colspan="6" class="empty">ยังไม่มีการจองในวันนี้ กด จองพื้นที่ เพื่อเพิ่มรายการแรก</td></tr>`}</tbody></table></div></div>`;
+};
+
+VIEWS.cowork = () => {
+  const t = today();
+  const st = m => planStatus(m);
+  const active = S.members.filter(m => ["active", "expiring"].includes(st(m)));
+  const expiring = S.members.filter(m => st(m) === "expiring");
+  const inToday = S.members.filter(m => (m.checkins || []).some(ts => ymd(new Date(ts)) === t));
+  const mrr = active.reduce((s, m) => { const p = planOf(m.planId); return s + (p && p.days >= 28 && p.credits == null ? num(p.price) : 0); }, 0);
+  const q = S.cwQ.trim().toLowerCase();
+  const F = {all: () => true, active: m => ["active", "expiring"].includes(st(m)), expiring: m => st(m) === "expiring", expired: m => ["expired", "used"].includes(st(m)), none: m => st(m) === "none"};
+  const list = S.members.filter(F[S.cwFilter] || F.all).filter(m => !q || (m.name + " " + (m.phone || "")).toLowerCase().includes(q))
+    .sort((a, b) => (a.planEnd || "9999") < (b.planEnd || "9999") ? -1 : 1);
+  return `<div class="head"><div><h1>สมาชิก Co-working</h1><p>แพ็กเกจ เช็คอิน ต่ออายุ และแต้มสะสมของลูกค้าทุกคน</p></div>
+    <div class="row"><button class="btn primary" data-act="mem-new">+ สมัครสมาชิก</button></div></div>
+  <div class="kpis">
+    <div class="card kpi"><div class="label">แพ็กเกจใช้งานอยู่</div><div class="v">${active.length}</div><div class="s">จากสมาชิก ${S.members.length} คน</div></div>
+    <div class="card kpi"><div class="label">เช็คอินวันนี้</div><div class="v">${inToday.length}</div><div class="s">${esc(inToday.map(m => m.name.split(" ")[0]).slice(0, 3).join(", ")) || "ยังไม่มี"}</div></div>
+    <div class="card kpi"><div class="label">ใกล้หมดอายุ 7 วัน</div><div class="v" style="color:${expiring.length ? "var(--sun)" : "inherit"}">${expiring.length}</div><div class="s">ควรติดต่อต่ออายุ</div></div>
+    <div class="card kpi"><div class="label">รายได้รายเดือนประจำ</div><div class="v">${baht(mrr)}</div><div class="s">จากแพ็กเกจรายเดือนที่ใช้งานอยู่</div></div>
+  </div>
+  <div class="plans">${S.plans.map(p => `<div class="card plan"><div class="label">${p.credits == null ? "ไม่จำกัดครั้ง" : p.credits + " ครั้ง"} · ${p.days} วัน</div>
+    <div style="font-weight:600">${esc(p.name)}</div><div class="pp">${baht(p.price)}</div><div class="small muted">${esc(p.desc || "")}</div></div>`).join("") || `<div class="card empty">ยังไม่มีแพ็กเกจ เพิ่มได้ที่ ตั้งค่า</div>`}</div>
+  <div class="row" style="justify-content:space-between;margin-bottom:12px">
+    <div class="cats" style="margin:0">${[["all", "ทั้งหมด"], ["active", "ใช้งานอยู่"], ["expiring", "ใกล้หมดอายุ"], ["expired", "หมดอายุ"], ["none", "ไม่มีแพ็กเกจ"]].map(([k, v]) => `<button class="chip" data-act="cw-filter" data-f="${k}" aria-pressed="${S.cwFilter === k}">${v}</button>`).join("")}</div>
+    <div style="width:min(240px,100%)"><input type="search" id="cw-q" placeholder="ค้นหาชื่อหรือเบอร์" value="${esc(S.cwQ)}" data-input="cwQ"></div>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <thead><tr><th>สมาชิก</th><th>แพ็กเกจ</th><th>หมดอายุ</th><th class="r">คงเหลือ</th><th class="r">แต้ม</th><th></th></tr></thead>
+    <tbody>${list.length ? list.map(m => { const p = planOf(m.planId), s = st(m), ps = PSTAT[s];
+      const left = m.planEnd ? daysBetween(t, m.planEnd) : null;
+      const inT = (m.checkins || []).some(ts => ymd(new Date(ts)) === t);
+      return `<tr><td><b>${esc(m.name)}</b><div class="small muted">${esc(m.phone || "")}</div></td>
+      <td>${p ? esc(p.name) : "-"}<div><span class="pill ${ps[1]}">${ps[0]}</span></div></td>
+      <td>${m.planEnd ? thDate(m.planEnd) + `<div class="small muted">${left >= 0 ? "อีก " + left + " วัน" : "เลยมา " + (-left) + " วัน"}</div>` : "-"}</td>
+      <td class="r num">${p ? (m.credits == null ? "ไม่จำกัด" : m.credits + " ครั้ง") : "-"}</td>
+      <td class="r num">${m.points || 0}</td>
+      <td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap">
+        ${["active", "expiring"].includes(s) ? (inT ? `<span class="pill p-ok">อยู่ในร้าน</span>` : `<button class="btn sm primary" data-act="mem-checkin" data-id="${esc(m.id)}">เช็คอิน</button>`) : ""}
+        <button class="btn sm" data-act="mem-renew" data-id="${esc(m.id)}">${p ? "ต่ออายุ" : "ซื้อแพ็กเกจ"}</button>
+        <button class="btn sm ghost" data-act="mem-edit" data-id="${esc(m.id)}">แก้ไข</button></div></td></tr>`; }).join("")
+      : `<tr><td colspan="6" class="empty">${S.members.length ? "ไม่มีสมาชิกในกลุ่มนี้" : "ยังไม่มีสมาชิก กด สมัครสมาชิก เพื่อเพิ่มคนแรก"}</td></tr>`}</tbody></table></div></div>`;
+};
+
+VIEWS.stock = () => {
+  const list = [...S.ingredients].sort((a, b) => (num(a.qty) / Math.max(1, num(a.low))) - (num(b.qty) / Math.max(1, num(b.low))));
+  const low = list.filter(i => num(i.qty) <= num(i.low));
+  const usedBy = id => S.products.filter(p => (p.recipe || []).some(r => r.ing === id)).map(p => p.name);
+  return `<div class="head"><div><h1>สต็อกวัตถุดิบ</h1><p>ตัดสต็อกอัตโนมัติตามสูตรทุกครั้งที่ขาย</p></div>
+    <button class="btn primary" data-act="ing-new">+ เพิ่มวัตถุดิบ</button></div>
+  <div class="kpis"><div class="card kpi"><div class="label">วัตถุดิบทั้งหมด</div><div class="v">${list.length}</div></div>
+    <div class="card kpi"><div class="label">ต้องสั่งเพิ่ม</div><div class="v" style="color:${low.length ? "var(--danger)" : "inherit"}">${low.length}</div><div class="s">${esc(low.map(i => i.name).slice(0, 3).join(", ")) || "ทุกอย่างเพียงพอ"}</div></div></div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <thead><tr><th>วัตถุดิบ</th><th class="r">คงเหลือ</th><th class="r">จุดสั่งซื้อ</th><th>สถานะ</th><th>ใช้ในเมนู</th><th></th></tr></thead>
+    <tbody>${list.length ? list.map(i => { const q = num(i.qty), l = num(i.low); const s = q <= 0 ? ["หมด", "p-bad"] : q <= l ? ["ต่ำกว่าจุดสั่งซื้อ", "p-warn"] : ["เพียงพอ", "p-ok"]; const u = usedBy(i.id);
+      return `<tr><td><b>${esc(i.name)}</b></td><td class="r num">${q.toLocaleString("th-TH")} ${esc(i.unit)}</td><td class="r num muted">${l.toLocaleString("th-TH")}</td>
+      <td><span class="pill ${s[1]}">${s[0]}</span></td><td class="small muted">${esc(u.slice(0, 3).join(", "))}${u.length > 3 ? " +" + (u.length - 3) : ""}</td>
+      <td><div class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn sm primary" data-act="ing-recv" data-id="${esc(i.id)}">รับเข้า</button><button class="btn sm ghost" data-act="ing-edit" data-id="${esc(i.id)}">แก้ไข</button></div></td></tr>`; }).join("")
+      : `<tr><td colspan="6" class="empty">ยังไม่มีวัตถุดิบ กด เพิ่มวัตถุดิบ แล้วผูกสูตรกับเมนูในหน้าตั้งค่า</td></tr>`}</tbody></table></div></div>`;
+};
+
+VIEWS.report = () => {
+  const P = {today: ["วันนี้", 0], "7d": ["7 วัน", 6], "30d": ["30 วัน", 29]};
+  const back = P[S.rPeriod][1], from = addDays(today(), -back);
+  const os = S.orders.filter(o => o.status !== "void" && ymd(new Date(o.ts)) >= from);
+  const total = os.reduce((s, o) => s + num(o.total), 0);
+  const stream = {fnb: 0, rental: 0, membership: 0}, items = {}, meth = {}, chan = {};
+  for (const o of os) {
+    const k = o.subtotal ? num(o.total) / num(o.subtotal) : 1;
+    for (const it of o.items) { stream[it.stream || "fnb"] = (stream[it.stream || "fnb"] || 0) + it.price * it.qty * k; if ((it.stream || "fnb") === "fnb") { items[it.name] = items[it.name] || {q: 0, v: 0}; items[it.name].q += it.qty; items[it.name].v += it.price * it.qty; } }
+    meth[o.method] = (meth[o.method] || 0) + num(o.total);
+    if (o.type === "pos") chan[o.channel] = (chan[o.channel] || 0) + num(o.total);
+  }
+  let buckets;
+  if (back === 0) { buckets = []; const hrs = os.map(o => new Date(o.ts).getHours()); const h0 = Math.min(7, ...hrs), h1 = Math.max(22, ...hrs); for (let h = h0; h <= h1; h++) buckets.push({l: z2(h), v: os.filter(o => new Date(o.ts).getHours() === h).reduce((s, o) => s + num(o.total), 0)}); }
+  else { buckets = []; for (let i = back; i >= 0; i--) { const d = addDays(today(), -i); buckets.push({l: back > 7 ? d.slice(8) : new Date(d + "T00:00").toLocaleDateString("th-TH", {weekday: "short"}), v: os.filter(o => ymd(new Date(o.ts)) === d).reduce((s, o) => s + num(o.total), 0)}); } }
+  const max = Math.max(1, ...buckets.map(b => b.v)); const peak = buckets.reduce((m, b) => b.v > m.v ? b : m, buckets[0]);
+  const hbars = (obj, names) => { const arr = Object.entries(obj).sort((a, b) => b[1] - a[1]); const mx = Math.max(1, ...arr.map(x => x[1]));
+    return arr.length ? arr.map(([k, v]) => `<div class="hbar"><span>${esc(names ? names[k] || k : k)}</span><span class="t"><i style="width:${v / mx * 100}%"></i></span><span class="num">${baht(Math.round(v))}</span></div>`).join("") : `<div class="empty small">ยังไม่มียอดในช่วงนี้</div>`; };
+  const top = Object.entries(items).sort((a, b) => b[1].q - a[1].q).slice(0, 8);
+  const bills = os.length;
+  return `<div class="head"><div><h1>รายงานยอดขาย</h1><p>${back ? thDate(from) + " ถึง " + thDate(today()) : thDay(today())}</p></div>
+    <div class="row">${Object.entries(P).map(([k, v]) => `<button class="chip" data-act="r-period" data-p="${k}" aria-pressed="${S.rPeriod === k}">${v[0]}</button>`).join("")}</div></div>
+  <div class="kpis">
+    <div class="card kpi"><div class="label">รายได้รวม</div><div class="v">${baht(Math.round(total))}</div><div class="s">${bills} บิล · เฉลี่ย ${baht(bills ? Math.round(total / bills) : 0)}</div></div>
+    <div class="card kpi"><div class="label">อาหารและเครื่องดื่ม</div><div class="v">${baht(Math.round(stream.fnb))}</div><div class="s">${total ? Math.round(stream.fnb / total * 100) : 0}% ของรายได้</div></div>
+    <div class="card kpi"><div class="label">พื้นที่เช่า</div><div class="v">${baht(Math.round(stream.rental))}</div><div class="s">${total ? Math.round(stream.rental / total * 100) : 0}% ของรายได้</div></div>
+    <div class="card kpi"><div class="label">Co-working</div><div class="v">${baht(Math.round(stream.membership))}</div><div class="s">${total ? Math.round(stream.membership / total * 100) : 0}% ของรายได้</div></div>
+  </div>
+  <div class="card pad" style="margin-bottom:16px"><div class="row" style="justify-content:space-between"><h2 style="font-size:16px">${back ? "รายได้รายวัน" : "รายได้รายชั่วโมง"}</h2>
+    <span class="small muted">${peak && peak.v ? "สูงสุด " + (back ? peak.l : peak.l + ":00 น.") + " · " + baht(Math.round(peak.v)) : ""}</span></div>
+    <div class="bars">${buckets.map(b => `<div class="bar ${b === peak && b.v ? "peak" : ""}" title="${b.l} · ${baht(Math.round(b.v))}">${b === peak && b.v ? `<em>${Math.round(b.v).toLocaleString("th-TH")}</em>` : ""}<i style="height:${b.v / max * 100}%"></i><span>${b.l}</span></div>`).join("")}</div></div>
+  <div class="r-grid">
+    <div class="card pad"><h2>เมนูขายดี</h2>${top.length ? top.map(([n, x], i) => `<div class="hbar"><span>${esc(n)}</span><span class="t"><i style="width:${x.q / top[0][1].q * 100}%"></i></span><span class="num">${x.q} แก้ว/จาน</span></div>`).join("") : `<div class="empty small">ยังไม่มียอดขาย</div>`}</div>
+    <div class="card pad"><h2>วิธีชำระเงิน</h2>${hbars(meth, METHODS)}<h2 style="margin-top:16px">ช่องทางขาย</h2>${hbars(chan, CHANNELS)}</div>
+  </div>
+  <div class="card"><div class="pad" style="padding-bottom:0"><h2 style="font-size:16px">บิลล่าสุด</h2></div><div class="tbl-wrap"><table>
+    <thead><tr><th>เวลา</th><th>บิล</th><th>รายการ</th><th>ชำระ</th><th class="r">ยอด</th><th></th></tr></thead>
+    <tbody>${S.orders.filter(o => ymd(new Date(o.ts)) >= from).sort((a, b) => b.ts - a.ts).slice(0, 25).map(o => `<tr style="${o.status === "void" ? "opacity:.5;text-decoration:line-through" : ""}">
+      <td class="num small">${back ? thDate(ymd(new Date(o.ts))) + " " : ""}${hm(o.ts)}</td><td class="num">${o.no ? "#" + String(o.no).padStart(3, "0") : "-"}</td>
+      <td class="small">${esc(o.items.map(i => i.qty + "× " + i.name).join(", "))}</td><td class="small">${METHODS[o.method] || "-"}</td><td class="r num">${baht(o.total)}</td>
+      <td>${o.status !== "void" ? `<button class="btn sm ghost danger" data-act="void" data-id="${esc(o.id)}">ยกเลิกบิล</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">ยังไม่มีบิล</td></tr>`}</tbody></table></div></div>`;
+};
+
+VIEWS.settings = () => {
+  const tabs = [["shop", "ร้าน"], ["menu", "เมนูอาหาร"], ["spaces", "พื้นที่เช่า"], ["plans", "แพ็กเกจ Co-working"], ["data", "ข้อมูลร้าน"]];
+  const c = S.config;
+  let body = "";
+  if (S.setTab === "shop") body = `<form class="card pad" data-form="config" style="display:flex;flex-direction:column;gap:14px;max-width:620px">
+    <label class="field"><span>ชื่อร้าน</span><input type="text" id="cfg-name" name="shopName" value="${esc(c.shopName)}" required></label>
+    <label class="field"><span>PromptPay (เบอร์มือถือ หรือ เลขประจำตัวผู้เสียภาษี 13 หลัก)</span><input type="text" id="cfg-pp" name="promptpay" value="${esc(c.promptpay)}" inputmode="numeric" placeholder="08x-xxx-xxxx"></label>
+    <div class="grid2">
+      <label class="field"><span>ส่วนลดสมาชิก (%)</span><input type="number" id="cfg-disc" name="memberDiscount" min="0" max="100" value="${num(c.memberDiscount)}"></label>
+      <label class="field"><span>ยอดซื้อกี่บาทได้ 1 แต้ม</span><input type="number" id="cfg-ppt" name="bahtPerPoint" min="1" value="${num(c.bahtPerPoint)}"></label>
+      <label class="field"><span>เปิดร้าน (ชั่วโมง)</span><input type="number" id="cfg-open" name="openHour" min="0" max="23" value="${num(c.openHour)}"></label>
+      <label class="field"><span>ปิดร้าน (ชั่วโมง)</span><input type="number" id="cfg-close" name="closeHour" min="1" max="24" value="${num(c.closeHour)}"></label>
+    </div><div><button class="btn primary">บันทึก</button></div></form>`;
+  if (S.setTab === "menu") body = `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn primary" data-act="prod-new">+ เพิ่มเมนู</button></div>
+    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>เมนู</th><th>หมวด</th><th class="r">ราคา</th><th>สูตร (ตัดสต็อก)</th><th></th></tr></thead><tbody>
+    ${CATS.flatMap(cat => S.products.filter(p => p.cat === cat.id)).concat(S.products.filter(p => !CATS.some(c => c.id === p.cat))).map(p => `<tr style="${p.active === false ? "opacity:.5" : ""}"><td><b>${esc(p.name)}</b>${p.active === false ? ' <span class="pill p-mute">ซ่อน</span>' : ""}</td><td>${catOf(p.cat).name}</td><td class="r num">${baht(p.price)}</td>
+      <td class="small muted">${esc((p.recipe || []).map(r => { const i = S.ingredients.find(x => x.id === r.ing); return i ? i.name + " " + r.qty + " " + i.unit : ""; }).filter(Boolean).join(", ")) || "-"}</td>
+      <td><button class="btn sm ghost" data-act="prod-edit" data-id="${esc(p.id)}">แก้ไข</button></td></tr>`).join("") || `<tr><td colspan="5" class="empty">ยังไม่มีเมนู</td></tr>`}</tbody></table></div></div>`;
+  if (S.setTab === "spaces") body = `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn primary" data-act="space-new">+ เพิ่มพื้นที่</button></div>
+    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>พื้นที่</th><th class="r">ที่นั่ง</th><th class="r">ราคา/ชม.</th><th>รายละเอียด</th><th></th></tr></thead><tbody>
+    ${S.spaces.map(s => `<tr><td><b>${esc(s.name)}</b></td><td class="r num">${s.seats}</td><td class="r num">${baht(s.rate)}</td><td class="small muted">${esc(s.desc || "")}</td><td><button class="btn sm ghost" data-act="space-edit" data-id="${esc(s.id)}">แก้ไข</button></td></tr>`).join("") || `<tr><td colspan="5" class="empty">ยังไม่มีพื้นที่ให้เช่า</td></tr>`}</tbody></table></div></div>`;
+  if (S.setTab === "plans") body = `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn primary" data-act="plan-new">+ เพิ่มแพ็กเกจ</button></div>
+    <div class="card"><div class="tbl-wrap"><table><thead><tr><th>แพ็กเกจ</th><th class="r">ราคา</th><th class="r">อายุ</th><th class="r">จำนวนครั้ง</th><th></th></tr></thead><tbody>
+    ${S.plans.map(p => `<tr><td><b>${esc(p.name)}</b><div class="small muted">${esc(p.desc || "")}</div></td><td class="r num">${baht(p.price)}</td><td class="r num">${p.days} วัน</td><td class="r num">${p.credits == null ? "ไม่จำกัด" : p.credits}</td><td><button class="btn sm ghost" data-act="plan-edit" data-id="${esc(p.id)}">แก้ไข</button></td></tr>`).join("") || `<tr><td colspan="5" class="empty">ยังไม่มีแพ็กเกจ</td></tr>`}</tbody></table></div></div>`;
+  if (S.setTab === "data") {
+    const sampleN = COLS.reduce((s, c) => s + S[c].filter(x => x.sample).length, 0);
+    body = `<div class="card pad" style="display:flex;flex-direction:column;gap:14px;max-width:680px">
+      <div><div class="label">ที่เก็บข้อมูล</div><p style="margin:4px 0 0">${S.mode === "cloud" ? "ข้อมูลเก็บบนฐานข้อมูลของแอปนี้ ทุกเครื่องที่เปิดลิงก์เดียวกันเห็นข้อมูลชุดเดียวกันแบบเรียลไทม์ เช่น แท็บเล็ตหน้าร้านกับจอครัว" : "ข้อมูลเก็บอยู่ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ควรใช้เครื่องเดียวเป็นเครื่องหลักของร้าน และคัดลอกข้อมูลสำรองเป็นระยะ"}</p></div>
+      <div><div class="label">ข้อมูลตัวอย่าง</div><p style="margin:4px 0 8px">มีรายการตัวอย่าง ${sampleN} รายการ (เมนู ห้อง แพ็กเกจ สมาชิก การจอง และบิลย้อนหลัง) ลบออกได้เมื่อพร้อมใช้ข้อมูลจริง เมนู ห้อง และแพ็กเกจที่ลบไปต้องเพิ่มใหม่เอง</p>
+        <div class="row">${sampleN ? `<button class="btn" data-act="sample-clear" data-scope="tx">ลบเฉพาะบิล การจอง และสมาชิกตัวอย่าง</button><button class="btn danger" data-act="sample-clear" data-scope="all">ลบข้อมูลตัวอย่างทั้งหมด</button>` : `<button class="btn" data-act="sample-load">โหลดข้อมูลตัวอย่าง</button>`}</div>
+        <p class="err" id="sample-msg" hidden></p></div>
+      ${S.mode === "local" ? `<div><div class="label">สำรองข้อมูล</div><p style="margin:4px 0 8px">คัดลอกข้อมูลทั้งหมดเป็นข้อความ JSON เก็บไว้ในโน้ตหรืออีเมล</p><button class="btn" data-act="export">คัดลอกข้อมูลสำรอง</button></div>` : ""}
+    </div>`;
+  }
+  return `<div class="head"><div><h1>ตั้งค่า</h1><p>ร้าน เมนูและสูตร พื้นที่เช่า แพ็กเกจสมาชิก</p></div></div>
+    <div class="cats">${tabs.map(([k, v]) => `<button class="chip" data-act="set-tab" data-t="${k}" aria-pressed="${S.setTab === k}">${v}</button>`).join("")}</div>${body}`;
+};
+
+/* ---------- modal ---------- */
+let modalState = null;
+function openModal({title, body, foot = "", wide = false, onSubmit}) {
+  modalState = {onSubmit};
+  $("#modal-root").innerHTML = `<div class="scrim" data-act="modal-scrim"><form class="modal ${wide ? "wide" : ""}" role="dialog" aria-modal="true" aria-label="${esc(title)}" id="modal-form" novalidate>
+    <div class="modal-h"><h2>${esc(title)}</h2><button type="button" class="btn sm ghost" data-act="modal-close" aria-label="ปิด">✕</button></div>
+    <div class="modal-b" id="modal-body">${body}</div>${foot ? `<div class="modal-f">${foot}</div>` : ""}</form></div>`;
+  const first = $("#modal-body input:not([type=hidden]),#modal-body select"); if (first) setTimeout(() => first.focus(), 30);
+}
+function closeModal() { $("#modal-root").innerHTML = ""; modalState = null; }
+const formData = f => Object.fromEntries(new FormData(f).entries());
+function showErr(msg) { let e = $("#modal-err"); if (!e) { e = document.createElement("p"); e.id = "modal-err"; e.className = "err"; $("#modal-body").appendChild(e); } e.textContent = msg; }
+
+/* ---------- payment ---------- */
+function crc16(s) { let c = 0xFFFF; for (let i = 0; i < s.length; i++) { c ^= s.charCodeAt(i) << 8; for (let j = 0; j < 8; j++) c = (c & 0x8000) ? ((c << 1) ^ 0x1021) & 0xFFFF : (c << 1) & 0xFFFF; } return c.toString(16).toUpperCase().padStart(4, "0"); }
+function promptPayPayload(id, amount) {
+  const f = (t, v) => t + String(v.length).padStart(2, "0") + v;
+  let target = String(id).replace(/\D/g, ""), acct;
+  if (target.length >= 13) acct = f("02", target.slice(0, 13));
+  else acct = f("01", ("0000000000000" + target.replace(/^0/, "66")).slice(-13));
+  let p = f("00", "01") + f("01", amount ? "12" : "11") + f("29", f("00", "A000000677010111") + acct) + f("53", "764");
+  if (amount) p += f("54", Number(amount).toFixed(2));
+  p += f("58", "TH") + "6304";
+  return p + crc16(p);
+}
+function qrSvg(payload) {
+  if (typeof window.qrcode !== "function") return "";
+  try { const q = window.qrcode(0, "M"); q.addData(payload); q.make(); return q.createSvgTag(6, 2); } catch (e) { return ""; }
+}
+
+let payCtx = null;
+function openPay(total, title, onPaid) {
+  payCtx = {total, method: "qr", received: "", onPaid};
+  openModal({title, body: `<div id="pay-body"></div>`, foot: `<button type="button" class="btn" data-act="modal-close">ยกเลิก</button><button class="btn primary" id="pay-confirm">ยืนยันรับเงิน ปิดบิล</button>`, onSubmit: confirmPay});
+  renderPay();
+}
+function renderPay() {
+  const p = payCtx, b = $("#pay-body"); if (!b) return;
+  let extra = "";
+  if (p.method === "cash") {
+    const rec = num(p.received), change = rec - p.total;
+    const quick = [...new Set([p.total, Math.ceil(p.total / 100) * 100, Math.ceil(p.total / 500) * 500, 1000])].filter(v => v >= p.total).slice(0, 4);
+    extra = `<label class="field"><span>รับเงินมา</span><input type="number" id="pay-rec" inputmode="decimal" value="${esc(p.received)}" data-input="payRec" placeholder="${p.total}"></label>
+      <div class="row">${quick.map(v => `<button type="button" class="btn sm" data-act="pay-quick" data-v="${v}">${baht(v)}</button>`).join("")}</div>
+      <div class="sum total" id="pay-change"><span>เงินทอน</span><span>${rec ? (change >= 0 ? baht(change) : "ยังไม่พอ") : "-"}</span></div>`;
+  } else if (p.method === "qr") {
+    const pp = S.config.promptpay;
+    if (!pp) extra = `<div class="card pad small">ยังไม่ได้ตั้งค่าเบอร์ PromptPay ไปที่ ตั้งค่า แล้วเลือก ร้าน เพื่อสร้าง QR พร้อมยอดเงินอัตโนมัติ</div>`;
+    else { const s = qrSvg(promptPayPayload(pp, p.total)); extra = s ? `<div class="qr">${s}</div><p class="small muted" style="text-align:center;margin:0">ให้ลูกค้าสแกนจ่าย ${baht(p.total)} แล้วตรวจยอดเข้าในแอปธนาคาร ก่อนกดปิดบิล</p>` : `<div class="card pad small">สร้าง QR ไม่ได้ในขณะนี้ ตรวจการเชื่อมต่ออินเทอร์เน็ต</div>`; }
+  } else extra = `<p class="small muted" style="margin:0">${p.method === "card" ? "รูดหรือแตะบัตรที่เครื่อง EDC แล้วกดปิดบิล" : "ตรวจยอดโอนเข้าบัญชีร้านก่อนกดปิดบิล"}</p>`;
+  b.innerHTML = `<div class="bigtotal">${baht(p.total)}</div>
+    <div class="paygrid" role="group" aria-label="วิธีชำระเงิน">${Object.entries(METHODS).map(([k, v]) => `<button type="button" data-act="pay-method" data-m="${k}" aria-pressed="${p.method === k}">${v}</button>`).join("")}</div>${extra}`;
+}
+function confirmPay() {
+  const p = payCtx; if (!p) return;
+  if (p.method === "cash" && p.received !== "" && num(p.received) < p.total) return showErr("รับเงินมาน้อยกว่ายอดที่ต้องชำระ");
+  const change = p.method === "cash" && p.received !== "" ? num(p.received) - p.total : 0;
+  const cb = p.onPaid; payCtx = null; closeModal(); cb(p.method, change);
+}
+
+async function finishSale(method, change) {
+  const c = S.cart, {sub, disc, total} = cartTotals();
+  const items = c.items.map(x => ({...x}));
+  const kitchen = items.some(i => i.kitchen);
+  const order = await recordOrder({no: nextOrderNo(), type: "pos", items, subtotal: sub, discount: disc, total, method, channel: c.channel, table: c.table, memberId: c.memberId, note: c.note, status: kitchen ? "new" : "served", kitchen});
+  await deductStock(items);
+  let pts = 0;
+  const m = memberOf(c.memberId);
+  if (m) { pts = Math.floor(total / Math.max(1, num(S.config.bahtPerPoint))); await Store.put("members", {...m, points: (m.points || 0) + pts}); }
+  S.cart = {items: [], channel: c.channel, table: "", memberId: null, note: ""}; S.cartOpen = false;
+  render(); showReceipt(order, change, pts);
+}
+function showReceipt(o, change, pts) {
+  const m = memberOf(o.memberId);
+  openModal({title: "ชำระเงินแล้ว", body: `<div class="receipt">
+      <div style="text-align:center;font-weight:600">${esc(S.config.shopName)}</div>
+      <div style="text-align:center" class="muted">${o.no ? "บิล #" + String(o.no).padStart(3, "0") + " · " : ""}${new Date(o.ts).toLocaleString("th-TH")}</div><hr>
+      ${o.items.map(i => `<div class="rl"><span>${i.qty} × ${esc(i.name)}</span><span>${(i.price * i.qty).toLocaleString("th-TH")}</span></div>`).join("")}<hr>
+      ${o.discount ? `<div class="rl"><span>ส่วนลดสมาชิก</span><span>-${o.discount.toLocaleString("th-TH")}</span></div>` : ""}
+      <div class="rl" style="font-weight:600"><span>รวมสุทธิ</span><span>${baht(o.total)}</span></div>
+      <div class="rl"><span>ชำระด้วย ${METHODS[o.method]}</span><span>${change ? "ทอน " + baht(change) : ""}</span></div>
+      ${m ? `<hr><div class="rl"><span>${esc(m.name)}</span><span>+${pts} แต้ม</span></div>` : ""}
+    </div>${o.kitchen ? `<p class="small muted" style="margin:0">ส่งออเดอร์เข้าจอครัวแล้ว</p>` : ""}`,
+    foot: `<button type="button" class="btn primary" data-act="modal-close">บิลถัดไป</button>`});
+}
+
+/* ---------- forms ---------- */
+function memberPicker() {
+  const list = [...S.members].sort((a, b) => a.name.localeCompare(b.name, "th"));
+  openModal({title: "เลือกสมาชิก", body: `<input type="search" id="mp-q" placeholder="พิมพ์ชื่อหรือเบอร์โทร" data-input="mpq">
+    <div id="mp-list" style="display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto">${list.map(m => `<button type="button" class="btn" style="justify-content:space-between" data-act="member-set" data-id="${esc(m.id)}" data-s="${esc((m.name + " " + (m.phone || "")).toLowerCase())}"><span>${esc(m.name)}<span class="muted small"> ${esc(m.phone || "")}</span></span><span class="small muted">${m.points || 0} แต้ม</span></button>`).join("")}</div>
+    <button type="button" class="btn primary" data-act="mem-new">+ สมัครสมาชิกใหม่</button>`});
+}
+
+function bookingForm(b) {
+  const isNew = !b;
+  b = b || {id: uid(), spaceId: (S.spaces[0] || {}).id, date: S.rentDate, start: "10:00", end: "12:00", customer: "", phone: "", people: 2, note: "", price: 0, status: "booked", paid: false};
+  openModal({title: isNew ? "จองพื้นที่" : "แก้ไขการจอง", body: `
+    <label class="field"><span>พื้นที่</span><select name="spaceId" id="bk-space" data-act-change="bk-calc">${S.spaces.map(s => `<option value="${esc(s.id)}" ${s.id === b.spaceId ? "selected" : ""}>${esc(s.name)} · ${baht(s.rate)}/ชม.</option>`).join("")}</select></label>
+    <div class="grid2"><label class="field"><span>วันที่</span><input type="date" name="date" id="bk-date" value="${esc(b.date)}" required></label>
+      <label class="field"><span>เริ่ม</span><input type="time" name="start" id="bk-start" value="${esc(b.start)}" step="900" required data-act-change="bk-calc"></label>
+      <label class="field"><span>สิ้นสุด</span><input type="time" name="end" id="bk-end" value="${esc(b.end)}" step="900" required data-act-change="bk-calc"></label></div>
+    <div class="grid2"><label class="field"><span>ชื่อลูกค้า หรือ องค์กร</span><input type="text" name="customer" id="bk-cust" value="${esc(b.customer)}" required list="mem-names"></label>
+      <label class="field"><span>เบอร์โทร</span><input type="tel" name="phone" id="bk-phone" value="${esc(b.phone)}"></label></div>
+    <datalist id="mem-names">${S.members.map(m => `<option value="${esc(m.name)}">`).join("")}</datalist>
+    <div class="grid2"><label class="field"><span>จำนวนคน</span><input type="number" name="people" id="bk-people" min="1" value="${esc(b.people)}"></label>
+      <label class="field"><span>ราคา (บาท)</span><input type="number" name="price" id="bk-price" min="0" value="${esc(b.price)}"></label></div>
+    <label class="field"><span>หมายเหตุ</span><input type="text" name="note" id="bk-note" value="${esc(b.note)}" placeholder="เช่น จัดโต๊ะแบบห้องเรียน ขอโปรเจกเตอร์"></label>
+    <label class="row small"><input type="checkbox" name="paid" id="bk-paid" ${b.paid ? "checked" : ""}> ชำระเงินแล้ว (บันทึกยอดเอง ไม่ผ่านหน้าชำระเงิน)</label>`,
+    foot: `${isNew ? "" : `<button type="button" class="btn danger" data-act="book-cancel" data-id="${esc(b.id)}" style="margin-right:auto">ยกเลิกการจอง</button>`}<button type="button" class="btn" data-act="modal-close">ปิด</button><button class="btn primary">บันทึกการจอง</button>`,
+    onSubmit: async f => {
+      const d = formData(f);
+      if (toMin(d.end) <= toMin(d.start)) return showErr("เวลาสิ้นสุดต้องหลังเวลาเริ่ม");
+      if (!d.customer.trim()) return showErr("กรอกชื่อลูกค้า");
+      const clash = S.bookings.find(x => x.id !== b.id && x.status !== "cancelled" && x.spaceId === d.spaceId && x.date === d.date && toMin(x.start) < toMin(d.end) && toMin(d.start) < toMin(x.end));
+      if (clash) return showErr(`ช่วงเวลานี้ชนกับการจองของ ${clash.customer} (${clash.start}–${clash.end})`);
+      const wasPaid = !!b.paid;
+      await Store.put("bookings", {...b, ...d, people: num(d.people), price: num(d.price), paid: !!d.paid});
+      if (!wasPaid && d.paid && num(d.price)) { const sp = spaceOf(d.spaceId); await recordOrder({no: 0, type: "rental", items: [{pid: null, name: (sp ? sp.name : "พื้นที่เช่า") + " " + d.start + "–" + d.end, price: num(d.price), qty: 1, stream: "rental", kitchen: false}], subtotal: num(d.price), total: num(d.price), method: "transfer", status: "served", kitchen: false}); }
+      S.rentDate = d.date; closeModal(); toast("บันทึกการจองแล้ว"); render();
+    }});
+}
+function bkCalc() {
+  const sp = spaceOf($("#bk-space").value), s = $("#bk-start").value, e = $("#bk-end").value;
+  if (sp && s && e && toMin(e) > toMin(s)) $("#bk-price").value = Math.round((toMin(e) - toMin(s)) / 60 * num(sp.rate));
+}
+
+function memberForm(m) {
+  const isNew = !m;
+  m = m || {id: uid(), name: "", phone: "", planId: null, planStart: null, planEnd: null, credits: null, points: 0, checkins: [], joined: today(), note: ""};
+  openModal({title: isNew ? "สมัครสมาชิก" : "ข้อมูลสมาชิก", body: `
+    <label class="field"><span>ชื่อ</span><input type="text" name="name" id="mf-name" value="${esc(m.name)}" required></label>
+    <label class="field"><span>เบอร์โทร</span><input type="tel" name="phone" id="mf-phone" value="${esc(m.phone)}"></label>
+    ${isNew ? `<label class="field"><span>แพ็กเกจ Co-working (เลือกได้ภายหลัง)</span><select name="planId" id="mf-plan"><option value="">สมาชิกสะสมแต้มอย่างเดียว</option>${S.plans.map(p => `<option value="${esc(p.id)}">${esc(p.name)} · ${baht(p.price)}</option>`).join("")}</select></label>`
+      : `<div class="grid2"><label class="field"><span>แต้มสะสม</span><input type="number" name="points" id="mf-pts" value="${m.points || 0}"></label>
+        ${m.planId ? `<label class="field"><span>หมดอายุ</span><input type="date" name="planEnd" id="mf-end" value="${esc(m.planEnd)}"></label>` : ""}
+        ${m.planId && m.credits != null ? `<label class="field"><span>ครั้งคงเหลือ</span><input type="number" name="credits" id="mf-cr" value="${m.credits}"></label>` : ""}</div>
+        <div class="small muted">สมัครเมื่อ ${thDate(m.joined)} · เข้าใช้ทั้งหมด ${(m.checkins || []).length} ครั้ง${(m.checkins || []).length ? " · ล่าสุด " + new Date(Math.max(...m.checkins)).toLocaleString("th-TH", {dateStyle: "medium", timeStyle: "short"}) : ""}</div>`}
+    <label class="field"><span>หมายเหตุ</span><input type="text" name="note" id="mf-note" value="${esc(m.note)}" placeholder="เช่น ชอบนั่งริมหน้าต่าง ออกใบกำกับภาษีในนามบริษัท"></label>`,
+    foot: `${isNew ? "" : `<button type="button" class="btn danger" data-act="mem-del" data-id="${esc(m.id)}" style="margin-right:auto">ลบสมาชิก</button>`}<button type="button" class="btn" data-act="modal-close">ปิด</button><button class="btn primary">${isNew ? "สมัครและไปชำระเงิน" : "บันทึก"}</button>`,
+    onSubmit: async f => {
+      const d = formData(f);
+      if (!d.name.trim()) return showErr("กรอกชื่อสมาชิก");
+      if (isNew) {
+        const base = {...m, name: d.name.trim(), phone: d.phone, note: d.note};
+        await Store.put("members", base);
+        const wasPicking = S.view === "sell";
+        closeModal();
+        if (d.planId) sellPlan(base, planOf(d.planId));
+        else { toast("เพิ่มสมาชิกแล้ว"); if (wasPicking) { S.cart.memberId = base.id; render(); } }
+      } else {
+        const upd = {...m, name: d.name.trim(), phone: d.phone, note: d.note, points: num(d.points)};
+        if (d.planEnd) upd.planEnd = d.planEnd;
+        if (d.credits !== undefined) upd.credits = num(d.credits);
+        await Store.put("members", upd); closeModal(); toast("บันทึกแล้ว");
+      }
+    }});
+}
+function sellPlan(m, plan) {
+  if (!plan) return;
+  openPay(num(plan.price), "ชำระค่า " + plan.name, async (method) => {
+    const cur = memberOf(m.id) || m;
+    const stillOn = cur.planId === plan.id && cur.planEnd && daysBetween(today(), cur.planEnd) >= 0;
+    const start = stillOn ? cur.planStart : today();
+    const end = addDays(stillOn ? cur.planEnd : today(), num(plan.days) - (stillOn ? 0 : 1));
+    const credits = plan.credits == null ? null : (stillOn && cur.credits != null ? cur.credits : 0) + num(plan.credits);
+    const pts = Math.floor(num(plan.price) / Math.max(1, num(S.config.bahtPerPoint)));
+    await Store.put("members", {...cur, planId: plan.id, planStart: start, planEnd: end, credits, points: (cur.points || 0) + pts});
+    const o = await recordOrder({no: 0, type: "membership", items: [{pid: null, name: plan.name + " · " + cur.name, price: num(plan.price), qty: 1, stream: "membership", kitchen: false}], subtotal: num(plan.price), total: num(plan.price), method, memberId: cur.id, status: "served", kitchen: false});
+    toast(`${cur.name} ใช้ได้ถึง ${thDate(end)}`);
+    showReceipt(o, 0, pts);
+  });
+}
+function renewPicker(m) {
+  openModal({title: (m.planId ? "ต่ออายุ " : "ซื้อแพ็กเกจ ") + m.name, body: `<p class="small muted" style="margin:0">${m.planId ? "ถ้ายังไม่หมดอายุและเลือกแพ็กเกจเดิม ระบบจะต่อวันจากวันหมดอายุเดิม และบวกจำนวนครั้งเพิ่ม" : "เลือกแพ็กเกจที่ลูกค้าต้องการ"}</p>
+    ${S.plans.map(p => `<button type="button" class="btn" style="justify-content:space-between;min-height:56px" data-act="plan-sell" data-m="${esc(m.id)}" data-p="${esc(p.id)}"><span style="text-align:left"><b>${esc(p.name)}</b><br><span class="small muted">${p.credits == null ? "ไม่จำกัดครั้ง" : p.credits + " ครั้ง"} · ${p.days} วัน</span></span><span class="num">${baht(p.price)}</span></button>`).join("") || `<div class="empty">ยังไม่มีแพ็กเกจ</div>`}`});
+}
+
+function simpleForm(title, fields, obj, onSave, onDelete) {
+  openModal({title, body: fields.map(f => f.type === "select"
+      ? `<label class="field"><span>${f.label}</span><select name="${f.name}" id="sf-${f.name}">${f.options.map(([v, l]) => `<option value="${esc(v)}" ${String(obj[f.name]) === String(v) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`
+      : `<label class="field"><span>${f.label}</span><input type="${f.type || "text"}" name="${f.name}" id="sf-${f.name}" value="${esc(obj[f.name] ?? "")}" ${f.req ? "required" : ""} ${f.type === "number" ? 'step="any" min="0"' : ""} placeholder="${esc(f.ph || "")}"></label>`).join("") + (title.includes("เมนู") ? recipeEditor(obj) : ""),
+    foot: `${onDelete ? `<button type="button" class="btn danger" data-act="sf-del" style="margin-right:auto">ลบ</button>` : ""}<button type="button" class="btn" data-act="modal-close">ปิด</button><button class="btn primary">บันทึก</button>`,
+    onSubmit: async f => {
+      const d = formData(f);
+      for (const fl of fields) { if (fl.req && !String(d[fl.name] || "").trim()) return showErr("กรอก " + fl.label); if (fl.type === "number") d[fl.name] = d[fl.name] === "" ? (fl.nullable ? null : 0) : num(d[fl.name]); }
+      await onSave(d, f); closeModal(); toast("บันทึกแล้ว");
+    }});
+  modalState.onDelete = onDelete;
+}
+function recipeEditor(p) {
+  const rows = (p.recipe || []).concat([{ing: "", qty: ""}]);
+  return `<div><div class="label" style="margin-bottom:6px">สูตร (ตัดสต็อกต่อ 1 ที่)</div><div id="recipe" style="display:flex;flex-direction:column;gap:6px">${rows.map((r, i) => recipeRow(r, i)).join("")}</div>
+    <button type="button" class="btn sm" style="margin-top:6px" data-act="recipe-add">+ เพิ่มวัตถุดิบ</button></div>`;
+}
+let rowSeq = 100;
+function recipeRow(r, i) {
+  const k = "r" + (i ?? rowSeq++);
+  return `<div class="recipe-row"><select name="ing_${k}" id="ing_${k}" aria-label="วัตถุดิบ"><option value="">เลือกวัตถุดิบ</option>${S.ingredients.map(x => `<option value="${esc(x.id)}" ${x.id === r.ing ? "selected" : ""}>${esc(x.name)} (${esc(x.unit)})</option>`).join("")}</select>
+    <input type="number" name="qty_${k}" id="qty_${k}" value="${esc(r.qty)}" step="any" min="0" placeholder="ปริมาณ" aria-label="ปริมาณ"><button type="button" class="btn sm ghost" data-act="recipe-del" aria-label="ลบแถว">✕</button></div>`;
+}
+const readRecipe = d => Object.keys(d).filter(k => k.startsWith("ing_") && d[k]).map(k => ({ing: d[k], qty: num(d["qty_" + k.slice(4)])})).filter(r => r.qty > 0);
+
+const productForm = p => { const isNew = !p; p = p || {id: uid(), name: "", cat: "coffee", price: 0, recipe: [], active: true};
+  simpleForm(isNew ? "เพิ่มเมนู" : "แก้ไขเมนู", [{name: "name", label: "ชื่อเมนู", req: true}, {name: "cat", label: "หมวด", type: "select", options: CATS.map(c => [c.id, c.name])}, {name: "price", label: "ราคา (บาท)", type: "number"}, {name: "active", label: "แสดงในหน้าขาย", type: "select", options: [["1", "แสดง"], ["0", "ซ่อน"]]}],
+    {...p, active: p.active === false ? "0" : "1"}, async d => Store.put("products", {...p, name: d.name.trim(), cat: d.cat, price: d.price, active: d.active !== "0", recipe: readRecipe(d)}), isNew ? null : () => Store.remove("products", p.id)); };
+const spaceForm = s => { const isNew = !s; s = s || {id: uid(), name: "", seats: 4, rate: 300, desc: ""};
+  simpleForm(isNew ? "เพิ่มพื้นที่เช่า" : "แก้ไขพื้นที่", [{name: "name", label: "ชื่อพื้นที่", req: true}, {name: "seats", label: "จำนวนที่นั่ง", type: "number"}, {name: "rate", label: "ราคาต่อชั่วโมง", type: "number"}, {name: "desc", label: "รายละเอียด", ph: "อุปกรณ์ที่มีให้"}],
+    s, async d => Store.put("spaces", {...s, ...d, name: d.name.trim()}), isNew ? null : () => Store.remove("spaces", s.id)); };
+const planForm = p => { const isNew = !p; p = p || {id: uid(), name: "", price: 0, days: 30, credits: null, desc: ""};
+  simpleForm(isNew ? "เพิ่มแพ็กเกจ" : "แก้ไขแพ็กเกจ", [{name: "name", label: "ชื่อแพ็กเกจ", req: true}, {name: "price", label: "ราคา (บาท)", type: "number"}, {name: "days", label: "อายุ (วัน)", type: "number"}, {name: "credits", label: "จำนวนครั้ง (เว้นว่าง = ไม่จำกัด)", type: "number", nullable: true}, {name: "desc", label: "รายละเอียด"}],
+    p, async d => Store.put("plans", {...p, ...d, name: d.name.trim(), days: Math.max(1, d.days)}), isNew ? null : () => Store.remove("plans", p.id)); };
+const ingForm = i => { const isNew = !i; i = i || {id: uid(), name: "", unit: "g", qty: 0, low: 0};
+  simpleForm(isNew ? "เพิ่มวัตถุดิบ" : "แก้ไขวัตถุดิบ", [{name: "name", label: "ชื่อวัตถุดิบ", req: true}, {name: "unit", label: "หน่วย", ph: "g, ml, ชิ้น"}, {name: "qty", label: "คงเหลือ", type: "number"}, {name: "low", label: "จุดสั่งซื้อ (เตือนเมื่อต่ำกว่า)", type: "number"}],
+    i, async d => Store.put("ingredients", {...i, ...d, name: d.name.trim()}), isNew ? null : () => Store.remove("ingredients", i.id)); };
+
+/* ---------- actions ---------- */
+const ACT = {
+  go: el => { S.view = el.dataset.v; if (el.dataset.tab) S.setTab = el.dataset.tab; S.cartOpen = false; render(); $("#view").scrollTop = 0; },
+  cat: el => { S.cat = el.dataset.c; render(); },
+  add: el => { const p = S.products.find(x => x.id === el.dataset.id); if (!p) return; const ex = S.cart.items.find(x => x.pid === p.id);
+    if (ex) ex.qty++; else S.cart.items.push({pid: p.id, name: p.name, price: num(p.price), qty: 1, stream: streamOfCat(p.cat), kitchen: p.cat !== "cowork"}); render(); },
+  qty: el => { const it = S.cart.items[+el.dataset.i]; if (!it) return; it.qty += +el.dataset.d; if (it.qty <= 0) S.cart.items.splice(+el.dataset.i, 1); render(); },
+  channel: el => { S.cart.channel = el.dataset.c; render(); },
+  "cart-clear": () => { S.cart.items = []; S.cart.memberId = null; S.cart.note = ""; render(); },
+  "cart-open": () => { S.cartOpen = true; render(); },
+  "cart-close": () => { S.cartOpen = false; render(); },
+  "member-pick": () => memberPicker(),
+  "member-set": el => { S.cart.memberId = el.dataset.id; closeModal(); render(); },
+  "member-clear": () => { S.cart.memberId = null; render(); },
+  checkout: () => { const {total} = cartTotals(); if (!S.cart.items.length) return; openPay(total, "ชำระเงิน", finishSale); },
+  "pay-method": el => { payCtx.method = el.dataset.m; renderPay(); },
+  "pay-quick": el => { payCtx.received = el.dataset.v; renderPay(); },
+  "k-next": async el => { const o = S.orders.find(x => x.id === el.dataset.id); if (o) await Store.put("orders", {...o, status: el.dataset.s}); },
+  "rent-day": el => { const d = +el.dataset.d; S.rentDate = d === 0 ? today() : addDays(S.rentDate, d); render(); },
+  "book-new": () => { if (!S.spaces.length) return toast("เพิ่มพื้นที่เช่าในหน้าตั้งค่าก่อน"); bookingForm(null); },
+  "book-edit": el => bookingForm(S.bookings.find(b => b.id === el.dataset.id)),
+  "book-status": async el => { const b = S.bookings.find(x => x.id === el.dataset.id); if (b) { await Store.put("bookings", {...b, status: el.dataset.s}); toast(el.dataset.s === "done" ? "เช็คเอาท์แล้ว" : "เช็คอินแล้ว"); } },
+  "book-cancel": async el => { const b = S.bookings.find(x => x.id === el.dataset.id); if (!b) return;
+    if (el.dataset.sure !== "1") { el.dataset.sure = "1"; el.textContent = "กดอีกครั้งเพื่อยืนยัน"; return; }
+    await Store.put("bookings", {...b, status: "cancelled"}); closeModal(); toast("ยกเลิกการจองแล้ว"); },
+  "book-pay": el => { const b = S.bookings.find(x => x.id === el.dataset.id); if (!b) return; const sp = spaceOf(b.spaceId);
+    openPay(num(b.price), "ชำระค่าเช่า " + (sp ? sp.name : ""), async (method) => {
+      const o = await recordOrder({no: 0, type: "rental", items: [{pid: null, name: (sp ? sp.name : "พื้นที่เช่า") + " " + b.start + "–" + b.end + " · " + b.customer, price: num(b.price), qty: 1, stream: "rental", kitchen: false}], subtotal: num(b.price), total: num(b.price), method, status: "served", kitchen: false});
+      await Store.put("bookings", {...b, paid: true, orderId: o.id}); showReceipt(o, 0, 0); }); },
+  "cw-filter": el => { S.cwFilter = el.dataset.f; render(); },
+  "mem-new": () => { closeModal(); memberForm(null); },
+  "mem-edit": el => memberForm(memberOf(el.dataset.id)),
+  "mem-del": async el => { if (el.dataset.sure !== "1") { el.dataset.sure = "1"; el.textContent = "กดอีกครั้งเพื่อลบ"; return; } await Store.remove("members", el.dataset.id); closeModal(); toast("ลบสมาชิกแล้ว"); },
+  "mem-renew": el => renewPicker(memberOf(el.dataset.id)),
+  "plan-sell": el => { const m = memberOf(el.dataset.m), p = planOf(el.dataset.p); closeModal(); sellPlan(m, p); },
+  "mem-checkin": async el => { const m = memberOf(el.dataset.id); if (!m) return; const p = planOf(m.planId);
+    const upd = {...m, checkins: [...(m.checkins || []), Date.now()].slice(-100)};
+    if (p && p.credits != null && m.credits != null) upd.credits = Math.max(0, m.credits - 1);
+    await Store.put("members", upd); toast(`${m.name} เช็คอินแล้ว${upd.credits != null ? " · เหลือ " + upd.credits + " ครั้ง" : ""}`); },
+  "ing-new": () => ingForm(null),
+  "ing-edit": el => ingForm(S.ingredients.find(i => i.id === el.dataset.id)),
+  "ing-recv": el => { const i = S.ingredients.find(x => x.id === el.dataset.id); if (!i) return;
+    openModal({title: "รับเข้า " + i.name, body: `<p class="small muted" style="margin:0">คงเหลือตอนนี้ ${num(i.qty).toLocaleString("th-TH")} ${esc(i.unit)}</p><label class="field"><span>จำนวนที่รับเข้า (${esc(i.unit)})</span><input type="number" name="add" id="recv-add" step="any" min="0" required></label>`,
+      foot: `<button type="button" class="btn" data-act="modal-close">ปิด</button><button class="btn primary">เพิ่มเข้าสต็อก</button>`,
+      onSubmit: async f => { const a = num(formData(f).add); if (a <= 0) return showErr("กรอกจำนวนมากกว่า 0"); await Store.put("ingredients", {...i, qty: num(i.qty) + a}); closeModal(); toast("เพิ่มสต็อกแล้ว"); }}); },
+  "r-period": el => { S.rPeriod = el.dataset.p; render(); },
+  void: async el => { if (el.dataset.sure !== "1") { el.dataset.sure = "1"; el.textContent = "ยืนยันยกเลิก"; return; } const o = S.orders.find(x => x.id === el.dataset.id); if (o) { await Store.put("orders", {...o, status: "void"}); toast("ยกเลิกบิลแล้ว"); } },
+  "set-tab": el => { S.setTab = el.dataset.t; render(); },
+  "prod-new": () => productForm(null), "prod-edit": el => productForm(S.products.find(p => p.id === el.dataset.id)),
+  "space-new": () => spaceForm(null), "space-edit": el => spaceForm(spaceOf(el.dataset.id)),
+  "plan-new": () => planForm(null), "plan-edit": el => planForm(planOf(el.dataset.id)),
+  "recipe-add": () => $("#recipe").insertAdjacentHTML("beforeend", recipeRow({ing: "", qty: ""})),
+  "recipe-del": el => el.closest(".recipe-row").remove(),
+  "sf-del": async el => { if (el.dataset.sure !== "1") { el.dataset.sure = "1"; el.textContent = "กดอีกครั้งเพื่อลบ"; return; } const fn = modalState && modalState.onDelete; closeModal(); if (fn) { await fn(); toast("ลบแล้ว"); } },
+  "modal-close": () => { payCtx = null; closeModal(); },
+  "modal-scrim": (el, ev) => { if (ev.target === el) { payCtx = null; closeModal(); } },
+  "sample-clear": async el => {
+    if (el.dataset.sure !== "1") { el.dataset.sure = "1"; el.textContent = "กดอีกครั้งเพื่อยืนยัน"; return; }
+    const cols = el.dataset.scope === "all" ? COLS : ["orders", "bookings", "members"];
+    el.disabled = true;
+    for (const c of cols) for (const x of S[c].filter(x => x.sample)) await Store.remove(c, x.id);
+    if (el.dataset.scope === "all" || !COLS.some(c => S[c].some(x => x.sample))) await Store.setConfig({...S.config, sample: false});
+    toast("ลบข้อมูลตัวอย่างแล้ว");
+  },
+  "sample-load": async el => {
+    el.disabled = true; const d = makeSampleData(Date.now());
+    for (const c of COLS) for (const x of d[c]) await Store.put(c, x);
+    await Store.setConfig({...S.config, sample: true}); toast("โหลดข้อมูลตัวอย่างแล้ว");
+  },
+  export: async () => { const txt = JSON.stringify(Object.fromEntries([...COLS.map(c => [c, S[c]]), ["config", S.config]]));
+    try { await navigator.clipboard.writeText(txt); toast("คัดลอกข้อมูลสำรองแล้ว วางเก็บไว้ในโน้ตหรืออีเมล"); }
+    catch (e) { openModal({title: "ข้อมูลสำรอง", body: `<p class="small muted" style="margin:0">คัดลอกข้อความนี้ไปเก็บไว้</p><textarea id="exp-txt" style="min-height:200px" readonly>${esc(txt)}</textarea>`}); setTimeout(() => { const t = $("#exp-txt"); if (t) t.select(); }, 50); } }
+};
+
+document.addEventListener("click", ev => {
+  const el = ev.target.closest("[data-act]"); if (!el) return;
+  const fn = ACT[el.dataset.act]; if (!fn) return;
+  if (el.dataset.act === "modal-scrim" && ev.target !== el) return;
+  ev.preventDefault(); fn(el, ev);
+});
+document.addEventListener("input", ev => {
+  const k = ev.target.dataset.input; if (!k) return;
+  const v = ev.target.value;
+  if (k === "q") { S.q = v; render(); }
+  else if (k === "cwQ") { S.cwQ = v; render(); }
+  else if (k === "table") S.cart.table = v;
+  else if (k === "note") S.cart.note = v;
+  else if (k === "rentDate") { if (v) { S.rentDate = v; render(); } }
+  else if (k === "payRec") { payCtx.received = v; const rec = num(v), ch = rec - payCtx.total, el = $("#pay-change span:last-child"); if (el) el.textContent = rec ? (ch >= 0 ? baht(ch) : "ยังไม่พอ") : "-"; }
+  else if (k === "mpq") { const q = v.trim().toLowerCase(); document.querySelectorAll("#mp-list [data-s]").forEach(b => b.hidden = q && !b.dataset.s.includes(q)); }
+});
+document.addEventListener("change", ev => { if (ev.target.dataset.actChange === "bk-calc") bkCalc(); });
+document.addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const f = ev.target;
+  if (f.id === "modal-form" && modalState && modalState.onSubmit) { const b = f.querySelector(".modal-f .btn.primary"); if (b) b.disabled = true; try { await modalState.onSubmit(f); } finally { if (b && b.isConnected) b.disabled = false; } }
+  else if (f.dataset.form === "config") { const d = formData(f); await Store.setConfig({...S.config, shopName: d.shopName.trim() || "Forest Room", promptpay: d.promptpay.trim(), memberDiscount: num(d.memberDiscount), bahtPerPoint: Math.max(1, num(d.bahtPerPoint)), openHour: num(d.openHour), closeHour: Math.max(num(d.openHour) + 1, num(d.closeHour))}); toast("บันทึกการตั้งค่าแล้ว"); }
+});
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && $("#modal-root").innerHTML) { payCtx = null; closeModal(); } });
+
+let toastT = 0;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2600); }
+
+setInterval(() => { if (S.ready && (S.view === "kitchen" || S.view === "rental") && !$("#modal-root").innerHTML) render(); }, 30000);
+render();
+Store.init();
+</script>
